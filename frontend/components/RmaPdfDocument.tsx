@@ -1,146 +1,73 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
-import { Rma, Device, RmaStatus } from '../types';
-
-// Register fonts - this is an example, you might need to adjust paths
-// Font.register({
-//   family: 'Oswald', // Example font
-//   src: 'https://fonts.gstatic.com/s/oswald/v13/Y_TKV6o8WovbUd3m_X9aAA.ttf'
-// });
+import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
+import { Rma, Device, RmaStatus, ServiceCycle } from '../types';
 
 const styles = StyleSheet.create({
-  page: {
-    padding: '30mm 20mm',
-    backgroundColor: '#ffffff',
-    fontFamily: 'Helvetica', // Default font
-    fontSize: 10,
-    color: '#000000',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingBottom: 12,
-    marginBottom: 12,
-    borderBottomWidth: 3,
-    borderBottomColor: '#000000',
-  },
-  headerLeft: {
-    flexDirection: 'column',
-  },
-  headerRight: {
-    flexDirection: 'column',
-    alignItems: 'flex-end',
-    fontSize: 9,
-    color: '#4A4A4A'
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 16,
-    marginTop: 2,
-  },
-  recipientText: {
-    fontWeight: 'bold',
-    color: '#000000',
-  },
-  pageNumber: {
-    fontSize: 9,
-    marginTop: 8,
-    fontWeight: 'bold',
-  },
-  section: {
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    borderBottomWidth: 1.5,
-    borderBottomColor: '#000000',
-    paddingBottom: 4,
-    marginBottom: 8,
-  },
-  infoTable: {
-    width: '100%',
-  },
-  infoTableRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    padding: '4px 0',
-  },
-  infoTableLabel: {
-    width: '33%',
-    fontWeight: 'bold',
-    color: '#374151'
-  },
-  infoTableValue: {},
-  deviceTable: {
-    width: '100%',
-    border: '1px solid #D1D5DB',
-  },
-  deviceTableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#F3F4F6',
-    fontWeight: 'bold',
-  },
-  deviceTableCell: {
-    padding: 4,
-    borderRightWidth: 1,
-    borderRightColor: '#D1D5DB',
-    flex: 1,
-  },
-  deviceTableCellHeader: {
-    padding: 4,
-    borderRightWidth: 1,
-    borderRightColor: '#D1D5DB',
-    flex: 1,
-    fontWeight: 'bold'
-  },
-  deviceTableBodyRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#D1D5DB',
-  },
+  page: { padding: '30mm 20mm', backgroundColor: '#ffffff', fontFamily: 'Helvetica', fontSize: 10, color: '#000000' },
+  section: { marginBottom: 12 },
+  sectionTitle: { fontSize: 14, fontWeight: 'bold', borderBottomWidth: 1.5, borderBottomColor: '#000000', paddingBottom: 4, marginBottom: 6 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 12, marginBottom: 12, borderBottomWidth: 3, borderBottomColor: '#000000' },
+  headerLeft: { flexDirection: 'column' },
+  headerRight: { flexDirection: 'column', alignItems: 'flex-end', fontSize: 9, color: '#4A4A4A' },
+  title: { fontSize: 24, fontWeight: 'bold' },
+  subtitle: { fontSize: 16, marginTop: 2 },
+  recipientText: { fontWeight: 'bold', color: '#000000' },
+  pageNumber: { fontSize: 9, marginTop: 8, fontWeight: 'bold' },
+  infoTable: { width: '100%' },
+  infoTableRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#E5E7EB', padding: '4px 0' },
+  infoTableLabel: { width: '33%', fontWeight: 'bold', color: '#374151' },
+  infoTableValue: { width: '67%' },
+  deviceTable: { width: '100%', border: '1px solid #D1D5DB' },
+  deviceTableHeader: { flexDirection: 'row', backgroundColor: '#F3F4F6', fontWeight: 'bold' },
+  deviceTableCell: { padding: 4, borderRightWidth: 1, borderRightColor: '#D1D5DB', flex: 1 },
+  deviceTableCellHeader: { padding: 4, borderRightWidth: 1, borderRightColor: '#D1D5DB', flex: 1, fontWeight: 'bold' },
+  deviceTableBodyRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#D1D5DB' },
   colModel: { flex: 2 },
   colPart: { flex: 2 },
   colSerial: { flex: 3, fontFamily: 'Courier' },
   colQty: { flex: 1 },
   colDesc: { flex: 4, fontSize: 8 },
-  shippingBox: {
-    border: '1px solid #000000',
-    padding: 12,
+  shippingBox: { border: '1px solid #000000', padding: 12 },
+  shippingListItem: { marginBottom: 4 },
+  rmaIdText: { fontSize: 20, fontWeight: 'bold', letterSpacing: 2 },
+  footer: { position: 'absolute', bottom: '20mm', left: '20mm', right: '20mm', textAlign: 'center', fontSize: 8, color: '#6B7280', borderTopWidth: 1, borderTopColor: '#000000', paddingTop: 4 },
+  resolutionBox: {
+    backgroundColor: '#F9FAFB',
+    padding: 8,
+    borderRadius: 3,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginTop: 4,
   },
-  shippingList: {
-    marginLeft: 15,
-  },
-  shippingListItem: {
-    marginBottom: 4,
-  },
-  rmaIdText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    letterSpacing: 2,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: '20mm',
-    left: '20mm',
-    right: '20mm',
-    textAlign: 'center',
+  resolutionDate: {
     fontSize: 8,
     color: '#6B7280',
-    borderTopWidth: 1,
-    borderTopColor: '#000000',
-    paddingTop: 4,
-  }
+    marginBottom: 2,
+  },
+  resolutionStatus: {
+    fontWeight: 'bold',
+    marginBottom: 4,
+    fontSize: 10,
+  },
+  resolutionNotes: {
+    fontSize: 10,
+  },
+  italicText: {
+    fontFamily: 'Helvetica-Oblique',
+    color: '#6B7280',
+  },
 });
+
+const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+};
 
 const RmaFormHeader = ({ rma, pageNumber, totalPages }: { rma: Rma; pageNumber: number, totalPages: number }) => (
   <View style={styles.header}>
     <View style={styles.headerLeft}>
-      <Text style={styles.title}>Return Authorization Form</Text>
+      <Text style={styles.title}>Return Authorization</Text>
       <Text style={styles.subtitle}>RMA #<Text style={{ fontWeight: 'bold' }}>{rma.id}</Text></Text>
     </View>
     <View style={styles.headerRight}>
@@ -156,7 +83,7 @@ const RmaFormFooter = () => (
   <Text style={styles.footer}>If you have any questions, please contact our support team at 1-800-555-HELP. &copy; {new Date().getFullYear()} Avana Medical. All rights reserved.</Text>
 );
 
-const InfoTable = ({ data }: { data: { label: string; value: string | undefined }[] }) => (
+const InfoTable = ({ data }: { data: { label: string; value: string | undefined | null }[] }) => (
   <View style={styles.infoTable}>
     {data.map(({ label, value }) => (
       <View style={styles.infoTableRow} key={label}>
@@ -177,14 +104,16 @@ const DeviceTable = ({ devices, rma }: { devices: Device[]; rma: Rma }) => (
       <Text style={[styles.deviceTableCellHeader, styles.colDesc, { borderRightWidth: 0 }]}>Failure Description</Text>
     </View>
     {devices.map(device => {
-      const initialCycle = rma.serviceCycles.find(c => c.deviceSerialNumber === device.serialNumber);
+      const mostRecentCycle = [...rma.serviceCycles]
+          .filter(c => c.deviceSerialNumber === device.serialNumber)
+          .sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime())[0];
       return (
         <View style={styles.deviceTableBodyRow} key={device.serialNumber}>
           <Text style={[styles.deviceTableCell, styles.colModel]}>{device.model}</Text>
           <Text style={[styles.deviceTableCell, styles.colPart]}>{device.partNumber}</Text>
           <Text style={[styles.deviceTableCell, styles.colSerial]}>{device.serialNumber}</Text>
-          <Text style={[styles.deviceTableCell, styles.colQty]}>{device.quantity}</Text>
-          <Text style={[styles.deviceTableCell, styles.colDesc, { borderRightWidth: 0 }]}>{initialCycle?.issueDescription || 'N/A'}</Text>
+          <Text style={[styles.deviceTableCell, styles.colQty]}>{String(device.quantity)}</Text>
+          <Text style={[styles.deviceTableCell, styles.colDesc, { borderRightWidth: 0 }]}>{mostRecentCycle?.issueDescription || 'N/A'}</Text>
         </View>
       );
     })}
@@ -219,8 +148,8 @@ const ReturnAuthDocument = ({ rma }: { rma: Rma }) => {
                 <InfoTable data={[
                   { label: 'Facility/Customer Name', value: rma.customer.name },
                   { label: 'Address', value: rma.customer.address },
-                  { label: 'Date of Incident', value: new Date(rma.dateOfIncident).toLocaleDateString() },
-                  { label: 'Date of Report', value: new Date(rma.dateOfReport).toLocaleDateString() },
+                  { label: 'Date of Incident', value: formatDate(rma.dateOfIncident) },
+                  { label: 'Date of Report', value: formatDate(rma.dateOfReport) },
                   { label: 'Attachment Proof', value: rma.attachment ? 'Proof Attached' : 'N/A' },
                 ]} />
               </View>
@@ -246,11 +175,11 @@ const ReturnAuthDocument = ({ rma }: { rma: Rma }) => {
   )
 };
 
+const ServiceReportDocument = ({ rma, serviceCycle }: { rma: Rma; serviceCycle: ServiceCycle }) => {
+    const device = rma.devices.find(d => d.serialNumber === serviceCycle.deviceSerialNumber);
+    const finalReportEvent = serviceCycle.history.find(h => h.status === RmaStatus.CLOSED || h.status === RmaStatus.REPAIRED) || serviceCycle.history[serviceCycle.history.length - 1];
 
-const ServiceReportDocument = ({ rma, device }: { rma: Rma; device: Device }) => {
-    const closedCycle = [...rma.serviceCycles]
-        .filter(c => c.deviceSerialNumber === device.serialNumber && c.status === RmaStatus.CLOSED)
-        .sort((a, b) => new Date(b.statusDate).getTime() - new Date(a.statusDate).getTime())[0];
+    if (!device) return <Document><Page><Text>Device not found for this service cycle.</Text></Page></Document>;
 
     return (
         <Document title={`ServiceReport-${rma.id}-${device.serialNumber}`}>
@@ -280,29 +209,32 @@ const ServiceReportDocument = ({ rma, device }: { rma: Rma; device: Device }) =>
                     <Text style={{ fontSize: 12, fontWeight: 'bold', marginBottom: 2 }}>{device.model}</Text>
                     <Text style={{ fontSize: 10, color: '#4A4A4A', marginBottom: 6 }}>S/N: {device.serialNumber}</Text>
 
-                    {closedCycle ? (
-                        <>
-                            <InfoTable data={[
-                                { label: "Part Number", value: device.partNumber },
-                                { label: "Quantity", value: String(device.quantity) },
-                                { label: "Accessories Included", value: closedCycle.accessoriesIncluded },
-                            ]} />
-                            <View style={{ marginTop: 8 }}>
-                                <Text style={{ fontWeight: 'bold' }}>Failure Description/Details</Text>
-                                <Text style={{ fontSize: 10, marginTop: 2, padding: 4, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#F9FAFB' }}>
-                                    {closedCycle.issueDescription}
-                                </Text>
-                            </View>
-                            {closedCycle.resolutionNotes && (
-                                <View style={{ marginTop: 8 }}>
-                                    <Text style={{ fontWeight: 'bold' }}>Service Notes & Resolution</Text>
-                                    <Text style={{ fontSize: 10, marginTop: 2, padding: 4, borderWidth: 1, borderColor: '#D1D5DB', backgroundColor: '#F3F4F6', whiteSpace: 'pre-wrap' }}>
-                                        {closedCycle.resolutionNotes}
-                                    </Text>
-                                </View>
-                            )}
-                        </>
-                    ) : <Text style={{color: '#6B7280'}}>No closed service ticket for this device.</Text>}
+                    <InfoTable data={[
+                        { label: "Part Number", value: device.partNumber },
+                        { label: "Quantity", value: String(device.quantity) },
+                        { label: "Accessories Included", value: serviceCycle.accessoriesIncluded },
+                        { label: "Service Ticket Date", value: formatDate(serviceCycle.creationDate) },
+                        { label: "Service Report Date", value: finalReportEvent ? formatDate(finalReportEvent.date) : 'N/A' },
+                    ]} />
+                    <View style={{ marginTop: 8 }}>
+                        <Text style={{ fontWeight: 'bold' }}>Failure Description/Details</Text>
+                        <Text style={{ fontSize: 10, marginTop: 2, padding: 4, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#F9FAFB' }}>
+                            {serviceCycle.issueDescription}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Service Resolution</Text>
+                    {finalReportEvent ? (
+                        <View style={styles.resolutionBox}>
+                            <Text style={styles.resolutionDate}>{new Date(finalReportEvent.date).toLocaleString()}</Text>
+                            <Text style={styles.resolutionStatus}>Final Status: "{finalReportEvent.status}"</Text>
+                            <Text style={styles.resolutionNotes}>{finalReportEvent.notes}</Text>
+                        </View>
+                    ) : (
+                        <Text style={styles.italicText}>No final resolution has been logged for this service ticket.</Text>
+                    )}
                 </View>
 
                 <RmaFormFooter />
@@ -311,9 +243,9 @@ const ServiceReportDocument = ({ rma, device }: { rma: Rma; device: Device }) =>
     );
 };
 
-const RmaPdfDocument: React.FC<{ rma: Rma; deviceToPreview?: Device }> = ({ rma, deviceToPreview }) => {
-  if (deviceToPreview) {
-    return <ServiceReportDocument rma={rma} device={deviceToPreview} />;
+const RmaPdfDocument: React.FC<{ rma: Rma; selectedCycle?: ServiceCycle }> = ({ rma, selectedCycle }) => {
+  if (selectedCycle) {
+    return <ServiceReportDocument rma={rma} serviceCycle={selectedCycle} />;
   } else {
     return <ReturnAuthDocument rma={rma} />;
   }

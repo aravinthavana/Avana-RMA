@@ -7,6 +7,12 @@ export enum RmaStatus {
   CLOSED = 'Closed',
 }
 
+export interface StatusHistoryEvent {
+  status: RmaStatus;
+  date: string;
+  notes: string;
+}
+
 export interface Customer {
   id: string;
   name: string;
@@ -30,7 +36,7 @@ export interface ServiceCycle {
   creationDate: string; // The date this specific ticket was created
   issueDescription: string;
   accessoriesIncluded?: string;
-  resolutionNotes?: string;
+  history: StatusHistoryEvent[];
 }
 
 export interface Rma {
