@@ -18,7 +18,9 @@ export interface Customer {
 
 export interface Device {
   model: string;
+  partNumber: string;
   serialNumber: string;
+  quantity: number;
 }
 
 export interface ServiceCycle {
@@ -38,4 +40,7 @@ export interface Rma {
   creationDate: string;
   lastUpdateDate: string;
   serviceCycles: ServiceCycle[];
+  dateOfIncident: string;
+  dateOfReport: string;
+  attachment?: string;
 }

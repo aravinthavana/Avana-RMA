@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Rma, RmaStatus, ServiceCycle, Device } from '../types';
-import { ArrowLeftIcon, PencilSquareIcon, PlusIcon, EyeIcon, ChatBubbleLeftEllipsisIcon, ChevronDownIcon, ClockIcon } from './icons';
+import { ArrowLeftIcon, PencilSquareIcon, PlusIcon, EyeIcon, ChatBubbleLeftEllipsisIcon, ChevronDownIcon, ClockIcon, PaperClipIcon } from './icons';
 import RmaPreviewModal from './RmaPreviewModal';
 import StatusUpdateModal from './StatusUpdateModal';
 import { getStatusBadgeColor } from './RmaList';
@@ -31,7 +31,7 @@ const ServiceHistoryTimeline = ({ cycle }: { cycle: ServiceCycle }) => {
             timestamp: new Date(cycle.creationDate).toLocaleString(),
             notes: (
                 <>
-                    <p className="font-semibold text-slate-800">Initial Report from Customer</p>
+                    <p className="font-semibold text-slate-800">Failure Description/Details</p>
                     <p className="mt-1 whitespace-pre-wrap">{cycle.issueDescription}</p>
                     {cycle.accessoriesIncluded && <p className="mt-2 text-xs text-slate-500">Accessories Included: {cycle.accessoriesIncluded}</p>}
                 </>
@@ -154,6 +154,10 @@ const RmaDetailView: React.FC<RmaDetailViewProps> = ({ rma, onBack, onStatusUpda
       if (cyclesForDevice.length === 0) return null;
       return cyclesForDevice.sort((a,b) => new Date(b.statusDate).getTime() - new Date(a.statusDate).getTime())[0];
   }
+  
+  const devicesWithClosedCycles = rma.devices.filter(device => 
+    rma.serviceCycles.some(cycle => cycle.deviceSerialNumber === device.serialNumber && cycle.status === RmaStatus.CLOSED)
+  );
 
   return (
     <div>
@@ -187,13 +191,17 @@ const RmaDetailView: React.FC<RmaDetailViewProps> = ({ rma, onBack, onStatusUpda
                         <a href="#" onClick={(e) => { e.preventDefault(); handleOpenPreview(); }} className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 font-medium" role="menuitem" tabIndex={-1}>
                           Return Authorization Form
                         </a>
-                        <div className="border-t border-slate-200 my-1"></div>
-                        <div className="px-4 pt-2 pb-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">Device Service Reports</div>
-                        {rma.devices.map(device => (
-                          <a href="#" key={device.serialNumber} onClick={(e) => { e.preventDefault(); handleOpenPreview(device); }} className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem" tabIndex={-1}>
-                            {device.model} - {device.serialNumber}
-                          </a>
-                        ))}
+                        {devicesWithClosedCycles.length > 0 && (
+                          <>
+                            <div className="border-t border-slate-200 my-1"></div>
+                            <div className="px-4 pt-2 pb-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">Device Service Reports</div>
+                            {devicesWithClosedCycles.map(device => (
+                              <a href="#" key={device.serialNumber} onClick={(e) => { e.preventDefault(); handleOpenPreview(device); }} className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem" tabIndex={-1}>
+                                {device.model} - {device.serialNumber}
+                              </a>
+                            ))}
+                          </>
+                        )}
                       </div>
                     </div>
                   )}
@@ -210,12 +218,25 @@ const RmaDetailView: React.FC<RmaDetailViewProps> = ({ rma, onBack, onStatusUpda
             </header>
             
             <section className="mt-6">
-                <h2 className="text-lg font-semibold text-slate-800 border-b border-slate-200 pb-2 mb-3">Customer Information</h2>
+                <h2 className="text-lg font-semibold text-slate-800 border-b border-slate-200 pb-2 mb-3">Recipient:</h2>
                 <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
                     <InfoPair label="Facility/Customer Name" value={rma.customer.name} />
                     <InfoPair label="Contact Person" value={rma.customer.contactPerson} />
                     <InfoPair label="Email & Phone" value={`${rma.customer.email} / ${rma.customer.phone}`} />
                     <InfoPair label="Address" value={<div className="whitespace-pre-line">{rma.customer.address}</div>} />
+                    <InfoPair label="Date of Incident" value={new Date(rma.dateOfIncident).toLocaleDateString()} />
+                    <InfoPair label="Date of Report" value={new Date(rma.dateOfReport).toLocaleDateString()} />
+                    <InfoPair 
+                        label="Attachment Proof" 
+                        value={
+                            rma.attachment ? (
+                                <a href={`/attachments/${rma.attachment}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium">
+                                    <PaperClipIcon className="h-4 w-4" />
+                                    {rma.attachment}
+                                </a>
+                            ) : 'N/A'
+                        }
+                    />
                 </dl>
             </section>
             
@@ -228,7 +249,9 @@ const RmaDetailView: React.FC<RmaDetailViewProps> = ({ rma, onBack, onStatusUpda
                      return (
                        <div key={device.serialNumber} className="p-3 border border-slate-200 rounded-lg">
                          <p className="font-medium text-slate-900">{device.model}</p>
+                         <p className="text-sm text-slate-500">Part #: {device.partNumber}</p>
                          <p className="text-sm text-slate-500 font-mono">{device.serialNumber}</p>
+                         <p className="text-sm text-slate-500">Quantity: {device.quantity}</p>
                          <div className="mt-2 pt-2 border-t border-slate-100">
                            {latestCycle ? (
                              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${getStatusBadgeColor(latestCycle.status)}`}>
@@ -251,7 +274,9 @@ const RmaDetailView: React.FC<RmaDetailViewProps> = ({ rma, onBack, onStatusUpda
                         <thead>
                           <tr>
                             <th scope="col" className="py-3.5 pl-6 pr-3 text-left text-sm font-semibold text-slate-900">Model</th>
-                            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Serial Number</th>
+                            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Part Number</th>
+                            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Serial / Lot Number</th>
+                            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Quantity</th>
                             <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Current Status</th>
                           </tr>
                         </thead>
@@ -261,7 +286,9 @@ const RmaDetailView: React.FC<RmaDetailViewProps> = ({ rma, onBack, onStatusUpda
                             return (
                               <tr key={device.serialNumber}>
                                 <td className="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-slate-900">{device.model}</td>
+                                <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{device.partNumber}</td>
                                 <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-500 font-mono">{device.serialNumber}</td>
+                                <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{device.quantity}</td>
                                 <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
                                   {latestCycle ? (
                                     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${getStatusBadgeColor(latestCycle.status)}`}>

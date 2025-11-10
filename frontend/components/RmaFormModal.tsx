@@ -14,9 +14,13 @@ interface RmaFormModalProps {
 
 type FormDevice = {
   model: string;
+  partNumber: string, 
   serialNumber: string;
+  quantity: number;
   issueDescription: string;
   accessoriesIncluded: string;
+  dateOfIncident: string, 
+  dateOfReport: string
 }
 
 const RmaFormModal: React.FC<RmaFormModalProps> = ({ rma, customers, onClose, onSave, preselectedCustomerId, onAddNewCustomer, lastCreatedCustomerId }) => {
@@ -26,26 +30,50 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({ rma, customers, onClose, on
       const cycle = rma.serviceCycles.find(sc => sc.deviceSerialNumber === d.serialNumber);
       return {
           model: d.model,
+          partNumber: d.partNumber,
           serialNumber: d.serialNumber,
+          quantity: d.quantity,
           issueDescription: cycle?.issueDescription || '',
           accessoriesIncluded: cycle?.accessoriesIncluded || '',
+          dateOfIncident: rma.dateOfIncident,
+          dateOfReport: rma.dateOfReport
       }
-  }) : [{ model: '', serialNumber: '', issueDescription: '', accessoriesIncluded: '' }];
+  }) : [{
+    model: '', 
+    partNumber: '',
+    serialNumber: '',
+    quantity: 1,
+    issueDescription: '', 
+    accessoriesIncluded: '',
+    dateOfIncident: new Date().toISOString().split('T')[0],
+    dateOfReport: new Date().toISOString().split('T')[0]
+   }];
   
   const [devices, setDevices] = useState<FormDevice[]>(initialDevices);
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [existingAttachment, setExistingAttachment] = useState(rma?.attachment || '');
 
   const [customerSearchTerm, setCustomerSearchTerm] = useState('');
   const [isCustomerDropdownOpen, setIsCustomerDropdownOpen] = useState(false);
   const customerDropdownRef = useRef<HTMLDivElement>(null);
   
-  const handleDeviceChange = (index: number, field: keyof FormDevice, value: string) => {
+  const handleDeviceChange = (index: number, field: keyof FormDevice, value: string | number) => {
     const newDevices = [...devices];
-    newDevices[index][field] = value;
+    (newDevices[index] as any)[field] = value;
     setDevices(newDevices);
   };
 
   const addDevice = () => {
-    setDevices([...devices, { model: '', serialNumber: '', issueDescription: '', accessoriesIncluded: '' }]);
+    setDevices([...devices, {
+      model: '', 
+      partNumber: '',
+      serialNumber: '',
+      quantity: 1,
+      issueDescription: '', 
+      accessoriesIncluded: '',
+      dateOfIncident: new Date().toISOString().split('T')[0],
+      dateOfReport: new Date().toISOString().split('T')[0]
+     }]);
   };
 
   const removeDevice = (index: number) => {
@@ -106,13 +134,21 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({ rma, customers, onClose, on
       return;
     }
 
-    const rmaDevices: Device[] = devices.map(d => ({ model: d.model, serialNumber: d.serialNumber }));
+    const rmaDevices: Device[] = devices.map(d => ({ 
+      model: d.model, 
+      partNumber: d.partNumber, 
+      serialNumber: d.serialNumber, 
+      quantity: d.quantity 
+    }));
     const serviceCyclesData = devices.map(d => ({ issueDescription: d.issueDescription, accessoriesIncluded: d.accessoriesIncluded }));
 
     onSave({
       customer,
       devices: rmaDevices,
       serviceCycles: serviceCyclesData,
+      dateOfIncident: devices[0].dateOfIncident,
+      dateOfReport: devices[0].dateOfReport,
+      attachment: attachment ? attachment.name : existingAttachment
     }, rma?.id);
   };
 
@@ -186,7 +222,7 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({ rma, customers, onClose, on
           {devices.map((device, index) => (
             <section key={index} className="border border-slate-200 rounded-lg p-4 relative">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-medium text-slate-900">Device #{index + 1}</h3>
+                    <h3 className="text-lg font-medium text-slate-900">Device Information #{index + 1}</h3>
                     {devices.length > 1 && !rma && (
                         <button type="button" onClick={() => removeDevice(index)} className="text-sm font-medium text-red-600 hover:text-red-500">Remove</button>
                     )}
@@ -197,11 +233,19 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({ rma, customers, onClose, on
                         <input type="text" id={`model-${index}`} value={device.model} onChange={e => handleDeviceChange(index, 'model', e.target.value)} required className={`mt-2 ${inputStyles}`} disabled={!!rma} />
                     </div>
                     <div>
-                        <label htmlFor={`serial-${index}`} className={labelStyles}>Serial Number</label>
+                        <label htmlFor={`partNumber-${index}`} className={labelStyles}>Part Number</label>
+                        <input type="text" id={`partNumber-${index}`} value={device.partNumber} onChange={e => handleDeviceChange(index, 'partNumber', e.target.value)} required className={`mt-2 ${inputStyles}`} disabled={!!rma} />
+                    </div>
+                    <div>
+                        <label htmlFor={`serial-${index}`} className={labelStyles}>Serial / Lot Number</label>
                         <input type="text" id={`serial-${index}`} value={device.serialNumber} onChange={e => handleDeviceChange(index, 'serialNumber', e.target.value)} required className={`mt-2 ${inputStyles}`} disabled={!!rma} />
                     </div>
+                    <div>
+                        <label htmlFor={`quantity-${index}`} className={labelStyles}>Quantity</label>
+                        <input type="number" id={`quantity-${index}`} value={device.quantity} onChange={e => handleDeviceChange(index, 'quantity', e.target.value)} required className={`mt-2 ${inputStyles}`} disabled={!!rma} />
+                    </div>
                     <div className="sm:col-span-2">
-                        <label htmlFor={`issue-${index}`} className={labelStyles}>Detailed Description of Issue</label>
+                        <label htmlFor={`issue-${index}`} className={labelStyles}>Failure Description/Details</label>
                         <textarea id={`issue-${index}`} value={device.issueDescription} onChange={e => handleDeviceChange(index, 'issueDescription', e.target.value)} required className={`mt-2 ${inputStyles}`} rows={3} disabled={!!rma} />
                     </div>
                     <div className="sm:col-span-2">
@@ -219,6 +263,24 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({ rma, customers, onClose, on
                 </button>
             </div>
           )}
+
+          <section className="border border-slate-200 rounded-lg p-4 relative">
+              <h3 className="text-lg font-medium text-slate-900">Additional Information</h3>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mt-4">
+                  <div>
+                      <label htmlFor="dateOfIncident" className={labelStyles}>Date of Incident</label>
+                      <input type="date" id="dateOfIncident" value={devices[0].dateOfIncident} onChange={e => handleDeviceChange(0, 'dateOfIncident', e.target.value)} required className={`mt-2 ${inputStyles}`} />
+                  </div>
+                  <div>
+                      <label htmlFor="dateOfReport" className={labelStyles}>Date of Report</label>
+                      <input type="date" id="dateOfReport" value={devices[0].dateOfReport} onChange={e => handleDeviceChange(0, 'dateOfReport', e.target.value)} required className={`mt-2 ${inputStyles}`} />
+                  </div>
+                  <div className="sm:col-span-2">
+                      <label htmlFor="attachment" className={labelStyles}>Attachment Proof (optional)</label>
+                      <input type="file" id="attachment" onChange={e => setAttachment(e.target.files ? e.target.files[0] : null)} className="mt-2 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
+                  </div>
+              </div>
+          </section>
 
 
           <div className="flex justify-end gap-4 pt-6 border-t border-slate-200">

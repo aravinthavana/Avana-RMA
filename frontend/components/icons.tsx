@@ -102,3 +102,9 @@ export const WrenchScrewdriverIcon = ({ className }: { className?: string }) => 
       <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.495-2.495a1.125 1.125 0 0 1 1.591 1.591l-2.495 2.495M11.42 15.17 6.873 20.623a1.125 1.125 0 0 1-1.591-1.591L9.828 14.42M3 3l3.59 3.59m0 0A9.953 9.953 0 0 1 12 5.05a9.953 9.953 0 0 1 5.41 1.44m-9.82 0A2.25 2.25 0 0 0 3 8.25v1.5a2.25 2.25 0 0 0 2.25 2.25h1.5a2.25 2.25 0 0 0 2.25-2.25v-1.5a2.25 2.25 0 0 0-2.25-2.25h-1.5Z" />
     </svg>
 );
+
+export const PaperClipIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className || "w-6 h-6"}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3.375 3.375 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.125 1.125 0 0 0 1.59 1.59l7.81-7.81" />
+    </svg>
+);
