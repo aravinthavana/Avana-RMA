@@ -181,7 +181,7 @@ const RmaDetailView: React.FC<RmaDetailViewProps> = ({ rma, onBack, onStatusUpda
       {isModalOpen && cycleToUpdate && (
         <StatusUpdateModal
           currentStatus={cycleToUpdate.status}
-          onSubmit={handleUpdate}
+          onSave={handleUpdate}
           onClose={() => setIsModalOpen(false)}
         />
       )}

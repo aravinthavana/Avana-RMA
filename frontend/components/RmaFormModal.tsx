@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Rma, Customer, Device } from '../types';
+import { Rma, Customer, Device, ServiceCycle } from '../types';
 import { XMarkIcon, PlusIcon } from './icons';
+
+
+const hospitals = [
+    "General Hospital",
+    "City Clinic",
+    "Sunrise Medical Center",
+    "Westside Regional Hospital",
+    "Community Health Services",
+];
 
 /**
  * Props for the RmaFormModal component.
@@ -103,6 +112,8 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({ rma, customers, onClose, on
   const [customerSearchTerm, setCustomerSearchTerm] = useState('');
   const [isCustomerDropdownOpen, setIsCustomerDropdownOpen] = useState(false);
   const customerDropdownRef = useRef<HTMLDivElement>(null);
+  const [hospital, setHospital] = useState(rma?.customer.name || '');
+
 
   /**
    * Validates a single field.
@@ -123,6 +134,10 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({ rma, customers, onClose, on
             case 'model': return value.trim() ? undefined : 'Device model is required.';
             case 'serialNumber': return value.trim() ? undefined : 'Serial number is required.';
             case 'issueDescription': return value.trim() ? undefined : 'Failure description is required.';
+            case 'quantity':
+                if (typeof value !== 'number' || isNaN(value)) return 'Quantity must be a number.';
+                if (value < 1) return 'Quantity must be at least 1.';
+                return undefined;
             default: return undefined;
         }
     } else {
@@ -320,11 +335,33 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({ rma, customers, onClose, on
     // Prepare data for saving.
     const customer = customers.find(c => c.id === formData.customerId);
     const rmaDevices: Device[] = formData.devices.map(d => ({ model: d.model, partNumber: d.partNumber, serialNumber: d.serialNumber, quantity: d.quantity }));
-    const serviceCyclesData = formData.devices.map(d => ({ issueDescription: d.issueDescription, accessoriesIncluded: d.accessoriesIncluded }));
+    
+    let serviceCyclesData;
+    if (rma) {
+        // If editing, preserve existing service cycles and update descriptions from form
+        serviceCyclesData = rma.serviceCycles.map(cycle => {
+            const formDevice = formData.devices.find(d => d.serialNumber === cycle.deviceSerialNumber);
+            return {
+                ...cycle,
+                issueDescription: formDevice?.issueDescription || cycle.issueDescription,
+                accessoriesIncluded: formDevice?.accessoriesIncluded || cycle.accessoriesIncluded,
+            };
+        });
+    } else {
+        // If creating, build new service cycles from form data
+        serviceCyclesData = formData.devices.map(d => ({ 
+            issueDescription: d.issueDescription, 
+            accessoriesIncluded: d.accessoriesIncluded,
+            deviceSerialNumber: d.serialNumber
+        }));
+    }
 
     // Call the parent onSave handler.
     onSave({
-      customer,
+      customer: {
+        ...customer,
+        name: hospital,
+    },
       devices: rmaDevices,
       serviceCycles: serviceCyclesData,
       dateOfIncident: formData.dateOfIncident,
@@ -348,7 +385,7 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({ rma, customers, onClose, on
   return (
     <div className="fixed inset-0 bg-slate-800 bg-opacity-75 flex items-center justify-center z-50 p-4 modal-enter" aria-labelledby="rma-modal-title" role="dialog" aria-modal="true">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col modal-content-enter">
-        <header className="px-6 py-4 flex justify-between items-center border-b border-slate-200 flex-shrink-0">
+        <header className="px-6 py-4 flex justify-between items-center border-b border-slate-200 shrink-0">
           <h2 id="rma-modal-title" className="text-xl font-semibold text-slate-800">{rma ? 'Edit RMA' : 'Create New RMA'}</h2>
           <button onClick={onClose} className="p-2 rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-100" aria-label="Close modal"><XMarkIcon className="w-6 h-6" /></button>
         </header>
@@ -357,26 +394,35 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({ rma, customers, onClose, on
             <section>
                 <h3 className="text-lg font-medium text-slate-900 border-b pb-2 mb-4">Customer Information</h3>
                 <div>
-                    <label htmlFor="customer" className={labelStyles}>Customer <span className="text-red-500">*</span></label>
-                    <div className="mt-2 flex items-center gap-2">
-                        <div className="relative flex-grow" ref={customerDropdownRef}>
-                        <input type="text" id="customer" placeholder="Search or select a customer" value={customerSearchTerm} onChange={handleCustomerSearchChange} onFocus={() => setIsCustomerDropdownOpen(true)} onBlur={() => setTouched(prev => ({...prev, customerId: true}))} disabled={!!preselectedCustomerId || !!rma} required autoComplete="off" className={getInputStyles(!!errors.customerId && touched.customerId)} role="combobox" aria-expanded={isCustomerDropdownOpen} aria-controls="customer-listbox" aria-autocomplete="list" aria-invalid={!!errors.customerId && touched.customerId} />
-                        {isCustomerDropdownOpen && !preselectedCustomerId && !rma && (
-                            <div id="customer-listbox" role="listbox" className="absolute z-20 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                            {filteredCustomers.length > 0 ? (
-                                filteredCustomers.map(c => (
-                                <div key={c.id} id={`customer-option-${c.id}`} role="option" aria-selected={c.id === formData.customerId} onClick={() => handleSelectCustomer(c)} className="cursor-pointer select-none relative py-2 pl-3 pr-9 text-slate-900 hover:bg-primary-600 hover:text-white"><span className="block truncate">{c.name}</span></div>
-                                ))
-                            ) : (
-                                <div className="px-4 py-2 text-sm text-slate-500">No customers found.</div>
-                            )}
-                            </div>
+                <label htmlFor="customer" className={labelStyles}>Customer <span className="text-red-500">*</span></label>
+                <div className="mt-2 flex items-center gap-2">
+                    <div className="relative grow" ref={customerDropdownRef}>
+                    <input type="text" id="customer" placeholder="Search or select a customer" value={customerSearchTerm} onChange={handleCustomerSearchChange} onFocus={() => setIsCustomerDropdownOpen(true)} onBlur={() => setTouched(prev => ({...prev, customerId: true}))} disabled={!!preselectedCustomerId || !!rma} required autoComplete="off" className={getInputStyles(!!errors.customerId && touched.customerId)} role="combobox" aria-expanded={isCustomerDropdownOpen} aria-controls="customer-listbox" aria-autocomplete="list" aria-invalid={!!errors.customerId && touched.customerId} />
+                    {isCustomerDropdownOpen && !preselectedCustomerId && !rma && (
+                        <div id="customer-listbox" role="listbox" className="absolute z-20 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                        {filteredCustomers.length > 0 ? (
+                            filteredCustomers.map(c => (
+                            <div key={c.id} id={`customer-option-${c.id}`} role="option" aria-selected={c.id === formData.customerId} onClick={() => handleSelectCustomer(c)} className="cursor-pointer select-none relative py-2 pl-3 pr-9 text-slate-900 hover:bg-primary-600 hover:text-white"><span className="block truncate">{c.name}</span></div>
+                            ))
+                        ) : (
+                            <div className="px-4 py-2 text-sm text-slate-500">No customers found.</div>
                         )}
                         </div>
-                        {!preselectedCustomerId && !rma && (<button type="button" onClick={onAddNewCustomer} title="Add New Customer" className="inline-flex items-center gap-x-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50"><PlusIcon className="h-5 w-5 text-slate-500"/> New</button>)}
+                    )}
                     </div>
-                    {errors.customerId && touched.customerId && <p className={errorTextStyles}>{errors.customerId}</p>}
+                    {!preselectedCustomerId && !rma && (<button type="button" onClick={onAddNewCustomer} title="Add New Customer" className="inline-flex items-center gap-x-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50"><PlusIcon className="h-5 w-5 text-slate-500"/> New</button>)}
                 </div>
+                {errors.customerId && touched.customerId && <p className={errorTextStyles}>{errors.customerId}</p>}
+            </div>
+            {rma && (
+                <div className="mt-4">
+                    <label htmlFor="hospital" className={labelStyles}>Hospital</label>
+                    <select id="hospital" value={hospital} onChange={e => setHospital(e.target.value)} className={`mt-2 ${getInputStyles(false)}`}>
+                        <option value="" disabled>Select a hospital</option>
+                        {hospitals.map(h => <option key={h} value={h}>{h}</option>)}
+                    </select>
+                </div>
+            )}
             </section>
 
             {/* Dynamic Device Information Sections */}
@@ -389,30 +435,31 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({ rma, customers, onClose, on
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div>
                             <label htmlFor={`model-${index}`} className={labelStyles}>Device Model <span className="text-red-500">*</span></label>
-                            <input type="text" id={`model-${index}`} value={device.model} onChange={e => handleDeviceChange(index, 'model', e.target.value)} onBlur={e => handleDeviceBlur(e, index, 'model')} required className={`mt-2 ${getInputStyles(!!errors.devices?.[index]?.model && !!touched.devices?.[index]?.model)}`} disabled={!!rma} />
+                            <input type="text" id={`model-${index}`} value={device.model} onChange={e => handleDeviceChange(index, 'model', e.target.value)} onBlur={e => handleDeviceBlur(e, index, 'model')} required className={`mt-2 ${getInputStyles(!!errors.devices?.[index]?.model && !!touched.devices?.[index]?.model)}`} />
                             {errors.devices?.[index]?.model && touched.devices?.[index]?.model && <p className={errorTextStyles}>{errors.devices[index]?.model}</p>}
                         </div>
                         <div>
                             <label htmlFor={`partNumber-${index}`} className={labelStyles}>Part Number</label>
-                            <input type="text" id={`partNumber-${index}`} value={device.partNumber} onChange={e => handleDeviceChange(index, 'partNumber', e.target.value)} className={`mt-2 ${getInputStyles(false)}`} disabled={!!rma} />
+                            <input type="text" id={`partNumber-${index}`} value={device.partNumber} onChange={e => handleDeviceChange(index, 'partNumber', e.target.value)} className={`mt-2 ${getInputStyles(false)}`} />
                         </div>
                         <div>
                             <label htmlFor={`serialNumber-${index}`} className={labelStyles}>Serial / Lot Number <span className="text-red-500">*</span></label>
-                            <input type="text" id={`serialNumber-${index}`} value={device.serialNumber} onChange={e => handleDeviceChange(index, 'serialNumber', e.target.value)} onBlur={e => handleDeviceBlur(e, index, 'serialNumber')} required className={`mt-2 ${getInputStyles(!!errors.devices?.[index]?.serialNumber && !!touched.devices?.[index]?.serialNumber)}`} disabled={!!rma} />
+                            <input type="text" id={`serialNumber-${index}`} value={device.serialNumber} onChange={e => handleDeviceChange(index, 'serialNumber', e.target.value)} onBlur={e => handleDeviceBlur(e, index, 'serialNumber')} required className={`mt-2 ${getInputStyles(!!errors.devices?.[index]?.serialNumber && !!touched.devices?.[index]?.serialNumber)}`} />
                             {errors.devices?.[index]?.serialNumber && touched.devices?.[index]?.serialNumber && <p className={errorTextStyles}>{errors.devices[index]?.serialNumber}</p>}
                         </div>
                         <div>
-                            <label htmlFor={`quantity-${index}`} className={labelStyles}>Quantity</label>
-                            <input type="number" id={`quantity-${index}`} value={device.quantity} onChange={e => handleDeviceChange(index, 'quantity', Number(e.target.value))} min={1} required className={`mt-2 ${getInputStyles(false)}`} disabled={!!rma} />
+                            <label htmlFor={`quantity-${index}`} className={labelStyles}>Quantity <span className="text-red-500">*</span></label>
+                            <input type="number" id={`quantity-${index}`} value={device.quantity} onChange={e => handleDeviceChange(index, 'quantity', Number(e.target.value))} onBlur={e => handleDeviceBlur(e, index, 'quantity')} min={1} required className={`mt-2 ${getInputStyles(!!errors.devices?.[index]?.quantity && !!touched.devices?.[index]?.quantity)}`} />
+                            {errors.devices?.[index]?.quantity && touched.devices?.[index]?.quantity && <p className={errorTextStyles}>{errors.devices[index]?.quantity}</p>}
                         </div>
                         <div className="sm:col-span-2">
                             <label htmlFor={`issueDescription-${index}`} className={labelStyles}>Failure Description/Details <span className="text-red-500">*</span></label>
-                            <textarea id={`issueDescription-${index}`} value={device.issueDescription} onChange={e => handleDeviceChange(index, 'issueDescription', e.target.value)} onBlur={e => handleDeviceBlur(e, index, 'issueDescription')} required className={`mt-2 ${getInputStyles(!!errors.devices?.[index]?.issueDescription && !!touched.devices?.[index]?.issueDescription)}`} rows={3} disabled={!!rma} />
+                            <textarea id={`issueDescription-${index}`} value={device.issueDescription} onChange={e => handleDeviceChange(index, 'issueDescription', e.target.value)} onBlur={e => handleDeviceBlur(e, index, 'issueDescription')} required className={`mt-2 ${getInputStyles(!!errors.devices?.[index]?.issueDescription && !!touched.devices?.[index]?.issueDescription)}`} rows={3} />
                             {errors.devices?.[index]?.issueDescription && touched.devices?.[index]?.issueDescription && <p className={errorTextStyles}>{errors.devices[index]?.issueDescription}</p>}
                         </div>
                         <div className="sm:col-span-2">
                             <label htmlFor={`accessoriesIncluded-${index}`} className={labelStyles}>Accessories Included</label>
-                            <textarea id={`accessoriesIncluded-${index}`} value={device.accessoriesIncluded} onChange={e => handleDeviceChange(index, 'accessoriesIncluded', e.target.value)} placeholder="e.g., Main unit, power cord, 2 batteries" className={`mt-2 ${getInputStyles(false)}`} rows={2} disabled={!!rma} />
+                            <textarea id={`accessoriesIncluded-${index}`} value={device.accessoriesIncluded} onChange={e => handleDeviceChange(index, 'accessoriesIncluded', e.target.value)} placeholder="e.g., Main unit, power cord, 2 batteries" className={`mt-2 ${getInputStyles(false)}`} rows={2} />
                         </div>
                     </div>
                 </section>
@@ -442,9 +489,9 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({ rma, customers, onClose, on
             </section>
 
             {/* Form Actions */}
-            <div className="flex justify-end gap-4 pt-6 border-t border-slate-200 flex-shrink-0">
+            <div className="flex justify-end gap-4 pt-6 border-t border-slate-200 shrink-0">
                 <button type="button" onClick={onClose} className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50">Cancel</button>
-                <button type="submit" disabled={!isFormValid} className="rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed">
+                <button type="submit" disabled={!isFormValid} className="rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed">
                 {rma ? 'Save Changes' : 'Create RMA'}
                 </button>
             </div>

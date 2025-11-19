@@ -114,18 +114,18 @@ const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersCh
           <h1 className="text-2xl font-bold text-slate-900">Return Merchandise Authorizations (RMAs)</h1>
           <p className="mt-1 text-sm text-slate-600">A list of all RMAs including their status and customer details.</p>
         </div>
-        <div className="flex-shrink-0">
-          <button type="button" onClick={onNewRma} className="inline-flex w-full sm:w-auto items-center justify-center gap-x-2 rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"><PlusIcon className="w-5 h-5" />New RMA</button>
+        <div className="shrink-0">
+          <button type="button" onClick={onNewRma} className="inline-flex w-full sm:w-auto items-center justify-center gap-x-2 rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"><PlusIcon className="w-5 h-5" />New RMA</button>
         </div>
       </div>
 
       {/* Search and Filter Controls */}
       <div className="flex flex-col sm:flex-row gap-4 mb-4">
-        <div className="relative flex-grow">
+        <div className="relative grow">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><MagnifyingGlassIcon className="h-5 w-5 text-slate-400" aria-hidden="true" /></div>
           <input type="search" placeholder="Search by RMA #, Customer, or Serial #" value={filters.searchTerm} onChange={(e) => onFiltersChange({ ...filters, searchTerm: e.target.value })} className="block w-full rounded-md border-0 py-1.5 pl-10 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6" />
         </div>
-        <button onClick={() => setShowFilters(!showFilters)} aria-expanded={showFilters} aria-controls="filter-panel" className="relative inline-flex flex-shrink-0 items-center gap-x-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50">
+        <button onClick={() => setShowFilters(!showFilters)} aria-expanded={showFilters} aria-controls="filter-panel" className="relative inline-flex shrink-0 items-center gap-x-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50">
           <FilterIcon className="w-5 h-5 text-slate-500"/>
           Filters
           {activeFilterCount > 0 && <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-xs font-semibold text-white ring-2 ring-slate-50">{activeFilterCount}</span>}

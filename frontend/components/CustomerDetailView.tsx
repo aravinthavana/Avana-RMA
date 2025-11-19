@@ -102,7 +102,7 @@ const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({ customer, rmas,
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-4">
             <h2 className="text-xl font-bold text-slate-900">Associated RMAs</h2>
             <div className="flex items-center gap-3">
-                 <button type="button" onClick={() => onNewRma(id)} className="inline-flex items-center gap-x-2 rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"><PlusIcon className="w-5 h-5" /> New RMA for Customer</button>
+                 <button type="button" onClick={() => onNewRma(id)} className="inline-flex items-center gap-x-2 rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"><PlusIcon className="w-5 h-5" /> New RMA for Customer</button>
                 <button onClick={() => setShowFilters(!showFilters)} className="inline-flex items-center gap-x-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50"><FilterIcon className="w-5 h-5 text-slate-500"/> Filter</button>
             </div>
         </div>
