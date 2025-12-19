@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Rma, RmaStatus } from '../../types';
 import { rmasApi } from '../api';
+import { useAuth } from '../context/AuthContext';
 
 export interface RmaFilters {
     searchTerm: string;
@@ -15,6 +16,7 @@ export interface RmaFilters {
  * Custom hook for managing RMA state and operations
  */
 export const useRmas = (initialPage: number = 1, initialLimit: number = 50) => {
+    const { isAuthenticated } = useAuth();
     const [rmas, setRmas] = useState<Rma[]>([]);
     const [page, setPage] = useState(initialPage);
     const [limit] = useState(initialLimit);
@@ -32,6 +34,8 @@ export const useRmas = (initialPage: number = 1, initialLimit: number = 50) => {
      * Fetch RMAs from API
      */
     const fetchRmas = async () => {
+        if (!isAuthenticated) return;
+
         setIsLoading(true);
         try {
             const response = await rmasApi.getAll(page, limit, {
@@ -171,8 +175,10 @@ export const useRmas = (initialPage: number = 1, initialLimit: number = 50) => {
      * Auto-fetch RMAs when page or filters change
      */
     useEffect(() => {
-        fetchRmas();
-    }, [page, limit, filters]);
+        if (isAuthenticated) {
+            fetchRmas();
+        }
+    }, [page, limit, filters, isAuthenticated]);
 
     return {
         // State

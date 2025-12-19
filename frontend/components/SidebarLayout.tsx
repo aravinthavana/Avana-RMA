@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../src/context/AuthContext';
 import { WrenchScrewdriverIcon, BuildingOffice2Icon, XMarkIcon, ChevronRightIcon, HomeIcon } from './icons';
 
 interface SidebarLayoutProps {
@@ -16,6 +17,7 @@ const Bars3Icon = ({ className }: { className?: string }) => (
 );
 
 export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeView, onNavigate, onGoHome }) => {
+    const { user, logout } = useAuth();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const navItems = [
@@ -116,11 +118,22 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeVi
 
                 <div className="p-4 border-t border-slate-200/50">
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
-                        <div className="h-9 w-9 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">EA</div>
-                        <div>
-                            <p className="text-sm font-medium text-slate-900">EAravinth</p>
-                            <p className="text-xs text-slate-500">Admin</p>
+                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary-100 to-indigo-100 flex items-center justify-center text-xs font-bold text-primary-700 border border-primary-200">
+                            {user?.name?.charAt(0) || 'U'}
                         </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-slate-900 truncate">{user?.name || 'User'}</p>
+                            <p className="text-xs text-slate-500 truncate">{user?.role || 'Admin'}</p>
+                        </div>
+                        <button
+                            onClick={logout}
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Sign out"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>

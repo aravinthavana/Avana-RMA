@@ -1,4 +1,5 @@
-import React, { useState, useMemo, FC, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, FC } from 'react';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 import { Rma, Customer, RmaStatus, ServiceCycle } from './types';
 import RmaList from './components/RmaList';
@@ -8,6 +9,8 @@ import CustomerDetailView from './components/CustomerDetailView';
 import RmaFormModal from './components/RmaFormModal';
 import NewCycleModal from './components/NewCycleModal';
 import CustomerFormModal from './components/CustomerFormModal';
+import LoginPage from './src/pages/Login';
+import ProtectedRoute from './components/ProtectedRoute';
 
 import { API_BASE_URL } from './config';
 import { SidebarLayout } from './components/SidebarLayout';
@@ -64,13 +67,33 @@ const App: FC = () => {
     setRmas,
   } = useRmas(1, 10);
 
+  // React Router hooks
+  const navigate = useNavigate();
+  const location = useLocation();
+
   // Combined loading state
   const isLoading = customersLoading || rmasLoading;
 
-  // State for controlling the current view and selected items.
-  const [currentView, setCurrentView] = useState<View>('dashboard');
+  // Selected IDs derived from routing would be ideal, but for now managing state here 
+  // is fine as we pass props.
+  // Actually, for RmaDetailView to work on direct link, we need to extract ID from URL param
+  // But our current components expect the full object passed in.
+  // Refactor strategy: Keep state valid for now, but update URL.
+  // Ideally components should fetch their own data by ID if missing.
+  // For this Refactor: We will use the existing Rmas/Customers list to find Selected Item.
+
   const [selectedRmaId, setSelectedRmaId] = useState<string | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+
+  // Sync state with URL params (basic implementation)
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.startsWith('/rmas/') && path !== '/rmas') {
+      setSelectedRmaId(path.split('/')[2]);
+    } else if (path.startsWith('/customers/') && path !== '/customers') {
+      setSelectedCustomerId(path.split('/')[2]);
+    }
+  }, [location.pathname]);
 
   // State for managing the visibility of various modals.
   const [isRmaModalOpen, setIsRmaModalOpen] = useState(false);
@@ -89,59 +112,14 @@ const App: FC = () => {
   const limit = 10;
   const customerLimit = 10;
 
-  // Sync app state with browser history
-  useEffect(() => {
-    // Push state to history when view changes
-    const state = {
-      view: currentView,
-      rmaId: selectedRmaId,
-      customerId: selectedCustomerId
-    };
-
-    // Build URL path
-    let path = '/';
-    if (currentView === 'dashboard') path = '/';
-    else if (currentView === 'rmaList') path = '/rmas';
-    else if (currentView === 'rmaDetail' && selectedRmaId) path = `/rmas/${selectedRmaId}`;
-    else if (currentView === 'customerList') path = '/customers';
-    else if (currentView === 'customerDetail' && selectedCustomerId) path = `/customers/${selectedCustomerId}`;
-
-    // Push state to browser history
-    window.history.pushState(state, '', path);
-  }, [currentView, selectedRmaId, selectedCustomerId]);
-
-  // Handle browser back/forward buttons
-  useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      if (event.state) {
-        setCurrentView(event.state.view || 'rmaList');
-        setSelectedRmaId(event.state.rmaId || null);
-        setSelectedCustomerId(event.state.customerId || null);
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-
-    // Set initial state
-    window.history.replaceState({
-      view: currentView,
-      rmaId: selectedRmaId,
-      customerId: selectedCustomerId
-    }, '', window.location.pathname);
-
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
   const handleSelectRma = (id: string) => {
     setSelectedRmaId(id);
-    if (currentView !== 'customerDetail') {
-      setCurrentView('rmaDetail');
-    }
+    navigate(`/rmas/${id}`);
   };
 
   const handleSelectCustomer = (id: string) => {
     setSelectedCustomerId(id);
-    setCurrentView('customerDetail');
+    navigate(`/customers/${id}`);
   };
 
   const closeRmaModal = () => {
@@ -395,126 +373,153 @@ const App: FC = () => {
 
   const handleBackFromRmaDetail = () => {
     setSelectedRmaId(null);
-    if (selectedCustomerId) setCurrentView('customerDetail');
-    else setCurrentView('rmaList');
+    if (selectedCustomerId) navigate(`/customers/${selectedCustomerId}`);
+    else navigate('/rmas');
   }
 
-  const handleNavigate = (view: 'rma' | 'customer') => {
+  const handleNavigate = (view: 'rma' | 'customer' | 'dashboard') => {
     setSelectedRmaId(null);
     setSelectedCustomerId(null);
-    if (view === 'rma') setCurrentView('rmaList');
-    if (view === 'customer') setCurrentView('customerList');
+    if (view === 'rma') navigate('/rmas');
+    if (view === 'customer') navigate('/customers');
+    if (view === 'dashboard') navigate('/');
   }
 
-  const isRmaActive = currentView === 'rmaList' || (currentView === 'rmaDetail' && !selectedCustomerId);
-  // const isCustomerActive = currentView.startsWith('customer') || (currentView === 'rmaDetail' && selectedCustomerId);
+
 
   const getBreadcrumbs = (): BreadcrumbItem[] => {
     const items: BreadcrumbItem[] = [];
+    const path = location.pathname;
 
     // Always show Home first, except on dashboard
-    if (currentView !== 'dashboard') {
-      items.push({ label: 'Home', onClick: () => setCurrentView('dashboard'), active: false });
+    if (path !== '/' && path !== '/dashboard') {
+      items.push({ label: 'Home', onClick: () => navigate('/'), active: false });
     }
 
-    if (currentView === 'dashboard') {
+    if (path === '/' || path === '/dashboard') {
       items.push({ label: 'Dashboard', active: true });
-    } else if (currentView === 'rmaList' || (currentView === 'rmaDetail' && !selectedCustomerId)) {
-      items.push({ label: 'RMAs', onClick: () => handleNavigate('rma'), active: currentView === 'rmaList' });
-      if (currentView === 'rmaDetail' && selectedRma) {
-        items.push({ label: `RMA #${selectedRma.id}`, active: true });
+    } else if (path.startsWith('/rmas')) {
+      items.push({ label: 'RMAs', onClick: () => navigate('/rmas'), active: path === '/rmas' });
+      if (selectedRmaId) {
+        items.push({ label: `RMA #${selectedRmaId}`, active: true });
       }
-    } else if (currentView.startsWith('customer') || (currentView === 'rmaDetail' && selectedCustomerId)) {
-      items.push({ label: 'Customers', onClick: () => handleNavigate('customer'), active: currentView === 'customerList' });
+    } else if (path.startsWith('/customers')) {
+      items.push({ label: 'Customers', onClick: () => navigate('/customers'), active: path === '/customers' });
       if (selectedCustomer) {
         items.push({
           label: selectedCustomer.name,
-          onClick: () => setCurrentView('customerDetail'),
-          active: currentView === 'customerDetail' && !selectedRmaId
+          onClick: () => navigate(`/customers/${selectedCustomer.id}`),
+          active: path === `/customers/${selectedCustomer.id}`
         });
-        if (currentView === 'rmaDetail' && selectedRma) {
-          items.push({ label: `RMA #${selectedRma.id}`, active: true });
-        }
+        // Handle nested RMA logic or simply rely on RMA route
       }
     }
     return items;
   }
 
-  const renderView = () => {
-    switch (currentView) {
-      case 'rmaDetail':
-        return selectedRma ? <RmaDetailView rma={selectedRma} onBack={handleBackFromRmaDetail} onStatusUpdate={handleStatusUpdate} onNewCycle={handleOpenNewCycleModal} /> : <div>RMA not found</div>;
-      case 'customerList':
-        return <CustomerListView
-          customers={customers}
-          rmas={rmas}
-          onSelectCustomer={handleSelectCustomer}
-          onAddCustomer={openNewCustomerModal}
-          onEditCustomer={handleEditCustomer}
-          onDeleteCustomer={handleDeleteCustomer}
-          page={customerPage}
-          totalPages={Math.ceil(totalCustomers / customerLimit)}
-          onPageChange={setCustomerPage}
-          isLoading={isLoading}
-        />;
-      case 'customerDetail':
-        if (selectedRmaId) {
-          const rmaForDetail = rmas.find(r => r.id === selectedRmaId);
-          return rmaForDetail ? <RmaDetailView rma={rmaForDetail} onBack={handleBackFromRmaDetail} onStatusUpdate={handleStatusUpdate} onNewCycle={handleOpenNewCycleModal} /> : <div>RMA not found</div>;
-        }
-        return selectedCustomer ? <CustomerDetailView customer={selectedCustomer} rmas={rmas.filter(r => r.customer.id === selectedCustomer.id)} onBack={() => setCurrentView('customerList')} onSelectRma={handleSelectRma} onNewRma={handleOpenNewRmaForCustomer} /> : <div>Customer not found</div>;
-      case 'dashboard':
-        return <Dashboard
-          rmas={rmas}
-          customers={customers}
-          onNavigateToRmas={() => setCurrentView('rmaList')}
-          onNavigateToCustomers={() => setCurrentView('customerList')}
-          onNewRma={openNewRmaModal}
-        />;
-      case 'rmaList':
-      default:
-        return <RmaList
-          rmas={filteredRmas}
-          customers={customers}
-          filters={filters}
-          onFiltersChange={setFilters}
-          onSelectRma={handleSelectRma}
-          onNewRma={openNewRmaModal}
-          onEditRma={handleEditRma}
-          onDeleteRma={handleDeleteRma}
-          page={page}
-          totalPages={Math.ceil(totalRmas / limit)}
-          onPageChange={setPage}
-          isLoading={isLoading}
-        />;
-    }
-  };
+
 
   const getActiveView = (): 'dashboard' | 'rma' | 'customer' => {
-    if (currentView === 'dashboard') return 'dashboard';
-    if (currentView === 'rmaList' || (currentView === 'rmaDetail' && !selectedCustomerId)) return 'rma';
-    return 'customer';
+    if (location.pathname === '/' || location.pathname === '/dashboard') return 'dashboard';
+    if (location.pathname.includes('rmas')) return 'rma';
+    if (location.pathname.includes('customers')) return 'customer';
+    return 'dashboard';
   };
 
   return (
-    <SidebarLayout
-      activeView={getActiveView()}
-      onNavigate={handleNavigate}
-      onGoHome={() => setCurrentView('dashboard')}
-    >
+    <>
       <Toaster position="top-right" toastOptions={{ className: 'glass !rounded-lg !border-slate-200 !text-slate-800 !shadow-lg', duration: 4000 }} />
 
-      {/* Breadcrumbs Section */}
-      <div className="mb-6">
-        <Breadcrumbs items={getBreadcrumbs()} />
-      </div>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
 
-      {renderView()}
+        <Route path="/*" element={
+          <ProtectedRoute>
+            <SidebarLayout
+              activeView={getActiveView()}
+              onNavigate={handleNavigate}
+              onGoHome={() => navigate('/')}
+            >
+              {/* Breadcrumbs Section */}
+              <div className="mb-6">
+                <Breadcrumbs items={getBreadcrumbs()} />
+              </div>
 
-      {isRmaModalOpen && <RmaFormModal isOpen={isRmaModalOpen} initialData={rmaToEdit} customers={customers} onSave={handleSaveRma} onClose={closeRmaModal} preselectedCustomerId={preselectedCustomerIdForRma} onAddNewCustomer={() => setIsCustomerModalOpen(true)} lastCreatedCustomerId={lastCreatedCustomerId} />}
-      {isNewCycleModalOpen && rmaForNewCycle && <NewCycleModal rma={rmaForNewCycle} onSave={handleSaveNewCycle} onClose={() => setIsNewCycleModalOpen(false)} />}
-      {isCustomerModalOpen && <CustomerFormModal onSave={handleSaveCustomer} onClose={() => setIsCustomerModalOpen(false)} customer={customerToEdit} />}
-    </SidebarLayout>
+              <Routes>
+                <Route path="/" element={
+                  <Dashboard
+                    rmas={rmas}
+                    customers={customers}
+                    onNavigateToRmas={() => navigate('/rmas')}
+                    onNavigateToCustomers={() => navigate('/customers')}
+                    onNewRma={openNewRmaModal}
+                  />
+                } />
+                <Route path="/rmas" element={
+                  <RmaList
+                    rmas={filteredRmas}
+                    customers={customers}
+                    filters={filters}
+                    onFiltersChange={setFilters}
+                    onSelectRma={handleSelectRma}
+                    onNewRma={openNewRmaModal}
+                    onEditRma={handleEditRma}
+                    onDeleteRma={handleDeleteRma}
+                    page={page}
+                    totalPages={Math.ceil(totalRmas / limit)}
+                    onPageChange={setPage}
+                    isLoading={isLoading}
+                  />
+                } />
+                <Route path="/rmas/:id" element={
+                  selectedRma ? (
+                    <RmaDetailView
+                      rma={selectedRma}
+                      onBack={handleBackFromRmaDetail}
+                      onStatusUpdate={handleStatusUpdate}
+                      onNewCycle={handleOpenNewCycleModal}
+                    />
+                  ) : (
+                    <div>RMA not found</div>
+                  )
+                } />
+                <Route path="/customers" element={
+                  <CustomerListView
+                    customers={customers}
+                    rmas={rmas}
+                    onSelectCustomer={handleSelectCustomer}
+                    onAddCustomer={openNewCustomerModal}
+                    onEditCustomer={handleEditCustomer}
+                    onDeleteCustomer={handleDeleteCustomer}
+                    page={customerPage}
+                    totalPages={Math.ceil(totalCustomers / customerLimit)}
+                    onPageChange={setCustomerPage}
+                    isLoading={isLoading}
+                  />
+                } />
+                <Route path="/customers/:id" element={
+                  selectedCustomer ? (
+                    <CustomerDetailView
+                      customer={selectedCustomer}
+                      rmas={rmas.filter(r => r.customer.id === selectedCustomer.id)}
+                      onBack={() => navigate('/customers')}
+                      onSelectRma={handleSelectRma}
+                      onNewRma={handleOpenNewRmaForCustomer}
+                    />
+                  ) : (
+                    <div>Customer not found</div>
+                  )
+                } />
+              </Routes>
+
+              {isRmaModalOpen && <RmaFormModal isOpen={isRmaModalOpen} initialData={rmaToEdit} customers={customers} onSave={handleSaveRma} onClose={closeRmaModal} preselectedCustomerId={preselectedCustomerIdForRma} onAddNewCustomer={() => setIsCustomerModalOpen(true)} lastCreatedCustomerId={lastCreatedCustomerId} />}
+              {isNewCycleModalOpen && rmaForNewCycle && <NewCycleModal rma={rmaForNewCycle} onSave={handleSaveNewCycle} onClose={() => setIsNewCycleModalOpen(false)} />}
+              {isCustomerModalOpen && <CustomerFormModal onSave={handleSaveCustomer} onClose={() => setIsCustomerModalOpen(false)} customer={customerToEdit} />}
+            </SidebarLayout>
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </>
   );
 };
 

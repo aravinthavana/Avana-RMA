@@ -1,8 +1,12 @@
 import { Router } from 'express';
 import customerController from '../controllers/customer.controller';
 import { customerSchema } from '../validation';
+import authMiddleware from '../middleware/auth.middleware';
 
 const router = Router();
+
+// Protect all routes
+router.use(authMiddleware);
 
 /**
  * Validation middleware for customer data

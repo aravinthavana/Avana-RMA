@@ -88,3 +88,15 @@ model ServiceHistory {
   @@index([serviceCycleId], name: "idx_service_history_serviceCycleId")
   @@map("service_history")
 }
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Hashed
+  name      String
+  role      String   @default("ADMIN") // Simple role for now
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("users")
+}

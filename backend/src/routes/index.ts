@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import customerRoutes from './customer.routes';
 import rmaRoutes from './rma.routes';
+import authRoutes from './auth.routes';
 
 const router = Router();
 
 // Mount route modules
+router.use('/auth', authRoutes);
 router.use('/customers', customerRoutes);
 router.use('/rmas', rmaRoutes);
 

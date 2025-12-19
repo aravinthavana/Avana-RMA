@@ -57,6 +57,13 @@ class ApiClient {
             },
         };
 
+        // Attach token if exists
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) {
+            // Check if headers is defined and is a plain object (which it is above)
+            (config.headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+        }
+
         try {
             const response = await fetch(url, config);
 

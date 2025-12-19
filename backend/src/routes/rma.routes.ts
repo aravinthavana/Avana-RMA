@@ -1,8 +1,12 @@
 import { Router } from 'express';
 import rmaController from '../controllers/rma.controller';
 import { createRmaSchema, updateRmaSchema, statusUpdateSchema } from '../validation';
+import authMiddleware from '../middleware/auth.middleware';
 
 const router = Router();
+
+// Protect all routes
+router.use(authMiddleware);
 
 /**
  * Validation middleware for RMA creation

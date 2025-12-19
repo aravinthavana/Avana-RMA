@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Customer } from '../../types';
 import { customersApi } from '../api';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * Custom hook for managing customer state and operations
  */
 export const useCustomers = (initialPage: number = 1, initialLimit: number = 10) => {
+    const { isAuthenticated } = useAuth();
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [page, setPage] = useState(initialPage);
     const [limit] = useState(initialLimit);
@@ -18,6 +20,8 @@ export const useCustomers = (initialPage: number = 1, initialLimit: number = 10)
      * Fetch customers from API
      */
     const fetchCustomers = async () => {
+        if (!isAuthenticated) return;
+
         setIsLoading(true);
         try {
             const response = await customersApi.getAll(page, limit);
@@ -33,6 +37,17 @@ export const useCustomers = (initialPage: number = 1, initialLimit: number = 10)
             setIsLoading(false);
         }
     };
+
+    // ... (rest of the file)
+
+    /**
+     * Auto-fetch customers when page changes or showArchived toggles
+     */
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchCustomers();
+        }
+    }, [page, limit, isAuthenticated]);
 
     /**
      * Create a new customer
@@ -108,8 +123,10 @@ export const useCustomers = (initialPage: number = 1, initialLimit: number = 10)
      * Auto-fetch customers when page changes or showArchived toggles
      */
     useEffect(() => {
-        fetchCustomers();
-    }, [page, limit]);
+        if (isAuthenticated) {
+            fetchCustomers();
+        }
+    }, [page, limit, isAuthenticated]);
 
     return {
         // State
