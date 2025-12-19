@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../database.db"
+}
+
+model Customer {
+  id            String    @id
+  name          String
+  contactPerson String?
+  email         String?
+  phone         String?
+  address       String?
+  rmas          Rma[]
+  
+  @@map("customers")
+}
+
+model Rma {
+  id              String          @id
+  customerId      String?
+  customerName    String?         // Preserved customer name for deleted customers
+  customerEmail   String?         // Preserved customer email
+  customerPhone   String?         // Preserved customer phone
+  creationDate    String
+  lastUpdateDate  String
+  dateOfIncident  String
+  dateOfReport    String
+  attachment      String?
+  
+  customer        Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  devices         RmaDevice[]
+  serviceCycles   ServiceCycle[]
+  
+  @@index([customerId], name: "idx_rmas_customerId")
+  @@index([creationDate], name: "idx_rmas_creationDate")
+  @@map("rmas")
+}
+
+model RmaDevice {
+  id            Int     @id @default(autoincrement())
+  rmaId         String
+  articleNumber String?
+  serialNumber  String
+  quantity      Int?
+  
+  rma           Rma     @relation(fields: [rmaId], references: [id], onDelete: Cascade)
+  
+  @@unique([serialNumber, rmaId])
+  @@index([rmaId], name: "idx_rma_devices_rmaId")
+  @@index([serialNumber], name: "idx_rma_devices_serialNumber")
+  @@map("rma_devices")
+}
+
+model ServiceCycle {
+  id                  Int               @id @default(autoincrement())
+  rmaId               String
+  deviceSerialNumber  String
+  status              String
+  creationDate        String
+  statusDate          String
+  issueDescription    String?
+  accessoriesIncluded String?
+  
+  rma                 Rma               @relation(fields: [rmaId], references: [id], onDelete: Cascade)
+  history             ServiceHistory[]
+  
+  @@index([rmaId], name: "idx_service_cycles_rmaId")
+  @@index([deviceSerialNumber], name: "idx_service_cycles_deviceSerialNumber")
+  @@map("service_cycles")
+}
+
+model ServiceHistory {
+  id              Int           @id @default(autoincrement())
+  serviceCycleId  Int
+  status          String
+  date            String
+  notes           String?
+  
+  serviceCycle    ServiceCycle  @relation(fields: [serviceCycleId], references: [id], onDelete: Cascade)
+  
+  @@index([serviceCycleId], name: "idx_service_history_serviceCycleId")
+  @@map("service_history")
+}
