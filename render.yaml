@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: avana-rma-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DATABASE_URL
+        sync: false   # Set manually in Render dashboard (from Neon)
+      - key: JWT_SECRET
+        generateValue: true  # Render auto-generates a secure value
+      - key: CORS_ORIGIN
+        sync: false   # Set to your Vercel URL after frontend deploy
+      - key: FRONTEND_URL
+        sync: false   # Same as CORS_ORIGIN
+    healthCheckPath: /api/health

@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:../database.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Customer {
@@ -92,11 +92,43 @@ model ServiceHistory {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  password  String   // Hashed
-  name      String
-  role      String   @default("ADMIN") // Simple role for now
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  password         String   // Hashed
+  name             String
+  role             String   @default("ADMIN") // "ADMIN", "USER"
+  isActive         Boolean  @default(true)
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  updatedAt        DateTime @updatedAt
+  auditLogs        AuditLog[]
+
   @@map("users")
 }
+
+model Notification {
+  id          String   @id @default(uuid())
+  type        String   // 'PASSWORD_RESET_REQUEST', 'SYSTEM_ALERT', etc.
+  message     String
+  metadata    String?  // JSON string for additional data
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  @@map("notifications")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String   // e.g., "LOGIN", "CREATE_RMA", "UPDATE_STATUS"
+  entity    String   // e.g., "RMA", "USER", "CUSTOMER"
+  entityId  String?  // ID of the affected entity
+  details   String?  // Additional context or JSON data
+  ipAddress String?
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], name: "idx_audit_userId")
+  @@index([action], name: "idx_audit_action")
+  @@map("audit_logs")
+}
+

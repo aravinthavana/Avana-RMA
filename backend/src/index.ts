@@ -1,14 +1,19 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import db from './database';
 import logger from './logger';
 
+// Load environment variables first
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
+
+// Security: Add HTTP security headers
+app.use(helmet());
 
 const whitelist = process.env.CORS_ORIGIN?.split(',') || [
     'http://localhost:3000'
@@ -16,10 +21,11 @@ const whitelist = process.env.CORS_ORIGIN?.split(',') || [
 
 const corsOptions: cors.CorsOptions = {
     origin: (origin, callback) => {
-        // In development, allow all localhost origins
-        if (!origin || origin.includes('localhost') || whitelist.includes(origin)) {
+        // In development, allow all localhost and local network origins
+        if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168.') || origin.includes('10.') || whitelist.includes(origin)) {
             callback(null, true);
         } else {
+            console.warn('Blocked CORS origin:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },
@@ -65,6 +71,11 @@ import routes from './routes';
 
 // Mount new routes
 app.use('/api', routes);
+
+// Health check endpoint (used by Render to verify the service is alive)
+app.get('/api/health', (_req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 // ==========================================
 
 // ====== NOTE: OLD MONOLITHIC CODE REMOVED ======
