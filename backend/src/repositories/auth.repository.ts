@@ -29,6 +29,19 @@ export class AuthRepository {
             data,
         });
     }
+
+    async update(id: string, data: Partial<User>): Promise<User> {
+        return await prisma.user.update({
+            where: { id },
+            data,
+        });
+    }
+
+    async findByResetToken(token: string): Promise<User | null> {
+        return await prisma.user.findFirst({
+            where: { resetToken: token },
+        });
+    }
 }
 
 export default new AuthRepository();

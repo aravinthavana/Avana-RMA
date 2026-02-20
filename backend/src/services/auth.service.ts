@@ -1,13 +1,26 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { User } from '@prisma/client';
 import authRepository from '../repositories/auth.repository';
+import notificationService from './notification.service';
+import { validatePassword } from '../utils/validation';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const JWT_EXPIRES_IN = '24h';
+const JWT_EXPIRES_IN = '2h'; // Reduced from 24h
 
 export class AuthService {
     private authRepo = authRepository;
+
+    /**
+     * Get JWT_SECRET with validation
+     */
+    private getJwtSecret(): string {
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            throw new Error('CRITICAL: JWT_SECRET environment variable must be set in .env file');
+        }
+        return secret;
+    }
 
     /**
      * Validate user credentials and return token + user info
@@ -43,7 +56,7 @@ export class AuthService {
     private generateToken(user: User): string {
         return jwt.sign(
             { id: user.id, email: user.email, role: user.role },
-            JWT_SECRET,
+            this.getJwtSecret(),
             { expiresIn: JWT_EXPIRES_IN }
         );
     }
@@ -65,6 +78,73 @@ export class AuthService {
             ...data,
             password: hashedPassword,
         });
+    }
+
+    /**
+     * Initiate password reset
+     */
+    async forgotPassword(email: string): Promise<void> {
+        const user = await this.authRepo.findByEmail(email);
+        if (!user) {
+            // For security: Don't reveal if user exists or not
+            // Silently fail but don't throw error
+            return;
+        }
+
+        // Generate cryptographically secure random token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
+
+        // Save to DB
+        await this.authRepo.update(user.id, {
+            resetToken,
+            resetTokenExpiry
+        });
+
+        // Create notification for admin
+        await notificationService.createNotification(
+            'PASSWORD_RESET_REQUEST',
+            `Password reset requested for ${user.name} (${email})`,
+            JSON.stringify({
+                email,
+                userName: user.name,
+                resetToken,
+                resetUrl: `http://localhost:5173/reset-password?token=${resetToken}`,
+                timestamp: new Date().toISOString()
+            })
+        );
+    }
+
+    /**
+     * Complete password reset
+     */
+    async resetPassword(token: string, newPassword: string): Promise<User> {
+        const user = await this.authRepo.findByResetToken(token);
+
+        if (!user) {
+            throw new Error('Invalid or expired password reset token');
+        }
+
+        if (!user.resetTokenExpiry || new Date() > user.resetTokenExpiry) {
+            throw new Error('Invalid or expired password reset token');
+        }
+
+        // Validate password strength
+        const passwordValidation = validatePassword(newPassword);
+        if (!passwordValidation.valid) {
+            throw new Error(passwordValidation.errors.join(', '));
+        }
+
+        const hashedPassword = await this.hashPassword(newPassword);
+
+        // Update user
+        const updatedUser = await this.authRepo.update(user.id, {
+            password: hashedPassword,
+            resetToken: null,
+            resetTokenExpiry: null
+        });
+
+        return updatedUser;
     }
 }
 
