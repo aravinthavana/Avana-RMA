@@ -289,7 +289,7 @@ const ModernHeader = ({ rma, documentType, pageNumber, totalPages }: {
 
 // Address Section Component
 const AddressSection = ({ rma }: { rma: Rma }) => (
-  <View style={styles.addressSection}>
+  <View style={styles.addressSection} wrap={false}>
     <View style={styles.addressBlock}>
       <Text style={styles.addressTitle}>Return To:</Text>
       <Text style={styles.addressText}>AVANA TECHNOLOGY SERVICES</Text>
@@ -319,7 +319,7 @@ const DeviceTable = ({ devices, rma }: { devices: Device[]; rma: Rma }) => (
       <Text style={[styles.tableHeaderCell, styles.colIssue, styles.tableCellLast]}>Reported Issue</Text>
     </View>
     {devices.map((device, idx) => (
-      <View key={idx} style={styles.tableRow}>
+      <View key={idx} style={styles.tableRow} wrap={false}>
         <Text style={[styles.tableCell, styles.colArticle]}>{device.articleNumber || 'N/A'}</Text>
         <Text style={[styles.tableCell, styles.colSerial]}>{device.serialNumber}</Text>
         <Text style={[styles.tableCell, styles.colQty]}>{device.quantity || 1}</Text>
@@ -339,12 +339,12 @@ export const ReturnAuthorizationDocument = ({ rma }: { rma: Rma }) => (
 
       <AddressSection rma={rma} />
 
-      <View style={styles.section}>
+      <View style={styles.section} wrap={false}>
         <Text style={styles.sectionHeader}>Device Information</Text>
         <DeviceTable devices={rma.devices} rma={rma} />
       </View>
 
-      <View style={styles.section}>
+      <View style={styles.section} wrap={false}>
         <Text style={styles.sectionHeader}>Shipping Instructions</Text>
         <View style={styles.shippingBox}>
           <Text style={styles.shippingTitle}>⚠ IMPORTANT SHIPPING GUIDELINES ⚠</Text>
@@ -357,7 +357,7 @@ export const ReturnAuthorizationDocument = ({ rma }: { rma: Rma }) => (
         </View>
       </View>
 
-      <View style={styles.section}>
+      <View style={styles.section} wrap={false}>
         <Text style={styles.sectionHeader}>Additional Notes</Text>
         <View style={styles.notesBox}>
           <Text style={styles.notesLabel}>Internal Use Only:</Text>
@@ -382,7 +382,7 @@ export const ServiceReportDocument = ({ rma, device, cycle }: {
     <Page size="A4" style={styles.page}>
       <ModernHeader rma={rma} documentType="SERVICE REPORT" pageNumber={1} totalPages={1} />
 
-      <View style={styles.section}>
+      <View style={styles.section} wrap={false}>
         <Text style={styles.sectionHeader}>Customer Information</Text>
         <View style={styles.infoGrid}>
           <View style={styles.infoItem}>
@@ -404,7 +404,7 @@ export const ServiceReportDocument = ({ rma, device, cycle }: {
         </View>
       </View>
 
-      <View style={styles.deviceSection}>
+      <View style={styles.deviceSection} wrap={false}>
         <Text style={styles.deviceHeader}>Device Details</Text>
         <View style={styles.deviceInfo}>
           <Text style={styles.deviceLabel}>Article Number:</Text>
@@ -424,14 +424,14 @@ export const ServiceReportDocument = ({ rma, device, cycle }: {
         </View>
       </View>
 
-      <View style={styles.section}>
+      <View style={styles.section} wrap={false}>
         <Text style={styles.sectionHeader}>Reported Issue</Text>
         <View style={{ padding: 10, borderWidth: 1, borderColor: '#000000' }}>
           <Text>{cycle.issueDescription || 'No description provided'}</Text>
         </View>
       </View>
 
-      <View style={styles.section}>
+      <View style={styles.section} wrap={false}>
         <Text style={styles.sectionHeader}>Service History</Text>
         {cycle.history && cycle.history.length > 0 ? (
           cycle.history.map((entry, idx) => (
@@ -446,7 +446,7 @@ export const ServiceReportDocument = ({ rma, device, cycle }: {
         )}
       </View>
 
-      <View style={styles.section}>
+      <View style={styles.section} wrap={false}>
         <Text style={styles.sectionHeader}>Technician Notes</Text>
         <View style={styles.notesBox}>
           <Text style={{ fontSize: 9 }}>(To be filled by service technician)</Text>
