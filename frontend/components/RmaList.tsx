@@ -312,7 +312,7 @@ const RmaList: React.FC<RmaListProps> = ({ onNewRma, onEditRma }) => {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-primary-600 truncate">RMA #{rma.id}</p>
+                    <p className="text-sm font-bold text-primary-600 truncate">#{rma.id}</p>
                     <p className="text-xs text-slate-500 mt-0.5">{formatDate(rma.creationDate)}</p>
                   </div>
                   <div className="flex items-center gap-2 ml-2">

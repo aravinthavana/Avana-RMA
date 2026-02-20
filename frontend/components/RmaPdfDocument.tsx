@@ -276,7 +276,7 @@ const ModernHeader = ({ rma, documentType, pageNumber, totalPages }: {
       </View>
       <View>
         <View style={styles.rmaNumber}>
-          <Text>RMA #{rma.id}</Text>
+          <Text>#{rma.id}</Text>
         </View>
         <Text style={styles.documentDate}>Date: {formatDate(rma.creationDate)}</Text>
         {totalPages > 1 && (
@@ -349,7 +349,7 @@ export const ReturnAuthorizationDocument = ({ rma }: { rma: Rma }) => (
         <View style={styles.shippingBox}>
           <Text style={styles.shippingTitle}>⚠ IMPORTANT SHIPPING GUIDELINES ⚠</Text>
           <Text style={styles.shippingItem}>• Include this RMA form inside the package</Text>
-          <Text style={styles.shippingItem}>• Write RMA #{rma.id} clearly on the outside of the package</Text>
+          <Text style={styles.shippingItem}>• Write #{rma.id} clearly on the outside of the package</Text>
           <Text style={styles.shippingItem}>• Pack all items securely to prevent damage during shipping</Text>
           <Text style={styles.shippingItem}>• Include all accessories and cables originally included</Text>
           <Text style={styles.shippingItem}>• Remove any personal data or confidential information</Text>

@@ -187,7 +187,7 @@ const RmaDetailView: React.FC = () => {
               <ArrowLeftIcon className="w-6 h-6 text-slate-500" />
             </button>
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">RMA #{rma.id}</h1>
+              <h1 className="text-3xl font-bold text-slate-900">#{rma.id}</h1>
               <div className="mt-2 text-sm text-slate-500">
                 <p><span className="font-semibold">Customer:</span> {rma.customer.name}</p>
                 <p><span className="font-semibold">Contact:</span> {rma.customer.contactPerson} ({rma.customer.email})</p>

@@ -132,7 +132,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNewRma }) => {
                                     onClick={() => navigate(`/rmas/${rma.id}`)}
                                 >
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-sm sm:text-base text-slate-900 truncate">RMA #{rma.id}</p>
+                                        <p className="font-semibold text-sm sm:text-base text-slate-900 truncate">#{rma.id}</p>
                                         <p className="text-xs sm:text-sm text-slate-600 truncate">{rma.customer?.name || 'Unknown Customer'}</p>
                                     </div>
                                     <div className="flex items-center gap-2 sm:gap-4 self-start sm:self-auto">

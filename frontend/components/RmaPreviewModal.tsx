@@ -35,7 +35,7 @@ const RmaFormHeader = ({ rma, pageNumber, totalPages }: { rma: Rma, pageNumber: 
     <header className="flex justify-between items-start pb-4 mb-4 border-b-4 border-black">
         <div>
             <h1 className="text-3xl font-bold text-black">Return Authorization Form</h1>
-            <p className="text-xl text-black mt-1">RMA #<span className="font-bold">{rma.id ?? 'N/A'}</span></p>
+            <p className="text-xl text-black mt-1">#<span className="font-bold">{rma.id ?? 'N/A'}</span></p>
         </div>
         <div className="text-right text-xs text-gray-600">
             <p className="font-bold text-black">Recipient: AVANA TECHNOLOGY SERVICES</p>
@@ -111,7 +111,7 @@ const ServiceReportContent: React.FC<{ rma: Rma; device: Device; serviceCycle: S
             <header className="flex justify-between items-start pb-4 mb-8 border-b-4 border-black">
                 <div>
                     <h1 className="text-3xl font-bold text-black">Device Service Report</h1>
-                    <p className="text-lg text-gray-700 mt-1">RMA #{rma.id ?? 'N/A'}</p>
+                    <p className="text-lg text-gray-700 mt-1">#{rma.id ?? 'N/A'}</p>
                 </div>
                 <div className="text-right text-xs text-gray-600">
                     <p className="font-bold text-black">AVANA TECHNOLOGY SERVICES</p>

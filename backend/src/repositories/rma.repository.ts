@@ -213,10 +213,10 @@ export class RmaRepository {
     }
 
     /**
-     * Generate a unique RMA ID
+     * Generate a unique RMA ID (short 6-character alphanumeric)
      */
     generateId(): string {
-        return `RMA-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        return `RMA-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     }
 
     /**

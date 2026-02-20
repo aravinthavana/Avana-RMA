@@ -15,17 +15,17 @@ interface NewCycleModalProps {
  * The data structure for the new service cycle form.
  */
 interface FormData {
-    selectedDeviceSn: string;
-    issueDescription: string;
-    accessoriesIncluded: string;
+  selectedDeviceSn: string;
+  issueDescription: string;
+  accessoriesIncluded: string;
 }
 
 /**
  * Shape of the validation errors object for the form.
  */
 interface Errors {
-    selectedDeviceSn?: string;
-    issueDescription?: string;
+  selectedDeviceSn?: string;
+  issueDescription?: string;
 }
 
 /**
@@ -33,10 +33,10 @@ interface Errors {
  */
 const NewCycleModal: React.FC<NewCycleModalProps> = ({ rma, onClose, onSave }) => {
   // State for form data, pre-populating the first device if available.
-  const [formData, setFormData] = useState<FormData>({ 
-      selectedDeviceSn: rma.devices[0]?.serialNumber || '', 
-      issueDescription: '', 
-      accessoriesIncluded: '' 
+  const [formData, setFormData] = useState<FormData>({
+    selectedDeviceSn: rma.devices[0]?.serialNumber || '',
+    issueDescription: '',
+    accessoriesIncluded: ''
   });
   const [errors, setErrors] = useState<Errors>({});
   const firstInputRef = useRef<HTMLSelectElement>(null);
@@ -51,11 +51,11 @@ const NewCycleModal: React.FC<NewCycleModalProps> = ({ rma, onClose, onSave }) =
    * @returns An `Errors` object containing any validation messages.
    */
   const validate = (): Errors => {
-      const newErrors: Errors = {};
-      if (!formData.selectedDeviceSn) newErrors.selectedDeviceSn = 'A device must be selected.';
-      if (!formData.issueDescription.trim()) newErrors.issueDescription = 'Issue description is required.';
-      else if (formData.issueDescription.trim().length < 10) newErrors.issueDescription = 'Description must be at least 10 characters long.';
-      return newErrors;
+    const newErrors: Errors = {};
+    if (!formData.selectedDeviceSn) newErrors.selectedDeviceSn = 'A device must be selected.';
+    if (!formData.issueDescription.trim()) newErrors.issueDescription = 'Issue description is required.';
+    else if (formData.issueDescription.trim().length < 10) newErrors.issueDescription = 'Description must be at least 10 characters long.';
+    return newErrors;
   }
 
   /**
@@ -66,7 +66,7 @@ const NewCycleModal: React.FC<NewCycleModalProps> = ({ rma, onClose, onSave }) =
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
     if (errors[id as keyof Errors]) {
-        setErrors(prev => ({ ...prev, [id]: undefined }));
+      setErrors(prev => ({ ...prev, [id]: undefined }));
     }
   };
 
@@ -78,8 +78,8 @@ const NewCycleModal: React.FC<NewCycleModalProps> = ({ rma, onClose, onSave }) =
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
-        return;
+      setErrors(validationErrors);
+      return;
     }
     onSave(rma.id, formData.selectedDeviceSn, formData.issueDescription, formData.accessoriesIncluded);
   };
@@ -99,36 +99,36 @@ const NewCycleModal: React.FC<NewCycleModalProps> = ({ rma, onClose, onSave }) =
           </button>
         </header>
         <form onSubmit={handleSubmit} className="p-6 space-y-6" noValidate>
-          <p className="text-sm text-slate-600">Creating a ticket for RMA #{rma.id}</p>
+          <p className="text-sm text-slate-600">Creating a ticket for #{rma.id}</p>
           <div>
             <label htmlFor="selectedDeviceSn" className={labelStyles}>Device <span className="text-red-500">*</span></label>
             <select
-                id="selectedDeviceSn"
-                value={formData.selectedDeviceSn}
-                onChange={handleChange}
-                ref={firstInputRef}
-                className={`mt-2 ${inputStyles} ${errors.selectedDeviceSn ? errorInputStyles : ''}`}
-                required
-                aria-invalid={!!errors.selectedDeviceSn}
-                aria-describedby={errors.selectedDeviceSn ? "device-error" : undefined}
+              id="selectedDeviceSn"
+              value={formData.selectedDeviceSn}
+              onChange={handleChange}
+              ref={firstInputRef}
+              className={`mt-2 ${inputStyles} ${errors.selectedDeviceSn ? errorInputStyles : ''}`}
+              required
+              aria-invalid={!!errors.selectedDeviceSn}
+              aria-describedby={errors.selectedDeviceSn ? "device-error" : undefined}
             >
-                <option value="" disabled>Select a device</option>
-                {rma.devices.map(d => (
-                    <option key={d.serialNumber} value={d.serialNumber}>
-                        {d.model} - {d.serialNumber}
-                    </option>
-                ))}
+              <option value="" disabled>Select a device</option>
+              {rma.devices.map(d => (
+                <option key={d.serialNumber} value={d.serialNumber}>
+                  {d.articleNumber || 'Device'} - {d.serialNumber}
+                </option>
+              ))}
             </select>
             {errors.selectedDeviceSn && <p id="device-error" className={errorTextStyles} role="alert">{errors.selectedDeviceSn}</p>}
           </div>
           <div>
             <label htmlFor="issueDescription" className={labelStyles}>Detailed Description of New Issue <span className="text-red-500">*</span></label>
             <div className="mt-2">
-              <textarea 
-                id="issueDescription" 
-                value={formData.issueDescription} 
-                onChange={handleChange} 
-                required 
+              <textarea
+                id="issueDescription"
+                value={formData.issueDescription}
+                onChange={handleChange}
+                required
                 className={`${inputStyles} ${errors.issueDescription ? errorInputStyles : ''}`}
                 rows={5}
                 aria-invalid={!!errors.issueDescription}
@@ -137,15 +137,15 @@ const NewCycleModal: React.FC<NewCycleModalProps> = ({ rma, onClose, onSave }) =
             </div>
             {errors.issueDescription && <p id="issue-error" className={errorTextStyles} role="alert">{errors.issueDescription}</p>}
           </div>
-           <div>
+          <div>
             <label htmlFor="accessoriesIncluded" className={labelStyles}>Accessories Included with this Return</label>
             <div className="mt-2">
-              <textarea 
-                id="accessoriesIncluded" 
-                value={formData.accessoriesIncluded} 
-                onChange={handleChange} 
+              <textarea
+                id="accessoriesIncluded"
+                value={formData.accessoriesIncluded}
+                onChange={handleChange}
                 placeholder="e.g., Main unit only"
-                className={inputStyles} 
+                className={inputStyles}
                 rows={2}
               />
             </div>
