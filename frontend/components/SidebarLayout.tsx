@@ -33,7 +33,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeVi
     ];
 
     return (
-        <div className="bg-slate-50 min-h-screen flex text-slate-900 font-sans">
+        <div className="bg-slate-50 min-h-screen flex text-slate-900 font-sans overflow-x-hidden">
             {/* Mobile Menu Backdrop */}
             <AnimatePresence>
                 {isMobileMenuOpen && (
@@ -188,8 +188,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeVi
             {/* Main Content Area */}
             <motion.div
                 layout
-                className="flex flex-col flex-1 min-w-0 transition-all duration-300 ease-in-out"
-                style={{ marginLeft: isCollapsed ? '80px' : '288px' }} // 80px = w-20, 288px = w-72. Using style for smoother integration with motion if needed, but class logic works too if responsive.
+                className={`flex flex-col flex-1 min-w-0 transition-all duration-300 ease-in-out w-full ${isCollapsed ? 'lg:ml-20' : 'lg:ml-72'}`}
             >
                 {/* Mobile Header */}
                 <div className="sticky top-0 z-20 flex items-center gap-x-6 bg-white/80 backdrop-blur-md px-4 py-4 shadow-sm sm:px-6 lg:hidden border-b border-slate-200/60 w-full">
@@ -234,7 +233,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeVi
                     </div>
                 </div>
 
-                <main className="flex-1 py-8 w-full max-w-[100vw] overflow-x-hidden">
+                <main className="flex-1 py-8 w-full overflow-x-hidden">
                     <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
                         {children}
                     </div>
