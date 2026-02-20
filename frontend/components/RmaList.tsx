@@ -1,26 +1,19 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Rma, RmaStatus, Customer } from '../types';
 import { PlusIcon, FilterIcon, XMarkIcon, MagnifyingGlassIcon, ChevronRightIcon, PencilIcon, TrashIcon } from './icons';
-import { RmaFilters } from '../App';
+import { RmaFilters } from '../src/hooks/useRmas';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from '../src/components/ui/Skeleton';
+import { useRmaContext } from '../src/context/RmaContext';
+import { useCustomerContext } from '../src/context/CustomerContext';
 
 /**
  * Props for the RmaList component.
  */
 interface RmaListProps {
-  rmas: Rma[];
-  customers: Customer[];
-  filters: RmaFilters;
-  onFiltersChange: (filters: RmaFilters) => void;
-  onSelectRma: (id: string) => void;
   onNewRma: () => void;
   onEditRma: (rma: Rma) => void;
-  onDeleteRma: (id: string) => void;
-  page?: number;
-  totalPages?: number;
-  onPageChange?: (page: number) => void;
-  isLoading?: boolean;
 }
 
 /**
@@ -56,7 +49,15 @@ const formatDate = (dateString: string) => {
 /**
  * Renders a list of RMAs with filtering and action controls.
  */
-const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersChange, onSelectRma, onNewRma, onEditRma, onDeleteRma, page, totalPages, onPageChange, isLoading = false }) => {
+const RmaList: React.FC<RmaListProps> = ({ onNewRma, onEditRma }) => {
+  const navigate = useNavigate();
+  const { rmas, filters, setFilters, page, totalRmas, setPage, isLoading, deleteRma } = useRmaContext();
+  const { customers } = useCustomerContext();
+
+  const totalPages = Math.ceil(totalRmas / 10); // Assuming limit is 10, or get from context
+
+  const updateFilters = (newFilters: RmaFilters) => setFilters(newFilters);
+
   const [showFilters, setShowFilters] = useState(false);
 
   /**
@@ -67,14 +68,14 @@ const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersCh
     const newStatuses = filters.statuses.includes(status)
       ? filters.statuses.filter(s => s !== status)
       : [...filters.statuses, status];
-    onFiltersChange({ ...filters, statuses: newStatuses });
+    setFilters({ ...filters, statuses: newStatuses });
   };
 
   /**
    * Clears all active filters.
    */
   const clearFilters = () => {
-    onFiltersChange({ searchTerm: '', statuses: [], customerId: '', dateFrom: '', dateTo: '' });
+    setFilters({ searchTerm: '', statuses: [], customerId: '', dateFrom: '', dateTo: '' });
   };
 
   /**
@@ -95,7 +96,7 @@ const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersCh
   const handleDelete = (e: React.MouseEvent, rmaId: string) => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this RMA? This action cannot be undone.')) {
-      onDeleteRma(rmaId);
+      deleteRma(rmaId);
     }
   }
 
@@ -129,7 +130,7 @@ const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersCh
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative grow group">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><MagnifyingGlassIcon className="h-5 w-5 text-slate-400 group-focus-within:text-primary-500 transition-colors" aria-hidden="true" /></div>
-          <input type="search" placeholder="Search RMAs..." value={filters.searchTerm} onChange={(e) => onFiltersChange({ ...filters, searchTerm: e.target.value })} className="block w-full rounded-lg border-0 py-2.5 pl-10 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-200 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6 transition-shadow" />
+          <input type="search" placeholder="Search RMAs..." value={filters.searchTerm} onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })} className="block w-full rounded-lg border-0 py-2.5 pl-10 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-200 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6 transition-shadow" />
         </div>
         <button onClick={() => setShowFilters(!showFilters)} aria-expanded={showFilters} aria-controls="filter-panel" className={`relative inline-flex shrink-0 items-center gap-x-2 rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm ring-1 ring-inset ring-slate-200 transition-all ${showFilters ? 'bg-primary-50 ring-primary-500 text-primary-700' : 'bg-white text-slate-700 hover:bg-slate-50'}`}>
           <FilterIcon className={`w-5 h-5 ${showFilters ? 'text-primary-500' : 'text-slate-500'}`} />
@@ -159,7 +160,7 @@ const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersCh
                 {/* Customer Filter */}
                 <div>
                   <label htmlFor="customer" className={labelStyles}>Customer</label>
-                  <select id="customer" value={filters.customerId} onChange={e => onFiltersChange({ ...filters, customerId: e.target.value })} className={`mt-2 ${inputStyles}`}>
+                  <select id="customer" value={filters.customerId} onChange={e => setFilters({ ...filters, customerId: e.target.value })} className={`mt-2 ${inputStyles}`}>
                     <option value="">All Customers</option>
                     {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
@@ -167,11 +168,11 @@ const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersCh
                 {/* Date Range Filter */}
                 <div>
                   <label htmlFor="dateFrom" className={labelStyles}>Created After</label>
-                  <input type="date" id="dateFrom" value={filters.dateFrom} onChange={e => onFiltersChange({ ...filters, dateFrom: e.target.value })} className={`mt-2 ${inputStyles}`} />
+                  <input type="date" id="dateFrom" value={filters.dateFrom} onChange={e => setFilters({ ...filters, dateFrom: e.target.value })} className={`mt-2 ${inputStyles}`} />
                 </div>
                 <div>
                   <label htmlFor="dateTo" className={labelStyles}>Created Before</label>
-                  <input type="date" id="dateTo" value={filters.dateTo} onChange={e => onFiltersChange({ ...filters, dateTo: e.target.value })} className={`mt-2 ${inputStyles}`} />
+                  <input type="date" id="dateTo" value={filters.dateTo} onChange={e => setFilters({ ...filters, dateTo: e.target.value })} className={`mt-2 ${inputStyles}`} />
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t border-slate-100 flex justify-end">
@@ -188,9 +189,9 @@ const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersCh
           {filters.statuses.map(status => (
             <span key={status} className="inline-flex items-center gap-x-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 border border-slate-200">{status}<button onClick={() => handleStatusChange(status)} aria-label={`Remove ${status} filter`} className="-mr-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-slate-400 hover:bg-slate-200 hover:text-slate-600"><XMarkIcon className="h-3 w-3" /></button></span>
           ))}
-          {filters.customerId && (<span className="inline-flex items-center gap-x-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 border border-slate-200">{getCustomerName(filters.customerId)}<button onClick={() => onFiltersChange({ ...filters, customerId: '' })} aria-label={`Remove ${getCustomerName(filters.customerId)} filter`} className="-mr-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-slate-400 hover:bg-slate-200 hover:text-slate-600"><XMarkIcon className="h-3 w-3" /></button></span>)}
-          {filters.dateFrom && (<span className="inline-flex items-center gap-x-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 border border-slate-200">From: {filters.dateFrom}<button onClick={() => onFiltersChange({ ...filters, dateFrom: '' })} aria-label={`Remove created after filter`} className="-mr-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-slate-400 hover:bg-slate-200 hover:text-slate-600"><XMarkIcon className="h-3 w-3" /></button></span>)}
-          {filters.dateTo && (<span className="inline-flex items-center gap-x-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 border border-slate-200">To: {filters.dateTo}<button onClick={() => onFiltersChange({ ...filters, dateTo: '' })} aria-label={`Remove created before filter`} className="-mr-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-slate-400 hover:bg-slate-200 hover:text-slate-600"><XMarkIcon className="h-3 w-3" /></button></span>)}
+          {filters.customerId && (<span className="inline-flex items-center gap-x-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 border border-slate-200">{getCustomerName(filters.customerId)}<button onClick={() => setFilters({ ...filters, customerId: '' })} aria-label={`Remove ${getCustomerName(filters.customerId)} filter`} className="-mr-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-slate-400 hover:bg-slate-200 hover:text-slate-600"><XMarkIcon className="h-3 w-3" /></button></span>)}
+          {filters.dateFrom && (<span className="inline-flex items-center gap-x-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 border border-slate-200">From: {filters.dateFrom}<button onClick={() => setFilters({ ...filters, dateFrom: '' })} aria-label={`Remove created after filter`} className="-mr-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-slate-400 hover:bg-slate-200 hover:text-slate-600"><XMarkIcon className="h-3 w-3" /></button></span>)}
+          {filters.dateTo && (<span className="inline-flex items-center gap-x-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 border border-slate-200">To: {filters.dateTo}<button onClick={() => setFilters({ ...filters, dateTo: '' })} aria-label={`Remove created before filter`} className="-mr-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-slate-400 hover:bg-slate-200 hover:text-slate-600"><XMarkIcon className="h-3 w-3" /></button></span>)}
         </div>
       )}
 
@@ -232,7 +233,7 @@ const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersCh
                     viewport={{ once: true }}
                     key={rma.id}
                     className="group hover:bg-slate-50/80 transition-colors"
-                    onClick={() => onSelectRma(rma.id)}
+                    onClick={() => navigate(`/rmas/${rma.id}`)}
                   >
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-primary-600 sm:pl-6 cursor-pointer group-hover:text-primary-700 transition-colors">{rma.id}</td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-500 cursor-pointer">
@@ -261,7 +262,7 @@ const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersCh
                       <div className="flex items-center justify-end gap-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={(e) => handleEdit(e, rma)} className="text-slate-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-white/80 transition-all shadow-sm ring-1 ring-transparent hover:ring-slate-200"><PencilIcon className="h-4 w-4" /><span className="sr-only">Edit</span></button>
                         <button onClick={(e) => handleDelete(e, rma.id)} className="text-slate-400 hover:text-red-600 p-1.5 rounded-full hover:bg-white/80 transition-all shadow-sm ring-1 ring-transparent hover:ring-red-100"><TrashIcon className="h-4 w-4" /><span className="sr-only">Delete</span></button>
-                        <button onClick={() => onSelectRma(rma.id)} className="text-slate-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-white/80 transition-all shadow-sm ring-1 ring-transparent hover:ring-slate-200"><ChevronRightIcon className="h-4 w-4" /><span className="sr-only">View</span></button>
+                        <button onClick={() => navigate(`/rmas/${rma.id}`)} className="text-slate-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-white/80 transition-all shadow-sm ring-1 ring-transparent hover:ring-slate-200"><ChevronRightIcon className="h-4 w-4" /><span className="sr-only">View</span></button>
                       </div>
                     </td>
                   </motion.tr>
@@ -306,7 +307,7 @@ const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersCh
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2 }}
                 viewport={{ once: true }}
-                onClick={() => onSelectRma(rma.id)}
+                onClick={() => navigate(`/rmas/${rma.id}`)}
                 className="bg-white rounded-lg p-4 shadow-sm border border-slate-200 active:bg-slate-50 transition-colors"
               >
                 <div className="flex items-start justify-between mb-3">
@@ -352,7 +353,7 @@ const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersCh
                 </div>
 
                 <div className="mt-3 pt-3 border-t border-slate-100 flex justify-end">
-                  <button onClick={() => onSelectRma(rma.id)} className="text-primary-600 hover:text-primary-700 text-sm font-medium inline-flex items-center gap-1">
+                  <button onClick={() => navigate(`/rmas/${rma.id}`)} className="text-primary-600 hover:text-primary-700 text-sm font-medium inline-flex items-center gap-1">
                     View Details <ChevronRightIcon className="h-4 w-4" />
                   </button>
                 </div>
@@ -370,18 +371,18 @@ const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersCh
       </div>
 
       {/* Pagination Controls */}
-      {totalPages && totalPages > 1 && (
+      {totalPages > 1 && (
         <div className="flex items-center justify-between border-t border-slate-200 bg-white/50 backdrop-blur-sm px-4 py-3 sm:px-6 mt-4 rounded-xl shadow-sm">
           <div className="flex flex-1 justify-between sm:hidden">
             <button
-              onClick={() => onPageChange && page && onPageChange(Math.max(page - 1, 1))}
+              onClick={() => setPage(Math.max(page - 1, 1))}
               disabled={page === 1}
               className="relative inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
             <button
-              onClick={() => onPageChange && page && onPageChange(Math.min(page + 1, totalPages))}
+              onClick={() => setPage(Math.min(page + 1, totalPages))}
               disabled={page === totalPages}
               className="relative ml-3 inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -397,7 +398,7 @@ const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersCh
             <div>
               <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                 <button
-                  onClick={() => onPageChange && page && onPageChange(Math.max(page - 1, 1))}
+                  onClick={() => setPage(Math.max(page - 1, 1))}
                   disabled={page === 1}
                   className="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -405,7 +406,7 @@ const RmaList: React.FC<RmaListProps> = ({ rmas, customers, filters, onFiltersCh
                   <ChevronRightIcon className="h-5 w-5 rotate-180" aria-hidden="true" />
                 </button>
                 <button
-                  onClick={() => onPageChange && page && onPageChange(Math.min(page + 1, totalPages))}
+                  onClick={() => setPage(Math.min(page + 1, totalPages))}
                   disabled={page === totalPages}
                   className="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >

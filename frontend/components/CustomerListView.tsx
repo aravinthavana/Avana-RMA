@@ -1,32 +1,33 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Customer } from '../types';
 import { PlusIcon, MagnifyingGlassIcon, ChevronRightIcon, PencilIcon, TrashIcon } from './icons';
 import { motion } from 'framer-motion';
 import { Skeleton } from '../src/components/ui/Skeleton';
 import { DeleteCustomerModal } from './DeleteCustomerModal';
+import { useCustomerContext } from '../src/context/CustomerContext';
+import { useRmaContext } from '../src/context/RmaContext';
 
 /**
  * Props for the CustomerListView component.
  */
 interface CustomerListViewProps {
-  customers: Customer[];
-  rmas?: any[]; // For counting RMAs per customer
-  onSelectCustomer: (id: string) => void;
   onAddCustomer: () => void;
   onEditCustomer: (customer: Customer) => void;
-  onDeleteCustomer: (id: string, deleteRmas?: boolean) => Promise<void>;
-  page?: number;
-  totalPages?: number;
-  onPageChange?: (page: number) => void;
-  isLoading?: boolean;
 }
 
 /**
  * Renders a list of customers with search, add, edit, and delete functionalities.
  */
-const CustomerListView: React.FC<CustomerListViewProps> = ({ customers, rmas = [], onSelectCustomer, onAddCustomer, onEditCustomer, onDeleteCustomer, page, totalPages, onPageChange, isLoading = false }) => {
+const CustomerListView: React.FC<CustomerListViewProps> = ({ onAddCustomer, onEditCustomer }) => {
+  const navigate = useNavigate();
+  const { customers, totalCustomers, page, setPage, isLoading, deleteCustomer } = useCustomerContext();
+  const { rmas } = useRmaContext();
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; customer: Customer | null }>({ isOpen: false, customer: null });
+
+  // Calculate total pages
+  const totalPages = Math.ceil(totalCustomers / 10);
 
   // Filtering based on active customer list (for current page)
   const filteredCustomers = customers.filter(c =>
@@ -51,14 +52,14 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({ customers, rmas = [
 
   const handleDeleteCustomerOnly = async () => {
     if (deleteModal.customer) {
-      await onDeleteCustomer(deleteModal.customer.id, false); // Don't delete RMAs
+      await deleteCustomer(deleteModal.customer.id, false); // Don't delete RMAs
       setDeleteModal({ isOpen: false, customer: null });
     }
   };
 
   const handleDeleteCustomerAndRmas = async () => {
     if (deleteModal.customer) {
-      await onDeleteCustomer(deleteModal.customer.id, true); // Delete RMAs too
+      await deleteCustomer(deleteModal.customer.id, true); // Delete RMAs too
       setDeleteModal({ isOpen: false, customer: null });
     }
   };
@@ -124,7 +125,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({ customers, rmas = [
                   viewport={{ once: true }}
                   key={customer.id}
                   className="group hover:bg-slate-50/80 transition-colors cursor-pointer"
-                  onClick={() => onSelectCustomer(customer.id)}
+                  onClick={() => navigate(`/customers/${customer.id}`)}
                 >
                   <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                     <div className="font-medium text-primary-600 group-hover:text-primary-800 font-display text-base">{customer.name ?? 'N/A'}</div>
@@ -140,7 +141,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({ customers, rmas = [
                     <div className="flex items-center justify-end gap-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button onClick={(e) => handleEdit(e, customer)} className="text-slate-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-white/80 transition-all shadow-sm ring-1 ring-transparent hover:ring-slate-200"><PencilIcon className="h-4 w-4" /><span className="sr-only">Edit</span></button>
                       <button onClick={(e) => handleDelete(e, customer)} className="text-slate-400 hover:text-red-600 p-1.5 rounded-full hover:bg-white/80 transition-all shadow-sm ring-1 ring-transparent hover:ring-red-100"><TrashIcon className="h-4 w-4" /><span className="sr-only">Delete</span></button>
-                      <button onClick={() => onSelectCustomer(customer.id)} className="text-slate-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-white/80 transition-all shadow-sm ring-1 ring-transparent hover:ring-slate-200"><ChevronRightIcon className="h-4 w-4" /><span className="sr-only">View</span></button>
+                      <button onClick={() => navigate(`/customers/${customer.id}`)} className="text-slate-400 hover:text-primary-600 p-1.5 rounded-full hover:bg-white/80 transition-all shadow-sm ring-1 ring-transparent hover:ring-slate-200"><ChevronRightIcon className="h-4 w-4" /><span className="sr-only">View</span></button>
                     </div>
                   </td>
                 </motion.tr>
@@ -180,7 +181,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({ customers, rmas = [
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
               viewport={{ once: true }}
-              onClick={() => onSelectCustomer(customer.id)}
+              onClick={() => navigate(`/customers/${customer.id}`)}
               className="bg-white rounded-lg p-4 shadow-sm border border-slate-200 active:bg-slate-50 transition-colors"
             >
               <div className="flex items-start justify-between mb-3">
@@ -207,7 +208,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({ customers, rmas = [
               </div>
 
               <div className="mt-3 pt-3 border-t border-slate-100 flex justify-end">
-                <button onClick={() => onSelectCustomer(customer.id)} className="text-primary-600 hover:text-primary-700 text-sm font-medium inline-flex items-center gap-1">
+                <button onClick={() => navigate(`/customers/${customer.id}`)} className="text-primary-600 hover:text-primary-700 text-sm font-medium inline-flex items-center gap-1">
                   View Details <ChevronRightIcon className="h-4 w-4" />
                 </button>
               </div>
@@ -223,18 +224,18 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({ customers, rmas = [
       </div>
 
       {/* Pagination Controls */}
-      {totalPages && totalPages > 1 && (
+      {totalPages > 1 && (
         <div className="flex items-center justify-between border-t border-slate-200 bg-white/50 backdrop-blur-sm px-4 py-3 sm:px-6 mt-4 rounded-xl shadow-sm">
           <div className="flex flex-1 justify-between sm:hidden">
             <button
-              onClick={() => onPageChange && page && onPageChange(Math.max(page - 1, 1))}
+              onClick={() => setPage(Math.max(page - 1, 1))}
               disabled={page === 1}
               className="relative inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
             <button
-              onClick={() => onPageChange && page && onPageChange(Math.min(page + 1, totalPages))}
+              onClick={() => setPage(Math.min(page + 1, totalPages))}
               disabled={page === totalPages}
               className="relative ml-3 inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -250,7 +251,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({ customers, rmas = [
             <div>
               <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                 <button
-                  onClick={() => onPageChange && page && onPageChange(Math.max(page - 1, 1))}
+                  onClick={() => setPage(Math.max(page - 1, 1))}
                   disabled={page === 1}
                   className="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -258,7 +259,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({ customers, rmas = [
                   <ChevronRightIcon className="h-5 w-5 rotate-180" aria-hidden="true" />
                 </button>
                 <button
-                  onClick={() => onPageChange && page && onPageChange(Math.min(page + 1, totalPages))}
+                  onClick={() => setPage(Math.min(page + 1, totalPages))}
                   disabled={page === totalPages}
                   className="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >

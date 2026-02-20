@@ -1,17 +1,16 @@
 import React, { useState, useMemo } from 'react';
-import { Customer, Rma, RmaStatus } from '../types';
+import { useParams, useNavigate } from 'react-router-dom';
+import { RmaStatus } from '../types';
 import { ArrowLeftIcon, FilterIcon, PlusIcon, ChevronRightIcon, ExclamationTriangleIcon } from './icons';
 import { getStatusBadgeColor } from './RmaList';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCustomerContext } from '../src/context/CustomerContext';
+import { useRmaContext } from '../src/context/RmaContext';
 
 /**
  * Props for the CustomerDetailView component.
  */
 interface CustomerDetailViewProps {
-  customer: Customer | null | undefined;
-  rmas: Rma[];
-  onBack: () => void;
-  onSelectRma: (id: string) => void;
   onNewRma: (customerId: string) => void;
 }
 
@@ -19,7 +18,14 @@ interface CustomerDetailViewProps {
  * Displays the details of a single customer, including a list of their associated RMAs.
  * Allows filtering of the RMA list and creating a new RMA for the customer.
  */
-const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({ customer, rmas, onBack, onSelectRma, onNewRma }) => {
+const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({ onNewRma }) => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { customers } = useCustomerContext();
+  const { rmas } = useRmaContext();
+
+  const customer = customers.find(c => c.id === id);
+  const customerRmas = useMemo(() => rmas.filter(r => r.customer?.id === id), [rmas, id]);
   // State for managing filters for the associated RMAs list.
   const [filters, setFilters] = useState({ statuses: [] as RmaStatus[], dateFrom: '', dateTo: '' });
   const [showFilters, setShowFilters] = useState(false);
@@ -37,8 +43,8 @@ const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({ customer, rmas,
    * A memoized list of RMAs for this customer, filtered by the current filter settings.
    */
   const filteredRmas = useMemo(() => {
-    if (!rmas) return [];
-    return rmas.filter(rma => {
+    if (!customerRmas) return [];
+    return customerRmas.filter(rma => {
       if (!rma) return false;
       const uniqueStatuses = [...new Set((rma.serviceCycles || []).map(cycle => cycle.status))];
       const hasMatchingStatus = filters.statuses.length === 0 || uniqueStatuses.some(status => filters.statuses.includes(status));
@@ -50,7 +56,7 @@ const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({ customer, rmas,
 
       return matchesDateFrom && matchesDateTo;
     });
-  }, [rmas, filters]);
+  }, [customerRmas, filters]);
 
   /**
    * Clears all active filters for the RMA list.
@@ -65,15 +71,17 @@ const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({ customer, rmas,
         <h3 className="mt-2 text-lg font-semibold text-slate-900 font-display">Customer Not Found</h3>
         <p className="mt-1 text-sm text-slate-500">The requested customer could not be loaded or does not exist.</p>
         <div className="mt-6">
-          <button onClick={onBack} className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 transition-all">
-            <ArrowLeftIcon className="w-5 h-5" /> Back to Customer List
-          </button>
+          <div className="mt-6">
+            <button onClick={() => navigate('/customers')} className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 transition-all">
+              <ArrowLeftIcon className="w-5 h-5" /> Back to Customer List
+            </button>
+          </div>
         </div>
       </div>
-    )
+    );
   }
 
-  const { id, name, contactPerson, email, phone, address } = customer;
+  const { name, contactPerson, email, phone, address } = customer;
 
   const labelStyles = "block text-sm font-medium text-slate-700";
   const inputStyles = "block w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm";
@@ -145,7 +153,7 @@ const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({ customer, rmas,
             const uniqueStatuses = [...new Set((rma.serviceCycles || []).map(cycle => cycle.status))];
             const devices = rma.devices || [];
             return (
-              <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} key={rma.id} onClick={() => onSelectRma(rma.id)} className="bg-white shadow-sm ring-1 ring-slate-200 rounded-xl p-4 cursor-pointer hover:bg-slate-50 hover:shadow-md transition-all duration-200">
+              <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} key={rma.id} onClick={() => navigate(`/rmas/${rma.id}`)} className="bg-white shadow-sm ring-1 ring-slate-200 rounded-xl p-4 cursor-pointer hover:bg-slate-50 hover:shadow-md transition-all duration-200">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-sm font-semibold text-primary-600">#{rma.id}</p>
@@ -183,7 +191,7 @@ const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({ customer, rmas,
             const uniqueStatuses = [...new Set((rma.serviceCycles || []).map(cycle => cycle.status))];
             const devices = rma.devices || [];
             return (
-              <motion.tr initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} key={rma.id} className="hover:bg-slate-50/80 cursor-pointer group transition-colors" onClick={() => onSelectRma(rma.id)}>
+              <motion.tr initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} key={rma.id} className="hover:bg-slate-50/80 cursor-pointer group transition-colors" onClick={() => navigate(`/rmas/${rma.id}`)}>
                 <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-primary-600 sm:pl-6 group-hover:text-primary-700">{rma.id}</td>
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
                   {devices.length === 1 ? (

@@ -1,17 +1,23 @@
 import React from 'react';
-import { Rma, Customer, RmaStatus } from '../types';
+import { useNavigate } from 'react-router-dom';
+import { RmaStatus } from '../types';
 import { motion } from 'framer-motion';
 import { ClockIcon, CheckCircleIcon, ExclamationTriangleIcon, ChartBarIcon } from './icons';
+import { useRmaContext } from '../src/context/RmaContext';
+import { useCustomerContext } from '../src/context/CustomerContext';
 
 interface DashboardProps {
-    rmas: Rma[];
-    customers: Customer[];
-    onNavigateToRmas: () => void;
-    onNavigateToCustomers: () => void;
     onNewRma: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ rmas, customers, onNavigateToRmas, onNavigateToCustomers, onNewRma }) => {
+const Dashboard: React.FC<DashboardProps> = ({ onNewRma }) => {
+    const navigate = useNavigate();
+    const { rmas } = useRmaContext();
+    const { customers } = useCustomerContext();
+
+    // Navigation handlers
+    const onNavigateToRmas = () => navigate('/rmas');
+    const onNavigateToCustomers = () => navigate('/customers');
     // Calculate statistics
     const totalRmas = rmas.length;
     const pendingRmas = rmas.filter(r => r.serviceCycles?.some(c => c.status === RmaStatus.PENDING)).length;
@@ -123,7 +129,7 @@ const Dashboard: React.FC<DashboardProps> = ({ rmas, customers, onNavigateToRmas
                                 <div
                                     key={rma.id || `rma-${index}`}
                                     className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 p-3 sm:p-4 bg-slate-50 rounded-lg sm:rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
-                                    onClick={onNavigateToRmas}
+                                    onClick={() => navigate(`/rmas/${rma.id}`)}
                                 >
                                     <div className="flex-1 min-w-0">
                                         <p className="font-semibold text-sm sm:text-base text-slate-900 truncate">RMA #{rma.id}</p>

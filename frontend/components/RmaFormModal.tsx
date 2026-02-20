@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Rma, Customer, Device, ServiceCycle } from '../types';
+import { Rma, Customer, Device, ServiceCycle, RmaStatus } from '../types';
 import { XMarkIcon, PlusIcon } from './icons';
 import { API_BASE_URL } from '../config';
 import { LoadingSpinner } from '../src/components/ui/LoadingSpinner';
@@ -420,7 +420,10 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
       serviceCyclesData = formData.devices.map(d => ({
         issueDescription: d.issueDescription,
         accessoriesIncluded: d.accessoriesIncluded,
-        deviceSerialNumber: d.serialNumber
+        deviceSerialNumber: d.serialNumber,
+        status: RmaStatus.RECEIVED, // Default status for new RMAs
+        creationDate: new Date().toISOString(),
+        statusDate: new Date().toISOString()
       }));
     }
 

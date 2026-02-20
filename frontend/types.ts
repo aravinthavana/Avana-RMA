@@ -52,3 +52,18 @@ export interface Rma {
   dateOfReport: string;
   attachment?: string;
 }
+
+export interface AuditLog {
+  id: string;
+  userId: string;
+  user?: {
+    name: string;
+    email: string;
+  };
+  action: string;
+  entity: string;
+  entityId?: string;
+  details?: string;
+  ipAddress?: string;
+  createdAt: string;
+}

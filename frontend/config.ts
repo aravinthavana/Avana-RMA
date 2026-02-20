@@ -11,8 +11,8 @@ export const getApiBaseUrl = () => {
         // In Cloud Workstations, the backend is on a similar URL, but with port 3001
         return `${protocol}//${hostname.replace('3000-', '3001-')}`;
     } else {
-        // Default to localhost for local development if nothing else matches
-        return 'http://localhost:3001';
+        // Default to relative path for local development to use Vite Proxy (port 3000 -> 3001)
+        return '';
     }
 };
 

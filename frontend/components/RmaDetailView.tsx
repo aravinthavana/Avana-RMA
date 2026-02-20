@@ -1,18 +1,13 @@
 import React, { useState } from 'react';
-import { Rma, RmaStatus, ServiceCycle, StatusHistoryEvent } from '../types';
+import { useParams, useNavigate } from 'react-router-dom';
+import { RmaStatus, ServiceCycle, StatusHistoryEvent } from '../types';
 import StatusUpdateModal from './StatusUpdateModal';
 import { RmaPreviewModal } from './RmaPreviewModal';
+import NewCycleModal from './NewCycleModal'; // Import NewCycleModal
 import { ArrowLeftIcon, PencilSquareIcon, PlusIcon, EyeIcon, ClockIcon } from './icons';
-
-/**
- * Props for the RmaDetailView component.
- */
-interface RmaDetailViewProps {
-  rma: Rma;
-  onBack: () => void;
-  onStatusUpdate: (rmaId: string, cycleCreationDate: string, deviceSerialNumber: string, newStatus: RmaStatus, notes: string) => void;
-  onNewCycle: (rma: Rma) => void;
-}
+import { useRmaContext } from '../src/context/RmaContext'; // Import Context
+import { motion } from 'framer-motion';
+import { getStatusBadgeColor } from './RmaList';
 
 /**
  * A detailed status badge component that shows the current status and the date of the last update.
@@ -43,12 +38,6 @@ const StatusBadge: React.FC<{ status: RmaStatus; date: string }> = ({ status, da
 /**
  * Displays the historical log of status updates for a given service cycle.
  */
-import { motion } from 'framer-motion';
-import { getStatusBadgeColor } from './RmaList';
-
-/**
- * Displays the historical log of status updates for a given service cycle.
- */
 const HistoryLog: React.FC<{ history: StatusHistoryEvent[] }> = ({ history }) => {
   if (!history || history.length === 0) {
     return (
@@ -68,12 +57,7 @@ const HistoryLog: React.FC<{ history: StatusHistoryEvent[] }> = ({ history }) =>
 
       <div className="space-y-6">
         {sortedHistory.map((event, index) => {
-          // Extract base color class or map to a hex color if needed for the dot
-          // For simplicity, we'll use a generic color mapping or the badge colors
           const badgeColor = getStatusBadgeColor(event.status as RmaStatus);
-          // clean up the badge color string to get just the text color part or similar, 
-          // but actually it's easier to just use standard tailwind classes for the dots based on status manually or reuse logic.
-          // Let's rely on a simple gray dot that highlights on hover or specific colors.
 
           return (
             <motion.div
@@ -111,11 +95,32 @@ const HistoryLog: React.FC<{ history: StatusHistoryEvent[] }> = ({ history }) =>
  * Displays the details of a single RMA, including its customer information, devices, and service cycles.
  * Provides functionality to update the status of a service cycle and to initiate the creation of a new cycle.
  */
-const RmaDetailView: React.FC<RmaDetailViewProps> = ({ rma, onBack, onStatusUpdate, onNewCycle }) => {
+const RmaDetailView: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { rmas, updateStatus, updateRma } = useRmaContext();
+
+  const rma = rmas.find(r => r.id === id);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNewCycleModalOpen, setIsNewCycleModalOpen] = useState(false); // Local State for NewCycleModal
   const [isHistoryVisible, setIsHistoryVisible] = useState<Record<string, boolean>>({});
   const [cycleToUpdate, setCycleToUpdate] = useState<ServiceCycle | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  if (!rma) {
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-xl font-bold text-slate-700">RMA Not Found</h2>
+        <button
+          onClick={() => navigate('/rmas')}
+          className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+        >
+          Back to List
+        </button>
+      </div>
+    );
+  }
 
   const handleOpenModal = (cycle: ServiceCycle) => {
     setCycleToUpdate(cycle);
@@ -124,10 +129,37 @@ const RmaDetailView: React.FC<RmaDetailViewProps> = ({ rma, onBack, onStatusUpda
 
   const handleUpdate = (newStatus: RmaStatus, notes: string) => {
     if (cycleToUpdate) {
-      onStatusUpdate(rma.id, cycleToUpdate.creationDate, cycleToUpdate.deviceSerialNumber, newStatus, notes);
+      updateStatus(rma.id, cycleToUpdate.deviceSerialNumber, newStatus, notes);
       setIsModalOpen(false);
       setCycleToUpdate(null);
     }
+  };
+
+  const handleSaveNewCycle = async (rmaId: string, deviceSerialNumber: string, issueDescription: string, accessoriesIncluded: string) => {
+    // Logic refactored from App.tsx
+    const now = new Date().toISOString();
+    const newCycle: ServiceCycle = {
+      deviceSerialNumber,
+      status: RmaStatus.PENDING,
+      statusDate: now,
+      creationDate: now,
+      issueDescription,
+      accessoriesIncluded,
+      history: [{
+        status: RmaStatus.PENDING,
+        date: now,
+        notes: issueDescription || 'New service ticket created.'
+      }]
+    };
+
+    const updatedRma = {
+      ...rma,
+      lastUpdateDate: now,
+      serviceCycles: [...rma.serviceCycles, newCycle]
+    };
+
+    await updateRma(rmaId, updatedRma);
+    setIsNewCycleModalOpen(false);
   };
 
   const toggleHistory = (cycleCreationDate: string) => {
@@ -150,11 +182,16 @@ const RmaDetailView: React.FC<RmaDetailViewProps> = ({ rma, onBack, onStatusUpda
       <div className="bg-white shadow-md rounded-lg p-6">
         {/* Header section with back button, RMA ID, and customer details */}
         <div className="flex justify-between items-start mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">RMA #{rma.id}</h1>
-            <div className="mt-2 text-sm text-slate-500">
-              <p><span className="font-semibold">Customer:</span> {rma.customer.name}</p>
-              <p><span className="font-semibold">Contact:</span> {rma.customer.contactPerson} ({rma.customer.email})</p>
+          <div className="flex items-start gap-4">
+            <button onClick={() => navigate('/rmas')} className="mt-1 p-1 hover:bg-slate-100 rounded-full transition-colors">
+              <ArrowLeftIcon className="w-6 h-6 text-slate-500" />
+            </button>
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900">RMA #{rma.id}</h1>
+              <div className="mt-2 text-sm text-slate-500">
+                <p><span className="font-semibold">Customer:</span> {rma.customer.name}</p>
+                <p><span className="font-semibold">Contact:</span> {rma.customer.contactPerson} ({rma.customer.email})</p>
+              </div>
             </div>
           </div>
           <div className="text-right">
@@ -175,7 +212,7 @@ const RmaDetailView: React.FC<RmaDetailViewProps> = ({ rma, onBack, onStatusUpda
                   <p className="font-bold text-lg text-primary-600">{device.articleNumber || 'No Article Number'}</p>
                   <p className="text-sm text-slate-500">S/N: {device.serialNumber}</p>
                 </div>
-                <button onClick={() => onNewCycle(rma)} className="inline-flex items-center gap-x-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50">
+                <button onClick={() => setIsNewCycleModalOpen(true)} className="inline-flex items-center gap-x-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50">
                   <PlusIcon className="-ml-0.5 h-5 w-5 text-slate-500" /> New Ticket
                 </button>
               </div>
@@ -224,6 +261,13 @@ const RmaDetailView: React.FC<RmaDetailViewProps> = ({ rma, onBack, onStatusUpda
         <RmaPreviewModal
           rma={rma}
           onClose={() => setIsPreviewOpen(false)}
+        />
+      )}
+      {isNewCycleModalOpen && (
+        <NewCycleModal
+          rma={rma}
+          onSave={handleSaveNewCycle}
+          onClose={() => setIsNewCycleModalOpen(false)}
         />
       )}
     </>

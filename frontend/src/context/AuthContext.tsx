@@ -95,9 +95,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 toast.error(error || 'Login failed');
                 return false;
             }
-        } catch (error) {
-            console.error('Login error:', error);
-            toast.error('An unexpected error occurred');
+        } catch (error: any) {
+            // Only log if it's not a standard auth failure
+            if (error?.statusCode !== 401) {
+                console.error('Login error:', error);
+            }
+            // For 401, the return false allows the Login component to show "Invalid credentials"
+            // For other errors, we might want a toast
+            if (error?.statusCode !== 401) {
+                toast.error('An unexpected error occurred');
+            }
             return false;
         } finally {
             setIsLoading(false);

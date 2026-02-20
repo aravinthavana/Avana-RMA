@@ -5,6 +5,7 @@ export interface User {
     email: string;
     name: string;
     role: string;
+    isActive: boolean;
 }
 
 export interface AuthResponse {
@@ -20,7 +21,7 @@ export const authApi = {
      * Login user
      */
     login: async (email: string, password: string): Promise<ApiResponse<AuthResponse>> => {
-        return apiClient.post<AuthResponse>('/api/auth/login', { email, password });
+        return apiClient.post<AuthResponse>('/api/auth/signin', { email, password });
     },
 
     /**
@@ -28,5 +29,18 @@ export const authApi = {
      */
     me: async (): Promise<ApiResponse<User>> => {
         return apiClient.get<User>('/api/auth/me');
+    },
+
+    /**
+     * Change password
+     */
+    changePassword: async (currentPassword: string, newPassword: string): Promise<ApiResponse<void>> => {
+        return apiClient.post<void>('/api/auth/change-password', { currentPassword, newPassword });
+    },
+    /**
+     * Request password reset
+     */
+    forgotPassword: async (email: string): Promise<ApiResponse<void>> => {
+        return apiClient.post<void>('/api/auth/forgot-password', { email });
     },
 };
