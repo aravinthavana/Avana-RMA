@@ -59,8 +59,13 @@ export class RmaController {
             res.setHeader('Content-Type', 'text/csv');
             res.setHeader('Content-Disposition', 'attachment; filename="rmas_export.csv"');
             res.status(200).send(csvString);
-        } catch (error) {
-            next(error);
+        } catch (error: any) {
+            console.error('Export CSV Error:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Failed to generate CSV export',
+                message: error.message
+            });
         }
     }
 

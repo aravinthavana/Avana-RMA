@@ -65,9 +65,8 @@ export class RmaService {
             'Injury Details'
         ];
 
-        // Format rows
         const rows = rmas.map(rma => {
-            const customerName = rma.customer?.contactPerson || rma.customerName || 'N/A';
+            const customerName = rma.customer?.contactPerson || 'N/A';
             const companyName = rma.customer?.name || 'Unknown Company';
             const devices = rma.devices?.map(d => d.serialNumber).join('; ') || 'N/A';
 
