@@ -92,8 +92,8 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.status(500).json({
         success: false,
         error: 'Internal Server Error',
-        message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong',
-        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        message: err.message || 'Something went wrong',
+        stack: err.stack || undefined
     });
 });
 
