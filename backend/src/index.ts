@@ -92,21 +92,9 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.status(500).json({
         success: false,
         error: 'Internal Server Error',
-        message: err.message,
-        stack: err.stack
+        message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong',
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
-});
-
-// DEBUG ENDPOINT - REMOVE LATER
-app.get('/api/test-error', async (req, res) => {
-    try {
-        const { PrismaClient } = require('@prisma/client');
-        const p = new PrismaClient();
-        await p.rma.findMany();
-        res.json({ success: true, message: 'DB query succeeded' });
-    } catch (e: any) {
-        res.status(500).json({ success: false, message: e.message, stack: e.stack });
-    }
 });
 
 app.listen(port, () => {
