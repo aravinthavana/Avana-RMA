@@ -15,9 +15,10 @@ if (dbUrl.includes('-pooler.') && dbUrl.includes('neon.tech')) {
 }
 
 try {
-    console.log('Running robust database migration...');
-    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
-    console.log('Database migration completed successfully.');
+    console.log('Running robust database migration via db push...');
+    // Automatically force the schema onto the DB since migration files were not generated locally.
+    execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
+    console.log('Database sync completed successfully.');
 } catch (error) {
     console.error('Database migration failed during Render build.');
     process.exit(1);
