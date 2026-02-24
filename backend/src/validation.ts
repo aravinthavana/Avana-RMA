@@ -39,6 +39,8 @@ export const createRmaSchema = z.object({
     devices: z.array(deviceSchema).min(1, 'At least one device is required').max(50, 'Too many devices'),
     dateOfIncident: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
     dateOfReport: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
+    isInjuryRelated: z.boolean().optional(),
+    injuryDetails: z.string().max(2000, 'Injury details are too long').optional(),
     attachment: z.string().max(500, 'Attachment path is too long').optional(),
 });
 
@@ -51,6 +53,8 @@ export const updateRmaSchema = z.object({
     serviceCycles: z.array(serviceCycleSchema).min(1, 'At least one service cycle is required'),
     dateOfIncident: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
     dateOfReport: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
+    isInjuryRelated: z.boolean().optional(),
+    injuryDetails: z.string().max(2000, 'Injury details are too long').optional(),
     attachment: z.string().max(500, 'Attachment path is too long').optional(),
 });
 
