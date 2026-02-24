@@ -85,6 +85,18 @@ app.get('/api/health', (_req, res) => {
 // All database operations now use Prisma ORM
 // ================================================
 
+// Global Error Handler
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    logger.error('Unhandled error:', err);
+    console.error('Unhandled error details:', err.message, err.stack);
+    res.status(500).json({
+        success: false,
+        error: 'Internal Server Error',
+        message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong',
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+});
+
 app.listen(port, () => {
     console.log(`Backend server listening at http://localhost:${port}`);
 });
