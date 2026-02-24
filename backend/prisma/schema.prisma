@@ -33,6 +33,8 @@ model Rma {
   dateOfIncident  String
   dateOfReport    String
   attachment      String?
+  isInjuryRelated Boolean         @default(false)
+  injuryDetails   String?
   
   customer        Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
   devices         RmaDevice[]

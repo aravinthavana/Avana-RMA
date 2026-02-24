@@ -339,6 +339,14 @@ export const ReturnAuthorizationDocument = ({ rma }: { rma: Rma }) => (
 
       <AddressSection rma={rma} />
 
+      {rma.isInjuryRelated && (
+        <View style={[styles.section, { backgroundColor: '#ffe5e5', padding: 10, borderWidth: 1, borderColor: '#ff0000' }]} wrap={false}>
+          <Text style={[styles.sectionHeader, { color: '#cc0000', borderBottomColor: '#cc0000' }]}>⚠ SAFETY INCIDENT REPORT</Text>
+          <Text style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 4 }}>Details recorded regarding patient, user, or third-party injury:</Text>
+          <Text style={{ fontSize: 9, backgroundColor: '#ffffff', padding: 6, borderWidth: 1, borderColor: '#ffcccc' }}>{rma.injuryDetails}</Text>
+        </View>
+      )}
+
       <View style={styles.section} wrap={false}>
         <Text style={styles.sectionHeader}>Device Information</Text>
         <DeviceTable devices={rma.devices} rma={rma} />
@@ -381,6 +389,14 @@ export const ServiceReportDocument = ({ rma, device, cycle }: {
   <Document>
     <Page size="A4" style={styles.page}>
       <ModernHeader rma={rma} documentType="SERVICE REPORT" pageNumber={1} totalPages={1} />
+
+      {rma.isInjuryRelated && (
+        <View style={[styles.section, { backgroundColor: '#ffe5e5', padding: 10, borderWidth: 1, borderColor: '#ff0000' }]} wrap={false}>
+          <Text style={[styles.sectionHeader, { color: '#cc0000', borderBottomColor: '#cc0000' }]}>⚠ SAFETY INCIDENT REPORT</Text>
+          <Text style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 4 }}>Details recorded regarding patient, user, or third-party injury:</Text>
+          <Text style={{ fontSize: 9, backgroundColor: '#ffffff', padding: 6, borderWidth: 1, borderColor: '#ffcccc' }}>{rma.injuryDetails}</Text>
+        </View>
+      )}
 
       <View style={styles.section} wrap={false}>
         <Text style={styles.sectionHeader}>Customer Information</Text>

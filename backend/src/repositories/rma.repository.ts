@@ -23,6 +23,8 @@ export interface CreateRmaData {
     dateOfIncident: string;
     dateOfReport: string;
     attachment?: string;
+    isInjuryRelated: boolean;
+    injuryDetails?: string;
     devices: Array<{
         articleNumber?: string;
         serialNumber: string;
@@ -138,6 +140,8 @@ export class RmaRepository {
                 dateOfIncident: data.dateOfIncident,
                 dateOfReport: data.dateOfReport,
                 attachment: data.attachment,
+                isInjuryRelated: data.isInjuryRelated,
+                injuryDetails: data.injuryDetails,
                 devices: {
                     create: data.devices,
                 },

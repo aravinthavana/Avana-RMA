@@ -127,6 +127,14 @@ const ServiceReportContent: React.FC<{ rma: Rma; device: Device; serviceCycle: S
                     ]} />
                 </SafeData>
             </Section>
+            {rma.isInjuryRelated && (
+                <Section title="⚠ Safety Incident Report">
+                    <div className="bg-red-50 p-4 border border-red-200 rounded-md">
+                        <p className="font-semibold text-red-900 border-b border-red-200 pb-2 mb-2 text-sm">Details recorded regarding patient, user, or third-party injury:</p>
+                        <p className="text-sm text-red-800 bg-white p-3 rounded border border-red-100 whitespace-pre-wrap">{rma.injuryDetails}</p>
+                    </div>
+                </Section>
+            )}
             <Section title="Service Details">
                 <h3 className="text-base font-bold text-black mt-4">{device.articleNumber || 'No Article Number'}</h3>
                 <p className="text-sm text-gray-600 mb-2">S/N: {device.serialNumber ?? 'N/A'}</p>
@@ -183,17 +191,27 @@ const ReturnAuthContent: React.FC<{ rma: Rma }> = ({ rma }) => {
                 <Page key={pageIndex} isLastPage={pageIndex === totalPages - 1}>
                     <RmaFormHeader rma={rma} pageNumber={pageIndex + 1} totalPages={totalPages} />
                     {pageIndex === 0 && (
-                        <Section title="Customer Information">
-                            <SafeData data={rma.customer} fallback={<p className="text-sm text-slate-500">Customer information is not available.</p>}>
-                                <InfoTable data={[
-                                    { label: "Facility/Customer Name", value: rma.customer?.name },
-                                    { label: "Address", value: <div className="whitespace-pre-line">{rma.customer?.address}</div> },
-                                    { label: "Date of Incident", value: formatDate(rma.dateOfIncident) },
-                                    { label: "Date of Report", value: formatDate(rma.dateOfReport) },
-                                    { label: "Attachment Proof", value: rma.attachment ? "Proof Attached" : 'N/A' },
-                                ]} />
-                            </SafeData>
-                        </Section>
+                        <>
+                            <Section title="Customer Information">
+                                <SafeData data={rma.customer} fallback={<p className="text-sm text-slate-500">Customer information is not available.</p>}>
+                                    <InfoTable data={[
+                                        { label: "Facility/Customer Name", value: rma.customer?.name },
+                                        { label: "Address", value: <div className="whitespace-pre-line">{rma.customer?.address}</div> },
+                                        { label: "Date of Incident", value: formatDate(rma.dateOfIncident) },
+                                        { label: "Date of Report", value: formatDate(rma.dateOfReport) },
+                                        { label: "Attachment Proof", value: rma.attachment ? "Proof Attached" : 'N/A' },
+                                    ]} />
+                                </SafeData>
+                            </Section>
+                            {rma.isInjuryRelated && (
+                                <Section title="⚠ Safety Incident Report">
+                                    <div className="bg-red-50 p-4 border border-red-200 rounded-md">
+                                        <p className="font-semibold text-red-900 border-b border-red-200 pb-2 mb-2 text-sm">Details recorded regarding patient, user, or third-party injury:</p>
+                                        <p className="text-sm text-red-800 bg-white p-3 rounded border border-red-100 whitespace-pre-wrap">{rma.injuryDetails}</p>
+                                    </div>
+                                </Section>
+                            )}
+                        </>
                     )}
                     <Section title={pageIndex === 0 ? "Authorized Devices for Return" : "Authorized Devices for Return (continued)"}>
                         <DeviceTable devices={chunk} rma={rma} />

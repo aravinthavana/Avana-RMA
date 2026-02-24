@@ -51,6 +51,8 @@ export interface Rma {
   dateOfIncident: string;
   dateOfReport: string;
   attachment?: string;
+  isInjuryRelated: boolean;
+  injuryDetails?: string;
 }
 
 export interface AuditLog {

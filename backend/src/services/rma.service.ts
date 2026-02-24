@@ -18,6 +18,8 @@ export interface CreateRmaDto {
     dateOfIncident: string;
     dateOfReport: string;
     attachment?: string;
+    isInjuryRelated: boolean;
+    injuryDetails?: string;
 }
 
 export interface UpdateRmaDto {
@@ -118,6 +120,8 @@ export class RmaService {
             dateOfIncident: data.dateOfIncident,
             dateOfReport: data.dateOfReport,
             attachment: data.attachment,
+            isInjuryRelated: data.isInjuryRelated,
+            injuryDetails: data.injuryDetails,
         };
 
         return await this.rmaRepo.create(rmaData);

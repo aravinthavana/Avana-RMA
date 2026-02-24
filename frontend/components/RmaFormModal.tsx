@@ -34,7 +34,10 @@ interface FormDeviceData {
 interface FormData {
   customerId: string;
   dateOfIncident: string;
+  dateOfIncident: string;
   dateOfReport: string;
+  isInjuryRelated: boolean;
+  injuryDetails: string;
   devices: FormDeviceData[];
 }
 
@@ -42,6 +45,7 @@ interface Errors {
   customerId?: string;
   dateOfIncident?: string;
   dateOfReport?: string;
+  injuryDetails?: string;
   devices?: { [index: number]: Partial<Record<keyof FormDeviceData, string>> };
   customer?: string; // Legacy/Fallback
 }
@@ -50,6 +54,8 @@ interface Touched {
   customerId?: boolean;
   dateOfIncident?: boolean;
   dateOfReport?: boolean;
+  isInjuryRelated?: boolean;
+  injuryDetails?: boolean;
   devices?: { [index: number]: Partial<Record<keyof FormDeviceData, boolean>> };
 }
 
@@ -88,6 +94,8 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
     customerId: initialData?.customer.id || preselectedCustomerId || '',
     dateOfIncident: (initialData?.dateOfIncident || new Date().toISOString()).split('T')[0],
     dateOfReport: (initialData?.dateOfReport || new Date().toISOString()).split('T')[0],
+    isInjuryRelated: initialData?.isInjuryRelated || false,
+    injuryDetails: initialData?.injuryDetails || '',
     devices: initialDevices
   });
 
@@ -116,6 +124,8 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
           customerId: initialData.customer.id,
           dateOfIncident: (initialData.dateOfIncident || new Date().toISOString()).split('T')[0],
           dateOfReport: (initialData.dateOfReport || new Date().toISOString()).split('T')[0],
+          isInjuryRelated: initialData.isInjuryRelated || false,
+          injuryDetails: initialData.injuryDetails || '',
           devices: initialData.devices.map(d => {
             const cycle = initialData.serviceCycles.find(sc => sc.deviceSerialNumber === d.serialNumber);
             return {
@@ -142,6 +152,8 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
           customerId: preselectedCustomerId || '',
           dateOfIncident: new Date().toISOString().split('T')[0],
           dateOfReport: new Date().toISOString().split('T')[0],
+          isInjuryRelated: false,
+          injuryDetails: '',
           devices: [{ articleNumber: '', serialNumber: '', quantity: 1, issueDescription: '', accessoriesIncluded: '' }]
         });
         setCustomerSearchTerm('');
@@ -254,6 +266,8 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
           if (!value) return 'Date of report is required.';
           if (new Date(formData.dateOfIncident) > new Date(value)) return 'Report date cannot be earlier than incident date.';
           return undefined;
+        case 'injuryDetails':
+          return (formData.isInjuryRelated && !value.trim()) ? 'Please provide details about the injury.' : undefined;
         default: return undefined;
       }
     }
@@ -277,6 +291,9 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
       if (Object.keys(singleDeviceErrors).length > 0) deviceErrors[index] = singleDeviceErrors;
     });
     if (Object.keys(deviceErrors).length > 0) newErrors.devices = deviceErrors;
+    if (data.isInjuryRelated && !data.injuryDetails.trim()) {
+      newErrors.injuryDetails = 'Please provide details about the injury.';
+    }
     return newErrors;
   }
 
@@ -369,6 +386,7 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
     // Touch all fields
     const fullTouched: Touched = {
       customerId: true, dateOfIncident: true, dateOfReport: true,
+      isInjuryRelated: true, injuryDetails: true,
       devices: formData.devices.reduce((acc, _, index) => {
         acc[index] = { serialNumber: true, issueDescription: true, quantity: true };
         return acc;
@@ -436,6 +454,8 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
       serviceCycles: serviceCyclesData,
       dateOfIncident: formData.dateOfIncident,
       dateOfReport: formData.dateOfReport,
+      isInjuryRelated: formData.isInjuryRelated,
+      injuryDetails: formData.isInjuryRelated ? formData.injuryDetails : '',
       attachment: attachment ? attachment.name : existingAttachment
     }, initialData?.id);
   };
@@ -537,6 +557,34 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
             </section>
           ))}
           {!initialData && (<div className="pt-2"><button type="button" onClick={addDevice} className="inline-flex items-center gap-x-2 rounded-md bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-200 hover:bg-slate-200 w-full justify-center"><PlusIcon className="h-5 w-5 text-slate-500" /> Add Another Device</button></div>)}
+
+          {/* Supplier Safety Compliance */}
+          <section className="border border-red-200 bg-red-50/30 rounded-lg p-4 relative">
+            <h3 className="text-lg font-medium text-red-900 border-b border-red-200 pb-2 mb-4 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+              Safety Incident Reporting (Mandatory Supplier Compliance)
+            </h3>
+            <div className="grid grid-cols-1 gap-6 mt-4">
+              <div>
+                <span className={labelStyles}>Was the device involved in any patient, user or third-party injury? <span className="text-red-500">*</span></span>
+                <div className="mt-3 flex items-center gap-6">
+                  <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                    <input type="radio" name="isInjuryRelated" checked={formData.isInjuryRelated} onChange={() => setFormData(prev => ({ ...prev, isInjuryRelated: true }))} className="h-4 w-4 text-primary-600 focus:ring-primary-600 cursor-pointer" /> Yes
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                    <input type="radio" name="isInjuryRelated" checked={!formData.isInjuryRelated} onChange={() => { setFormData(prev => ({ ...prev, isInjuryRelated: false, injuryDetails: '' })); setErrors(prev => ({ ...prev, injuryDetails: undefined })); }} className="h-4 w-4 text-primary-600 focus:ring-primary-600 cursor-pointer" /> No
+                  </label>
+                </div>
+              </div>
+              {formData.isInjuryRelated && (
+                <div>
+                  <label htmlFor="injuryDetails" className={labelStyles}>Who was injured and how? Please provide full details. <span className="text-red-500">*</span></label>
+                  <textarea id="injuryDetails" value={formData.injuryDetails} onChange={handleChange} onBlur={handleBlur} required className={`mt-2 ${getInputStyles(!!errors.injuryDetails && !!touched.injuryDetails)}`} rows={3} placeholder="Please provide specific details about the incident, who was affected, and the nature of the injuries." />
+                  {errors.injuryDetails && touched.injuryDetails && <p className={errorTextStyles}>{errors.injuryDetails}</p>}
+                </div>
+              )}
+            </div>
+          </section>
 
           {/* Additional Info */}
           <section className="border border-slate-200 rounded-lg p-4 relative">
