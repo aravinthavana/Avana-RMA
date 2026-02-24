@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Rma, RmaStatus, Customer } from '../types';
-import { PlusIcon, FilterIcon, XMarkIcon, MagnifyingGlassIcon, ChevronRightIcon, PencilIcon, TrashIcon } from './icons';
+import { PlusIcon, FilterIcon, XMarkIcon, MagnifyingGlassIcon, ChevronRightIcon, PencilIcon, TrashIcon, DownloadIcon } from './icons';
 import { RmaFilters } from '../src/hooks/useRmas';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from '../src/components/ui/Skeleton';
 import { useRmaContext } from '../src/context/RmaContext';
 import { useCustomerContext } from '../src/context/CustomerContext';
+import { rmasApi } from '../src/api';
+import { toast } from 'react-hot-toast';
 
 /**
  * Props for the RmaList component.
@@ -59,6 +61,29 @@ const RmaList: React.FC<RmaListProps> = ({ onNewRma, onEditRma }) => {
   const updateFilters = (newFilters: RmaFilters) => setFilters(newFilters);
 
   const [showFilters, setShowFilters] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  /**
+   * Triggers the CSV export for the currently active filters.
+   */
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      await rmasApi.exportCsv({
+        search: filters.searchTerm,
+        status: filters.statuses.join(','),
+        customerId: filters.customerId,
+        dateFrom: filters.dateFrom,
+        dateTo: filters.dateTo,
+        isInjuryRelated: filters.isInjuryRelated
+      });
+      toast.success('Export downloaded successfully');
+    } catch (error) {
+      toast.error('Failed to download export');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   /**
    * Toggles a status in the filter state.
@@ -75,7 +100,7 @@ const RmaList: React.FC<RmaListProps> = ({ onNewRma, onEditRma }) => {
    * Clears all active filters.
    */
   const clearFilters = () => {
-    setFilters({ searchTerm: '', statuses: [], customerId: '', dateFrom: '', dateTo: '' });
+    setFilters({ searchTerm: '', statuses: [], customerId: '', dateFrom: '', dateTo: '', isInjuryRelated: undefined });
   };
 
   /**
@@ -106,7 +131,8 @@ const RmaList: React.FC<RmaListProps> = ({ onNewRma, onEditRma }) => {
     filters.statuses.length +
     (filters.customerId ? 1 : 0) +
     (filters.dateFrom ? 1 : 0) +
-    (filters.dateTo ? 1 : 0);
+    (filters.dateTo ? 1 : 0) +
+    (filters.isInjuryRelated ? 1 : 0);
 
   const getCustomerName = (id: string) => customers.find(c => c.id === id)?.name || 'Unknown Customer';
 
@@ -121,7 +147,18 @@ const RmaList: React.FC<RmaListProps> = ({ onNewRma, onEditRma }) => {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 font-display">RMAs</h1>
           <p className="mt-2 text-sm text-slate-600">Manage your Return Merchandise Authorizations.</p>
         </div>
-        <div className="shrink-0">
+        <div className="shrink-0 flex flex-col sm:flex-row items-center gap-3">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            type="button"
+            onClick={handleExport}
+            disabled={isExporting}
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-x-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 transition-all disabled:opacity-50"
+          >
+            {isExporting ? <span className="animate-spin h-5 w-5 border-2 border-slate-500 border-t-transparent rounded-full" /> : <DownloadIcon className="w-5 h-5 text-slate-500" />}
+            Export
+          </motion.button>
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="button" onClick={onNewRma} className="inline-flex w-full sm:w-auto items-center justify-center gap-x-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary-500/30 hover:bg-primary-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-all"><PlusIcon className="w-5 h-5" />New RMA</motion.button>
         </div>
       </div>
@@ -174,6 +211,22 @@ const RmaList: React.FC<RmaListProps> = ({ onNewRma, onEditRma }) => {
                   <label htmlFor="dateTo" className={labelStyles}>Created Before</label>
                   <input type="date" id="dateTo" value={filters.dateTo} onChange={e => setFilters({ ...filters, dateTo: e.target.value })} className={`mt-2 ${inputStyles}`} />
                 </div>
+                {/* Safety Incident Filter */}
+                <div>
+                  <label className={labelStyles}>Safety Issues</label>
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center">
+                      <input
+                        id="filter-injury"
+                        type="checkbox"
+                        checked={filters.isInjuryRelated === true}
+                        onChange={(e) => setFilters({ ...filters, isInjuryRelated: e.target.checked ? true : undefined })}
+                        className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <label htmlFor="filter-injury" className="ml-3 text-sm text-slate-600">Incidents Only</label>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="mt-4 pt-4 border-t border-slate-100 flex justify-end">
                 <button onClick={clearFilters} className="text-sm font-semibold text-primary-600 hover:text-primary-500 transition-colors">Clear All Filters</button>
@@ -192,6 +245,7 @@ const RmaList: React.FC<RmaListProps> = ({ onNewRma, onEditRma }) => {
           {filters.customerId && (<span className="inline-flex items-center gap-x-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 border border-slate-200">{getCustomerName(filters.customerId)}<button onClick={() => setFilters({ ...filters, customerId: '' })} aria-label={`Remove ${getCustomerName(filters.customerId)} filter`} className="-mr-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-slate-400 hover:bg-slate-200 hover:text-slate-600"><XMarkIcon className="h-3 w-3" /></button></span>)}
           {filters.dateFrom && (<span className="inline-flex items-center gap-x-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 border border-slate-200">From: {filters.dateFrom}<button onClick={() => setFilters({ ...filters, dateFrom: '' })} aria-label={`Remove created after filter`} className="-mr-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-slate-400 hover:bg-slate-200 hover:text-slate-600"><XMarkIcon className="h-3 w-3" /></button></span>)}
           {filters.dateTo && (<span className="inline-flex items-center gap-x-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 border border-slate-200">To: {filters.dateTo}<button onClick={() => setFilters({ ...filters, dateTo: '' })} aria-label={`Remove created before filter`} className="-mr-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-slate-400 hover:bg-slate-200 hover:text-slate-600"><XMarkIcon className="h-3 w-3" /></button></span>)}
+          {filters.isInjuryRelated && (<span className="inline-flex items-center gap-x-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-700 border border-red-200">Incidents Only<button onClick={() => setFilters({ ...filters, isInjuryRelated: undefined })} aria-label={`Remove incidents only filter`} className="-mr-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-red-500 hover:bg-red-200 hover:text-red-700 transition-colors"><XMarkIcon className="h-3 w-3" /></button></span>)}
         </div>
       )}
 

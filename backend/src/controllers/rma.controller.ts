@@ -40,6 +40,31 @@ export class RmaController {
     }
 
     /**
+     * GET /api/rmas/export
+     * Export RMAs to CSV based on filters
+     */
+    async exportFilteredRmas(req: Request, res: Response, next: NextFunction) {
+        try {
+            const filters = {
+                searchTerm: req.query.search as string,
+                statuses: req.query.status ? (req.query.status as string).split(',') : undefined,
+                customerId: req.query.customerId as string,
+                dateFrom: req.query.dateFrom as string,
+                dateTo: req.query.dateTo as string,
+                isInjuryRelated: req.query.isInjuryRelated as string,
+            };
+
+            const csvString = await this.rmaService.exportRmasToCsv(filters);
+
+            res.setHeader('Content-Type', 'text/csv');
+            res.setHeader('Content-Disposition', 'attachment; filename="rmas_export.csv"');
+            res.status(200).send(csvString);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
      * GET /api/rmas/:id
      * Get a single RMA by ID
      */

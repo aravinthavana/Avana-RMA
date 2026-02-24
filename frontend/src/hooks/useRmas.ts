@@ -10,6 +10,7 @@ export interface RmaFilters {
     customerId: string;
     dateFrom: string;
     dateTo: string;
+    isInjuryRelated?: boolean;
 }
 
 /**
@@ -28,6 +29,7 @@ export const useRmas = (initialPage: number = 1, initialLimit: number = 50) => {
         customerId: '',
         dateFrom: '',
         dateTo: '',
+        isInjuryRelated: undefined,
     });
 
     /**
@@ -44,6 +46,7 @@ export const useRmas = (initialPage: number = 1, initialLimit: number = 50) => {
                 customerId: filters.customerId,
                 dateFrom: filters.dateFrom,
                 dateTo: filters.dateTo,
+                isInjuryRelated: filters.isInjuryRelated,
             });
 
             if (response.data) {

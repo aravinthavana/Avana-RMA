@@ -48,6 +48,60 @@ export class RmaService {
     }
 
     /**
+     * Export RMAs to CSV format based on filters
+     */
+    async exportRmasToCsv(filters: RmaFilters = {}): Promise<string> {
+        const rmas = await this.rmaRepo.findAllForExport(filters);
+
+        // Define CSV headers
+        const headers = [
+            'RMA ID',
+            'Creation Date',
+            'Customer Name',
+            'Customer Company',
+            'Device Serials',
+            'Current Status',
+            'Safety Incident',
+            'Injury Details'
+        ];
+
+        // Format rows
+        const rows = rmas.map(rma => {
+            const customerName = rma.customer?.contactPerson || rma.customerName || 'N/A';
+            const companyName = rma.customer?.name || 'Unknown Company';
+            const devices = rma.devices?.map(d => d.serialNumber).join('; ') || 'N/A';
+
+            // Get unique statuses
+            const statuses = rma.serviceCycles?.map(c => c.status) || [];
+            const currentStatus = [...new Set(statuses)].join('; ') || 'Pending';
+
+            return [
+                rma.id,
+                rma.creationDate,
+                customerName,
+                companyName,
+                devices,
+                currentStatus,
+                rma.isInjuryRelated ? 'Yes' : 'No',
+                rma.injuryDetails || ''
+            ].map(val => {
+                // Properly escape strings for CSV insertion
+                const stringVal = String(val);
+                if (stringVal.includes(',') || stringVal.includes('"') || stringVal.includes('\n')) {
+                    return `"${stringVal.replace(/"/g, '""')}"`;
+                }
+                return stringVal;
+            }).join(',');
+        });
+
+        // Combine headers and rows
+        return [
+            headers.join(','),
+            ...rows
+        ].join('\n');
+    }
+
+    /**
      * Get a single RMA by ID
      */
     async getRmaById(id: string) {

@@ -8,6 +8,7 @@ export interface RmaFilters {
     customerId?: string;
     dateFrom?: string;
     dateTo?: string;
+    isInjuryRelated?: boolean | string;
 }
 
 export interface PaginationOptions {
@@ -41,6 +42,40 @@ export interface CreateRmaData {
 }
 
 export class RmaRepository {
+    private buildWhereClause(filters: RmaFilters): any {
+        const { searchTerm, statuses, customerId, dateFrom, dateTo, isInjuryRelated } = filters;
+        const where: any = {};
+
+        if (customerId) {
+            where.customerId = customerId;
+        }
+
+        if (searchTerm) {
+            where.OR = [
+                { id: { contains: searchTerm } },
+                { customer: { name: { contains: searchTerm, mode: 'insensitive' } } },
+            ];
+        }
+
+        if (dateFrom || dateTo) {
+            where.creationDate = {};
+            if (dateFrom) where.creationDate.gte = dateFrom;
+            if (dateTo) where.creationDate.lte = dateTo;
+        }
+
+        if (statuses && statuses.length > 0) {
+            where.serviceCycles = {
+                some: { status: { in: statuses } },
+            };
+        }
+
+        if (isInjuryRelated !== undefined) {
+            where.isInjuryRelated = isInjuryRelated === 'true' || isInjuryRelated === true;
+        }
+
+        return where;
+    }
+
     /**
      * Find all RMAs with pagination, filtering, and full relations
      */
@@ -49,39 +84,7 @@ export class RmaRepository {
         filters: RmaFilters = {}
     ) {
         const { page = 1, limit = 50 } = pagination;
-        const { searchTerm, statuses, customerId, dateFrom, dateTo } = filters;
-
-        const where: any = {};
-
-        // Filter by customer
-        if (customerId) {
-            where.customerId = customerId;
-        }
-
-        // Filter by search term (RMA ID or customer name)
-        if (searchTerm) {
-            where.OR = [
-                { id: { contains: searchTerm } },
-                { customer: { name: { contains: searchTerm } } },
-            ];
-        }
-
-        // Filter by date range
-        if (dateFrom) {
-            where.creationDate = { ...where.creationDate, gte: dateFrom };
-        }
-        if (dateTo) {
-            where.creationDate = { ...where.creationDate, lte: dateTo };
-        }
-
-        // Filter by statuses (check if any service cycle has matching status)
-        if (statuses && statuses.length > 0) {
-            where.serviceCycles = {
-                some: {
-                    status: { in: statuses },
-                },
-            };
-        }
+        const where = this.buildWhereClause(filters);
 
         const [rmas, total] = await Promise.all([
             prisma.rma.findMany({
@@ -105,6 +108,29 @@ export class RmaRepository {
         ]);
 
         return { rmas, total };
+    }
+
+    /**
+     * Find all RMAs without pagination for exporting
+     */
+    async findAllForExport(filters: RmaFilters = {}) {
+        const where = this.buildWhereClause(filters);
+
+        return await prisma.rma.findMany({
+            where,
+            include: {
+                customer: true,
+                devices: true,
+                serviceCycles: {
+                    include: {
+                        history: {
+                            orderBy: { date: 'desc' },
+                        },
+                    },
+                },
+            },
+            orderBy: { creationDate: 'desc' },
+        });
     }
 
     /**
