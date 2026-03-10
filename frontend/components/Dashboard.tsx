@@ -5,6 +5,9 @@ import { motion } from 'framer-motion';
 import { ClockIcon, CheckCircleIcon, ExclamationTriangleIcon, ChartBarIcon } from './icons';
 import { useRmaContext } from '../src/context/RmaContext';
 import { useCustomerContext } from '../src/context/CustomerContext';
+import { useAuth } from '../src/context/AuthContext';
+import { adminApi } from '../src/api/admin.api';
+import toast from 'react-hot-toast';
 
 interface DashboardProps {
     onNewRma: () => void;
@@ -14,6 +17,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNewRma }) => {
     const navigate = useNavigate();
     const { rmas } = useRmaContext();
     const { customers } = useCustomerContext();
+    const { user } = useAuth();
+    const [isBackingUp, setIsBackingUp] = React.useState(false);
 
     // Navigation handlers
     const onNavigateToRmas = () => navigate('/rmas');
@@ -26,7 +31,21 @@ const Dashboard: React.FC<DashboardProps> = ({ onNewRma }) => {
     const totalCustomers = customers.length;
 
     // Get recent RMAs (last 5)
+    // Create shallow copy before sorting to avoid mutating state
     const recentRmas = [...rmas].sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()).slice(0, 5);
+
+    const handleBackup = async () => {
+        setIsBackingUp(true);
+        try {
+            await adminApi.downloadDatabaseBackup();
+            toast.success('Database backup downloaded successfully');
+        } catch (error) {
+            toast.error('Failed to download database backup');
+            console.error(error);
+        } finally {
+            setIsBackingUp(false);
+        }
+    };
 
     const stats = [
         { label: 'Total RMAs', value: totalRmas, icon: ChartBarIcon, color: 'bg-blue-500', textColor: 'text-blue-600', bgLight: 'bg-blue-50' },
@@ -36,9 +55,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onNewRma }) => {
     ];
 
     const quickActions = [
-        { label: 'New RMA', onClick: onNewRma, color: 'bg-primary-600 hover:bg-primary-700', icon: '📝' },
-        { label: 'View All RMAs', onClick: onNavigateToRmas, color: 'bg-slate-600 hover:bg-slate-700', icon: '📋' },
-        { label: 'Manage Customers', onClick: onNavigateToCustomers, color: 'bg-indigo-600 hover:bg-indigo-700', icon: '👥' },
+        { label: 'New RMA', onClick: onNewRma, color: 'bg-primary-600 hover:bg-primary-700', icon: '📝', show: true },
+        { label: 'View All RMAs', onClick: onNavigateToRmas, color: 'bg-slate-600 hover:bg-slate-700', icon: '📋', show: true },
+        { label: 'Manage Customers', onClick: onNavigateToCustomers, color: 'bg-indigo-600 hover:bg-indigo-700', icon: '👥', show: true },
+        { label: isBackingUp ? 'Exporting...' : 'Backup Database', onClick: handleBackup, color: 'bg-red-600 hover:bg-red-700', icon: '💾', show: user?.role === 'SUPERADMIN' || user?.role === 'ADMIN' },
     ];
 
     return (
@@ -84,12 +104,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onNewRma }) => {
                 className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200"
             >
                 <h2 className="text-lg sm:text-xl font-semibold text-slate-900 mb-3 sm:mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-                    {quickActions.map((action, index) => (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+                    {quickActions.filter(action => action.show).map((action, index) => (
                         <button
                             key={action.label}
                             onClick={action.onClick}
-                            className={`${action.color} text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg sm:rounded-xl text-sm sm:text-base font-medium shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 flex items-center justify-center gap-2`}
+                            disabled={action.label === 'Exporting...'}
+                            className={`${action.color} text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg sm:rounded-xl text-sm sm:text-base font-medium shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                             <span className="text-xl sm:text-2xl">{action.icon}</span>
                             <span className="truncate">{action.label}</span>
