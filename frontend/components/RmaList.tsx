@@ -53,10 +53,11 @@ const formatDate = (dateString: string) => {
  */
 const RmaList: React.FC<RmaListProps> = ({ onNewRma, onEditRma }) => {
   const navigate = useNavigate();
-  const { rmas, filters, setFilters, page, totalRmas, setPage, isLoading, deleteRma } = useRmaContext();
+  const { rmas, filters, setFilters, page, totalRmas, limit, setPage, isLoading, deleteRma } = useRmaContext();
   const { customers } = useCustomerContext();
 
-  const totalPages = Math.ceil(totalRmas / 10); // Assuming limit is 10, or get from context
+  const totalPages = Math.ceil(totalRmas / limit);
+
 
   const updateFilters = (newFilters: RmaFilters) => setFilters(newFilters);
 

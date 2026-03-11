@@ -15,15 +15,15 @@ interface StatusUpdateModalProps {
  * The data structure for the status update form.
  */
 interface FormData {
-    newStatus: RmaStatus;
-    notes: string;
+  newStatus: RmaStatus;
+  notes: string;
 }
 
 /**
  * Shape of the validation errors object for the form.
  */
 interface Errors {
-    notes?: string;
+  notes?: string;
 }
 
 /**
@@ -48,11 +48,11 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({ currentStatus, on
    * @returns An `Errors` object containing any validation messages.
    */
   const validate = (): Errors => {
-      const newErrors: Errors = {};
-      if (isNotesRequired && !formData.notes.trim()) {
-          newErrors.notes = 'Service notes are required to close a service ticket.';
-      }
-      return newErrors;
+    const newErrors: Errors = {};
+    if (isNotesRequired && !formData.notes.trim()) {
+      newErrors.notes = 'Service notes are required to close a service ticket.';
+    }
+    return newErrors;
   }
 
   /**
@@ -63,7 +63,7 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({ currentStatus, on
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
     if (id === 'notes' && errors.notes) {
-        setErrors(prev => ({...prev, notes: undefined }))
+      setErrors(prev => ({ ...prev, notes: undefined }))
     }
   };
 
@@ -75,19 +75,19 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({ currentStatus, on
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
-        return;
+      setErrors(validationErrors);
+      return;
     }
     onSave(formData.newStatus, formData.notes);
   };
-  
+
   // Defines the list of statuses available in the dropdown.
   const availableStatuses = Object.values(RmaStatus);
 
-  const inputStyles = "block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6";
-  const errorInputStyles = "ring-red-500 focus:ring-red-600";
-  const labelStyles = "block text-sm font-medium leading-6 text-slate-900";
-  const errorTextStyles = "mt-2 text-sm text-red-600";
+  const inputStyles = "form-input";
+  const errorInputStyles = "form-input--error";
+  const labelStyles = "form-label";
+  const errorTextStyles = "form-error";
 
   return (
     <div className="fixed inset-0 bg-slate-800 bg-opacity-75 flex items-center justify-center z-50 p-4 modal-enter" aria-labelledby="status-update-title" role="dialog" aria-modal="true">

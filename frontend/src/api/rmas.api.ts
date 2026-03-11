@@ -104,27 +104,47 @@ export const rmasApi = {
     },
 
     /**
-     * Export RMAs to CSV
+     * Export RMAs to CSV using native fetch (not the JSON apiClient)
+     * because the CSV is a binary stream, not a JSON response.
+     * B-5: Removes dependency on the undocumented {message: text} side-effect in ApiClient.
      */
     exportCsv: async (filters?: RmaFilters): Promise<void> => {
-        try {
-            // Note: apiClient turns non-JSON string responses into { message: string }
-            const res = await apiClient.get<any>('/api/rmas/export', filters as any);
-            const csvContent = res.message || res;
+        const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+        const params = filters
+            ? '?' + new URLSearchParams(
+                Object.entries(filters)
+                    .filter(([_, v]) => v !== undefined && v !== null && v !== '')
+                    .map(([k, v]) => [k, String(v)])
+            ).toString()
+            : '';
 
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
+        const apiBase = (window as any).__VITE_API_BASE_URL__ ||
+            import.meta.env.VITE_API_BASE_URL ||
+            '';
 
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `RMA_Export_${new Date().toISOString().split('T')[0]}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Failed to export CSV', error);
-            throw error;
+        const response = await fetch(`${apiBase}/api/rmas/export${params}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.json().catch(() => ({}));
+            throw new Error(errorBody?.error || `Export failed: HTTP ${response.status}`);
         }
+
+        const csvContent = await response.text();
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `RMA_Export_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     },
 };

@@ -57,8 +57,8 @@ class ApiClient {
             },
         };
 
-        // Attach token if exists
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        // Attach token — check sessionStorage first (session-only login), then localStorage (remember me)
+        const token = sessionStorage.getItem('token') || localStorage.getItem('token');
         if (token) {
             // Check if headers is defined and is a plain object (which it is above)
             (config.headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;

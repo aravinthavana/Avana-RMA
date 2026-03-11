@@ -84,10 +84,10 @@ const NewCycleModal: React.FC<NewCycleModalProps> = ({ rma, onClose, onSave }) =
     onSave(rma.id, formData.selectedDeviceSn, formData.issueDescription, formData.accessoriesIncluded);
   };
 
-  const inputStyles = "block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6";
-  const errorInputStyles = "ring-red-500 focus:ring-red-600";
-  const labelStyles = "block text-sm font-medium leading-6 text-slate-900";
-  const errorTextStyles = "mt-2 text-sm text-red-600";
+  const inputStyles = "form-input";
+  const errorInputStyles = "form-input--error";
+  const labelStyles = "form-label";
+  const errorTextStyles = "form-error";
 
   return (
     <div className="fixed inset-0 bg-slate-800 bg-opacity-75 flex items-center justify-center z-50 p-4 modal-enter" aria-labelledby="new-cycle-title" role="dialog" aria-modal="true">

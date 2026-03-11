@@ -41,11 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     // Assuming apiClient reads localStorage. If token is in sessionStorage, 
                     // apiClient might miss it if hardcoded to localStorage.
 
-                    // HACK: Ensure token is in localStorage for apiClient if it was in sessionStorage
-                    // This is a simplification. Ideally update apiClient to check both.
-                    if (sessionStorage.getItem('token') && !localStorage.getItem('token')) {
-                        localStorage.setItem('token', token); // Temporarily sync for apiClient
-                    }
+                    // apiClient reads sessionStorage first (see client.ts), so no sync needed
 
                     const { data, error } = await authApi.me();
                     if (data) {
@@ -78,15 +74,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     localStorage.setItem('token', data.token);
                     sessionStorage.removeItem('token');
                 } else {
+                    // Not remembering — session-only token (cleared when the browser tab closes)
                     sessionStorage.setItem('token', data.token);
-                    // Also set in localStorage because our simple apiClient probably reads from there
-                    // A better fix is updating apiClient, but for now let's use localStorage as primary
-                    // and just clear it on window close if not rememberMe? No, that's hard (onbeforeunload is flaky).
+                    localStorage.removeItem('token'); // Ensure no stale persistent copy exists
 
-                    // Correct approach: Update apiClient to check both.
-                    // For now, stick to localStorage for simplicity if we can't update client easily,
-                    // OR implementation:
-                    localStorage.setItem('token', data.token); // For apiClient compatibility
                 }
 
                 toast.success(`Welcome back, ${data.user.name.split(' ')[0]}!`);

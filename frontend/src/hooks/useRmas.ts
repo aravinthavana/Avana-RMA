@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { Rma, RmaStatus } from '../../types';
 import { rmasApi } from '../api';
@@ -33,9 +33,9 @@ export const useRmas = (initialPage: number = 1, initialLimit: number = 50) => {
     });
 
     /**
-     * Fetch RMAs from API
+     * Fetch RMAs from API (B-3: wrapped in useCallback to be stable across renders)
      */
-    const fetchRmas = async () => {
+    const fetchRmas = useCallback(async () => {
         if (!isAuthenticated) return;
 
         setIsLoading(true);
@@ -59,7 +59,7 @@ export const useRmas = (initialPage: number = 1, initialLimit: number = 50) => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [isAuthenticated, page, limit, filters]);
 
     /**
      * Create a new RMA

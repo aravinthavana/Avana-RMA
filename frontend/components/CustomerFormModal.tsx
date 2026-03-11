@@ -131,11 +131,11 @@ const CustomerFormModal: React.FC<CustomerFormModalProps> = ({ customer, onClose
   /**
    * Gets dynamic input styles based on the field's validation state.
    */
-  const getInputStyles = (field: keyof FormErrors) => {
-    return `block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset placeholder:text-slate-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${errors[field] && touched[field] ? 'ring-red-500 text-red-900 focus:ring-red-500' : 'ring-slate-300 focus:ring-primary-600'}`;
-  };
+  const getInputStyles = (field: keyof FormErrors) =>
+    `form-input${errors[field] && touched[field] ? ' form-input--error' : ''}`;
 
-  const labelStyles = "block text-sm font-medium leading-6 text-slate-900";
+  const labelStyles = "form-label";
+
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 modal-enter" aria-labelledby="customer-modal-title" role="dialog" aria-modal="true">

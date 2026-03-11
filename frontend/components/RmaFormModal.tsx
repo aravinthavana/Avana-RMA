@@ -34,7 +34,6 @@ interface FormDeviceData {
 interface FormData {
   customerId: string;
   dateOfIncident: string;
-  dateOfIncident: string;
   dateOfReport: string;
   isInjuryRelated: boolean;
   injuryDetails: string;
@@ -464,9 +463,9 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
   // Actually we need to display valid list.
 
   const getInputStyles = (isError: boolean) =>
-    `block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset placeholder:text-slate-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${isError ? 'ring-red-500 text-red-900 focus:ring-red-500' : 'ring-slate-300 focus:ring-primary-600'}`;
-  const labelStyles = "block text-sm font-medium leading-6 text-slate-900";
-  const errorTextStyles = "mt-1 text-sm text-red-600";
+    `form-input${isError ? ' form-input--error' : ''}`;
+  const labelStyles = "form-label";
+  const errorTextStyles = "form-error";
 
   if (!isOpen) return null;
 
