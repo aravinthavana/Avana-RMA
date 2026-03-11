@@ -106,8 +106,21 @@ export class RmaController {
      */
     async create(req: Request, res: Response, next: NextFunction) {
         try {
+            // Recursively sanitize null bytes from all strings to prevent PostgreSQL UTF-8 0x00 errors
+            const sanitizeNullBytes = (obj: any): any => {
+                if (typeof obj === 'string') return obj.replace(/\0/g, '');
+                if (Array.isArray(obj)) return obj.map(sanitizeNullBytes);
+                if (obj !== null && typeof obj === 'object') {
+                    return Object.fromEntries(
+                        Object.entries(obj).map(([k, v]) => [k, sanitizeNullBytes(v)])
+                    );
+                }
+                return obj;
+            };
+
+            const requestBody = sanitizeNullBytes(req.body);
+
             // Handle both old format (customer object) and new format (customerId)
-            const requestBody = req.body;
             const rmaData = {
                 ...requestBody,
                 customerId: requestBody.customerId || requestBody.customer?.id,
