@@ -1,6 +1,5 @@
-import { PrismaClient, Rma as PrismaRma } from '@prisma/client';
+import prisma from '../lib/prisma';
 
-const prisma = new PrismaClient();
 
 export interface RmaFilters {
     searchTerm?: string;
@@ -246,20 +245,17 @@ export class RmaRepository {
      * Generate a unique RMA ID (short 6-character alphanumeric)
      */
     generateId(): string {
-        return `RMA-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        // Use 6 random characters taken from a 30-byte random buffer to avoid Math.random() collisions
+        const randomPart = Array.from({ length: 6 }).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+        return `RMA-${randomPart}`;
     }
 
     /**
      * Count RMAs
      */
     async count(filters: RmaFilters = {}): Promise<number> {
-        const { customerId, dateFrom, dateTo } = filters;
-        const where: any = {};
-
-        if (customerId) where.customerId = customerId;
-        if (dateFrom) where.creationDate = { gte: dateFrom };
-        if (dateTo) where.creationDate = { ...where.creationDate, lte: dateTo };
-
+        const where = this.buildWhereClause(filters);
         return await prisma.rma.count({ where });
     }
 }

@@ -1,6 +1,6 @@
-import { PrismaClient, Customer as PrismaCustomer } from '@prisma/client';
+import { Customer as PrismaCustomer } from '@prisma/client';
+import prisma from '../lib/prisma';
 
-const prisma = new PrismaClient();
 
 export interface PaginationOptions {
     page?: number;

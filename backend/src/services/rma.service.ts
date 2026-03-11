@@ -278,7 +278,7 @@ export class RmaService {
         await this.serviceCycleRepo.addHistoryEvent(cycleId, historyData);
 
         // Update RMA's lastUpdateDate
-        await this.rmaRepo.update(cycle.rmaId, {});
+        await this.rmaRepo.update(cycle.rmaId, { lastUpdateDate: new Date().toISOString() });
 
         return updatedCycle;
     }
@@ -314,7 +314,7 @@ export class RmaService {
         });
 
         // Update RMA's lastUpdateDate
-        await this.rmaRepo.update(rmaId, {});
+        await this.rmaRepo.update(rmaId, { lastUpdateDate: new Date().toISOString() });
 
         return cycle;
     }

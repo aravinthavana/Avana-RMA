@@ -211,7 +211,10 @@ export class RmaController {
      */
     async updateCycleStatus(req: Request, res: Response, next: NextFunction) {
         try {
-            const cycleId = parseInt(req.params.cycleId);
+            const cycleId = parseInt(req.params.cycleId, 10);
+            if (isNaN(cycleId)) {
+                return res.status(400).json({ success: false, error: 'Invalid cycle ID — must be a number' });
+            }
             const cycle = await this.rmaService.updateServiceCycleStatus(cycleId, req.body);
 
             res.json({

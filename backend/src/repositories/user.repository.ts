@@ -1,6 +1,6 @@
-import { PrismaClient, User } from '@prisma/client';
+import { User } from '@prisma/client';
+import prisma from '../lib/prisma';
 
-const prisma = new PrismaClient();
 
 export class UserRepository {
     async findAll(): Promise<User[]> {
