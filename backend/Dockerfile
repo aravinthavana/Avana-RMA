@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
@@ -18,12 +18,13 @@ RUN npx prisma generate
 RUN npm run build
 
 # Production stage
-FROM node:20-alpine
+FROM node:20-slim
 
 WORKDIR /app
 
 # Install postgresql-client for pg_dump capability (used by backup service)
-RUN apk add --no-cache postgresql-client
+# Using Debian slim avoids Alpine DNS / mirror firewall blocks
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
 
 # Copy package files and install only production dependencies
 COPY package*.json ./
