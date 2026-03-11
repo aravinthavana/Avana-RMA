@@ -37,7 +37,7 @@ const corsOptions: cors.CorsOptions = {
             }
         }
         // Always check the explicit whitelist (production domains)
-        if (whitelist.includes(origin)) {
+        if (whitelist.includes('*') || whitelist.includes(origin)) {
             return callback(null, true);
         }
         console.warn('Blocked CORS origin:', origin);
