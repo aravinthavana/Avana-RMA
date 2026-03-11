@@ -66,13 +66,11 @@ export class CustomerRepository {
 
     /**
      * Create a new customer
+     * C-1: id is now DB-generated via @default(uuid()) in schema — no need to pass it here.
      */
     async create(data: Omit<PrismaCustomer, 'id'>): Promise<PrismaCustomer> {
         return await prisma.customer.create({
-            data: {
-                id: this.generateId(),
-                ...data,
-            },
+            data,
         });
     }
 
@@ -151,12 +149,6 @@ export class CustomerRepository {
         return await prisma.customer.count({ where });
     }
 
-    /**
-     * Generate a unique customer ID
-     */
-    private generateId(): string {
-        return `CUST-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    }
 }
 
 export default new CustomerRepository();

@@ -31,26 +31,15 @@ export class CustomerService {
      * Get a single customer by ID
      */
     async getCustomerById(id: string): Promise<Customer | null> {
-        if (!id) {
-            throw new Error('Customer ID is required');
-        }
         return await this.customerRepo.findById(id);
     }
 
     /**
-     * Create a new customer
+     * Create a new customer.
+     * C-4: Input is pre-validated by Zod at the route layer (customerSchema).
+     * No need to re-validate name or email here.
      */
     async createCustomer(data: CreateCustomerDto): Promise<Customer> {
-        // Validate required fields
-        if (!data.name || data.name.trim() === '') {
-            throw new Error('Customer name is required');
-        }
-
-        // Validate email format if provided
-        if (data.email && !this.isValidEmail(data.email)) {
-            throw new Error('Invalid email format');
-        }
-
         return await this.customerRepo.create({
             name: data.name,
             contactPerson: data.contactPerson || null,
@@ -61,29 +50,15 @@ export class CustomerService {
     }
 
     /**
-     * Update an existing customer
+     * Update an existing customer.
+     * C-4: Input is pre-validated by Zod at the route layer.
+     * Existence check is kept for correct 404 responses.
      */
     async updateCustomer(id: string, data: UpdateCustomerDto): Promise<Customer> {
-        if (!id) {
-            throw new Error('Customer ID is required');
-        }
-
-        // Check if customer exists
         const existing = await this.customerRepo.findById(id);
         if (!existing) {
             throw new Error(`Customer with ID ${id} not found`);
         }
-
-        // Validate name if being updated
-        if (data.name !== undefined && data.name.trim() === '') {
-            throw new Error('Customer name cannot be empty');
-        }
-
-        // Validate email if being updated
-        if (data.email && !this.isValidEmail(data.email)) {
-            throw new Error('Invalid email format');
-        }
-
         return await this.customerRepo.update(id, data);
     }
 
@@ -91,25 +66,11 @@ export class CustomerService {
      * Delete a customer
      */
     async deleteCustomer(id: string, deleteRmas: boolean = false): Promise<Customer> {
-        if (!id) {
-            throw new Error('Customer ID is required');
-        }
-
-        // Check if customer exists
         const existing = await this.customerRepo.findById(id);
         if (!existing) {
             throw new Error(`Customer with ID ${id} not found`);
         }
-
         return await this.customerRepo.delete(id, deleteRmas);
-    }
-
-    /**
-     * Validate email format
-     */
-    private isValidEmail(email: string): boolean {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
     }
 }
 

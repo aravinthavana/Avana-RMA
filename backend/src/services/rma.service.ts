@@ -160,23 +160,13 @@ export class RmaService {
 
         // Generate RMA ID
         const rmaId = this.rmaRepo.generateId();
-        const now = new Date().toISOString();
 
-        // Prepare service cycles with dates
-        const serviceCycles = data.serviceCycles.map(cycle => ({
-            ...cycle,
-            creationDate: now,
-            statusDate: now,
-        }));
-
-        // Create RMA
+        // Create RMA — creationDate and lastUpdateDate default to now() in DB (A-2)
         const rmaData: CreateRmaData = {
             id: rmaId,
             customerId: data.customerId,
             devices: data.devices,
-            serviceCycles,
-            creationDate: now,
-            lastUpdateDate: now,
+            serviceCycles: data.serviceCycles, // creationDate/statusDate defaulted in DB
             dateOfIncident: data.dateOfIncident,
             dateOfReport: data.dateOfReport,
             attachment: data.attachment,
@@ -245,9 +235,9 @@ export class RmaService {
             notes
         });
 
-        // Update RMA last update date
+        // Update RMA last update date (A-2: Date object, not ISO string)
         await this.rmaRepo.update(rmaId, {
-            lastUpdateDate: new Date().toISOString()
+            lastUpdateDate: new Date()
         });
 
         // Return the updated cycle directly — no need for a second full findById round-trip (A-6)
@@ -267,7 +257,7 @@ export class RmaService {
             throw new Error(`Service cycle with ID ${cycleId} not found`);
         }
 
-        const now = new Date().toISOString();
+        const now = new Date(); // A-2: DateTime — Date object, not ISO string
 
         // Update status
         const updatedCycle = await this.serviceCycleRepo.updateStatus(
@@ -285,8 +275,8 @@ export class RmaService {
 
         await this.serviceCycleRepo.addHistoryEvent(cycleId, historyData);
 
-        // Update RMA's lastUpdateDate
-        await this.rmaRepo.update(cycle.rmaId, { lastUpdateDate: new Date().toISOString() });
+        // Update RMA's lastUpdateDate (A-2: Date object)
+        await this.rmaRepo.update(cycle.rmaId, { lastUpdateDate: now });
 
         return updatedCycle;
     }
@@ -309,20 +299,17 @@ export class RmaService {
             throw new Error(`Device with serial ${data.deviceSerialNumber} not found in this RMA`);
         }
 
-        const now = new Date().toISOString();
-
         const cycle = await this.serviceCycleRepo.create({
             rmaId,
             deviceSerialNumber: data.deviceSerialNumber,
             status: data.status,
-            creationDate: now,
-            statusDate: now,
+            // creationDate and statusDate omitted — DB defaults to now() (A-2)
             issueDescription: data.issueDescription,
             accessoriesIncluded: data.accessoriesIncluded,
         });
 
-        // Update RMA's lastUpdateDate
-        await this.rmaRepo.update(rmaId, { lastUpdateDate: new Date().toISOString() });
+        // Update RMA's lastUpdateDate (A-2: Date object)
+        await this.rmaRepo.update(rmaId, { lastUpdateDate: new Date() });
 
         return cycle;
     }

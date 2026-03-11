@@ -11,7 +11,7 @@ datasource db {
 }
 
 model Customer {
-  id            String    @id
+  id            String    @id @default(uuid())  // C-1: DB-generated UUID
   name          String
   contactPerson String?
   email         String?
@@ -23,15 +23,15 @@ model Customer {
 }
 
 model Rma {
-  id              String          @id
+  id              String          @id               // RMA-XXXXXX short code, still generated in repo
   customerId      String?
   customerName    String?         // Preserved customer name for deleted customers
   customerEmail   String?         // Preserved customer email
   customerPhone   String?         // Preserved customer phone
-  creationDate    String
-  lastUpdateDate  String
-  dateOfIncident  String
-  dateOfReport    String
+  creationDate    DateTime        @default(now())   // A-2: was String
+  lastUpdateDate  DateTime        @default(now()) @updatedAt  // A-2: was String
+  dateOfIncident  String          // Date-only (YYYY-MM-DD) — kept as String intentionally
+  dateOfReport    String          // Date-only (YYYY-MM-DD) — kept as String intentionally
   attachment      String?
   isInjuryRelated Boolean         @default(false)
   injuryDetails   String?
@@ -65,8 +65,8 @@ model ServiceCycle {
   rmaId               String
   deviceSerialNumber  String
   status              String
-  creationDate        String
-  statusDate          String
+  creationDate        DateTime          @default(now())   // A-2: was String
+  statusDate          DateTime          @default(now())   // A-2: was String
   issueDescription    String?
   accessoriesIncluded String?
   
@@ -82,7 +82,7 @@ model ServiceHistory {
   id              Int           @id @default(autoincrement())
   serviceCycleId  Int
   status          String
-  date            String
+  date            DateTime      @default(now())   // A-2: was String
   notes           String?
   
   serviceCycle    ServiceCycle  @relation(fields: [serviceCycleId], references: [id], onDelete: Cascade)
@@ -133,4 +133,3 @@ model AuditLog {
   @@index([action], name: "idx_audit_action")
   @@map("audit_logs")
 }
-

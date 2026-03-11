@@ -18,10 +18,10 @@ export interface PaginationOptions {
 export interface CreateRmaData {
     id: string;
     customerId: string;
-    creationDate: string;
-    lastUpdateDate: string;
-    dateOfIncident: string;
-    dateOfReport: string;
+    creationDate?: Date;       // A-2: DateTime — defaults in DB
+    lastUpdateDate?: Date;     // A-2: DateTime — defaults in DB
+    dateOfIncident: string;    // Date-only string (YYYY-MM-DD)
+    dateOfReport: string;      // Date-only string (YYYY-MM-DD)
     attachment?: string;
     isInjuryRelated: boolean;
     injuryDetails?: string;
@@ -33,8 +33,8 @@ export interface CreateRmaData {
     serviceCycles: Array<{
         deviceSerialNumber: string;
         status: string;
-        creationDate: string;
-        statusDate: string;
+        creationDate?: Date;   // A-2: DateTime — defaults in DB
+        statusDate?: Date;     // A-2: DateTime — defaults in DB
         issueDescription?: string;
         accessoriesIncluded?: string;
     }>;
@@ -58,8 +58,9 @@ export class RmaRepository {
 
         if (dateFrom || dateTo) {
             where.creationDate = {};
-            if (dateFrom) where.creationDate.gte = dateFrom;
-            if (dateTo) where.creationDate.lte = dateTo;
+            // A-2: creationDate is now DateTime — parse filter strings to Date objects
+            if (dateFrom) where.creationDate.gte = new Date(dateFrom);
+            if (dateTo) where.creationDate.lte = new Date(dateTo + 'T23:59:59.999Z');
         }
 
         if (statuses && statuses.length > 0) {
@@ -154,14 +155,14 @@ export class RmaRepository {
 
     /**
      * Create a new RMA with devices and service cycles
+     * A-2: creationDate and lastUpdateDate are now DateTime with @default(now()) — DB sets them automatically.
      */
     async create(data: CreateRmaData) {
         return await prisma.rma.create({
             data: {
                 id: data.id,
                 customerId: data.customerId,
-                creationDate: data.creationDate,
-                lastUpdateDate: data.lastUpdateDate,
+                // creationDate and lastUpdateDate omitted — DB defaults to now()
                 dateOfIncident: data.dateOfIncident,
                 dateOfReport: data.dateOfReport,
                 attachment: data.attachment,
@@ -171,7 +172,8 @@ export class RmaRepository {
                     create: data.devices,
                 },
                 serviceCycles: {
-                    create: data.serviceCycles,
+                    // creationDate and statusDate omitted in each cycle — DB defaults to now()
+                    create: data.serviceCycles.map(({ creationDate: _, statusDate: __, ...cycle }) => cycle),
                 },
             },
             include: {
@@ -191,7 +193,7 @@ export class RmaRepository {
      */
     async update(id: string, data: Partial<CreateRmaData>) {
         const updateData: any = {
-            lastUpdateDate: new Date().toISOString(),
+            lastUpdateDate: new Date(), // A-2: was toISOString() — now proper Date object
         };
 
         if (data.dateOfIncident) updateData.dateOfIncident = data.dateOfIncident;

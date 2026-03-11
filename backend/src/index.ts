@@ -86,7 +86,7 @@ import routes from './routes';
 // Mount new routes
 app.use('/api', routes);
 
-// Health check endpoint (used by Render to verify the service is alive)
+// Health check endpoint (used by Docker/Portainer to verify the service is alive)
 app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });

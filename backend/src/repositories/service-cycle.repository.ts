@@ -5,15 +5,15 @@ export interface CreateServiceCycleData {
     rmaId: string;
     deviceSerialNumber: string;
     status: string;
-    creationDate: string;
-    statusDate: string;
+    creationDate?: Date;      // A-2: DateTime — DB defaults to now()
+    statusDate?: Date;        // A-2: DateTime — DB defaults to now()
     issueDescription?: string;
     accessoriesIncluded?: string;
 }
 
 export interface AddHistoryEventData {
     status: string;
-    date: string;
+    date?: Date;              // A-2: DateTime — DB defaults to now()
     notes?: string;
 }
 
@@ -60,8 +60,9 @@ export class ServiceCycleRepository {
 
     /**
      * Update a service cycle status
+     * A-2: statusDate is now a DateTime — accept a Date object
      */
-    async updateStatus(id: number, status: string, statusDate: string) {
+    async updateStatus(id: number, status: string, statusDate: Date = new Date()) {
         return await prisma.serviceCycle.update({
             where: { id },
             data: {
@@ -76,13 +77,14 @@ export class ServiceCycleRepository {
 
     /**
      * Add a history event to a service cycle
+     * A-2: date is now a DateTime — accept a Date object (defaults to now)
      */
     async addHistoryEvent(serviceCycleId: number, data: AddHistoryEventData) {
         return await prisma.serviceHistory.create({
             data: {
                 serviceCycleId,
                 status: data.status,
-                date: data.date,
+                date: data.date ?? new Date(),
                 notes: data.notes,
             },
         });
