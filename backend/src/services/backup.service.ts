@@ -1,14 +1,12 @@
-import { exec } from 'child_process';
-import util from 'util';
+import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-const execPromise = util.promisify(exec);
-
 export class BackupService {
     /**
      * Generates a PostgreSQL database dump using pg_dump.
+     * Uses spawn() with an explicit args array to prevent shell command injection.
      * Returns the absolute path to the generated .sql file.
      */
     async createDatabaseBackup(): Promise<string> {
@@ -29,26 +27,49 @@ export class BackupService {
 
         const filePath = path.join(tempDir, fileName);
 
-        try {
-            // Run pg_dump
-            // Note: pg_dump must be installed in the environment (e.g., inside the Docker container)
-            const command = `pg_dump "${databaseUrl}" -f "${filePath}" --clean --if-exists --no-owner --no-privileges`;
-            await execPromise(command);
+        return new Promise((resolve, reject) => {
+            // SECURITY: Use spawn() with a discrete args array, NOT exec() with a shell string.
+            // This guarantees the DATABASE_URL is passed as a literal argument and
+            // can never be interpreted as a shell command even if malformed.
+            const pgDump = spawn('pg_dump', [
+                databaseUrl,
+                '-f', filePath,
+                '--clean',
+                '--if-exists',
+                '--no-owner',
+                '--no-privileges',
+            ], { stdio: ['ignore', 'pipe', 'pipe'], shell: false });
 
-            // Verify file was created
-            if (!fs.existsSync(filePath)) {
-                throw new Error('Backup file was not created by pg_dump.');
-            }
+            let stderrOutput = '';
+            pgDump.stderr.on('data', (data) => {
+                stderrOutput += data.toString();
+            });
 
-            return filePath;
-        } catch (error: any) {
-            console.error('Backup generation failed:', error);
-            // Clean up partial file if it exists
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
-            throw new Error(`Failed to generate database backup: ${error.message}`);
-        }
+            pgDump.on('close', (code) => {
+                if (code !== 0) {
+                    // Clean up partial file if present
+                    if (fs.existsSync(filePath)) {
+                        try { fs.unlinkSync(filePath); } catch (_) { }
+                    }
+                    reject(new Error(`pg_dump process exited with code ${code}: ${stderrOutput}`));
+                    return;
+                }
+
+                if (!fs.existsSync(filePath)) {
+                    reject(new Error('Backup file was not created by pg_dump.'));
+                    return;
+                }
+
+                resolve(filePath);
+            });
+
+            pgDump.on('error', (err) => {
+                if (fs.existsSync(filePath)) {
+                    try { fs.unlinkSync(filePath); } catch (_) { }
+                }
+                reject(new Error(`Failed to start pg_dump process: ${err.message}`));
+            });
+        });
     }
 }
 

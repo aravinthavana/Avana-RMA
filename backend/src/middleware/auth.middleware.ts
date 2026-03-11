@@ -1,12 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-
 /**
  * Middleware to verify JWT token
  */
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    const JWT_SECRET = process.env.JWT_SECRET;
+    if (!JWT_SECRET) {
+        // Server misconfiguration — never expose internal error to client
+        console.error('CRITICAL: JWT_SECRET environment variable is not set!');
+        return res.status(500).json({ success: false, error: 'Server configuration error' });
+    }
     // Get token from header
     const authHeader = req.headers.authorization;
 

@@ -102,14 +102,15 @@ export class AuthService {
         });
 
         // Create notification for admin
+        // SECURITY: Store only non-sensitive identifiers, NOT the token itself.
+        // The token is a credential; storing it in the DB gives anyone with DB read access the ability to reset the account.
         await notificationService.createNotification(
             'PASSWORD_RESET_REQUEST',
             `Password reset requested for ${user.name} (${email})`,
             JSON.stringify({
                 email,
                 userName: user.name,
-                resetToken,
-                resetUrl: `http://localhost:5173/reset-password?token=${resetToken}`,
+                userId: user.id,
                 timestamp: new Date().toISOString()
             })
         );

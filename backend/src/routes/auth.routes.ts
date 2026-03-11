@@ -14,8 +14,18 @@ const forgotPasswordLimiter = rateLimit({
     legacyHeaders: false,
 });
 
+// Brute-force protection for login
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // 10 failed attempts across 15 min allowed per IP
+    message: { success: false, error: 'Too many login attempts from this IP. Please try again in 15 minutes.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: true, // Only count FAILED requests
+});
+
 // Public routes
-router.post('/signin', authController.login);
+router.post('/signin', loginLimiter, authController.login);
 router.post('/forgot-password', forgotPasswordLimiter, authController.forgotPassword);
 router.post('/reset-password', authController.resetPassword);
 

@@ -42,8 +42,12 @@ export class UserService {
     }
 
     async updateUser(id: string, data: any): Promise<User> {
-        // If password is being updated, hash it
+        // If password is being updated, validate strength and hash it
         if (data.password) {
+            const passwordValidation = validatePassword(data.password);
+            if (!passwordValidation.valid) {
+                throw new Error(passwordValidation.errors.join(', '));
+            }
             const salt = await bcrypt.genSalt(10);
             data.password = await bcrypt.hash(data.password, salt);
         }

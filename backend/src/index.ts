@@ -21,13 +21,27 @@ const whitelist = process.env.CORS_ORIGIN?.split(',') || [
 
 const corsOptions: cors.CorsOptions = {
     origin: (origin, callback) => {
-        // In development, allow all localhost and local network origins
-        if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168.') || origin.includes('10.') || whitelist.includes(origin)) {
-            callback(null, true);
-        } else {
-            console.warn('Blocked CORS origin:', origin);
-            callback(new Error('Not allowed by CORS'));
+        // Allow requests with no origin (e.g. mobile apps, curl, server-side)
+        if (!origin) {
+            return callback(null, true);
         }
+        // In development, also allow local network origins
+        if (process.env.NODE_ENV !== 'production') {
+            if (
+                origin.includes('localhost') ||
+                origin.includes('127.0.0.1') ||
+                origin.includes('192.168.') ||
+                origin.includes('10.')
+            ) {
+                return callback(null, true);
+            }
+        }
+        // Always check the explicit whitelist (production domains)
+        if (whitelist.includes(origin)) {
+            return callback(null, true);
+        }
+        console.warn('Blocked CORS origin:', origin);
+        callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
 };
@@ -88,12 +102,13 @@ app.get('/api/health', (_req, res) => {
 // Global Error Handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     logger.error('Unhandled error:', err);
-    console.error('Unhandled error details:', err.message, err.stack);
-    res.status(500).json({
+    // SECURITY: Never expose internal stack traces in production
+    const isDev = process.env.NODE_ENV !== 'production';
+    res.status(err.status || 500).json({
         success: false,
         error: 'Internal Server Error',
-        message: err.message || 'Something went wrong',
-        stack: err.stack || undefined
+        message: isDev ? (err.message || 'Something went wrong') : 'Something went wrong',
+        ...(isDev && { stack: err.stack }),
     });
 });
 
