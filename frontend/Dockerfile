@@ -10,8 +10,7 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# IMPORTANT: Set API URL to route to the same origin (Nginx will proxy it)
-ENV VITE_API_BASE_URL=/api
+# IMPORTANT: Base URL is left blank so requests are sent relative to the current host (Nginx handles proxying to the backend)
 
 # Build the React application
 RUN npm run build
