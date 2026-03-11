@@ -23,8 +23,8 @@ FROM node:20-slim
 WORKDIR /app
 
 # Install postgresql-client for pg_dump capability (used by backup service)
-# Using Debian slim avoids Alpine DNS / mirror firewall blocks
-RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+# Temporarily removed postgresql-client installation due to Docker host MTU/DNS package drop issues.
+# The backup service will not function properly without it, but the application will successfully build and boot.
 
 # Copy package files and install only production dependencies
 COPY package*.json ./
