@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { RmaService } from '../services/rma.service';
+import logger from '../logger';
 
 export class RmaController {
     constructor(private readonly rmaService: RmaService) { }
@@ -144,6 +145,7 @@ export class RmaController {
                 data: rma,
             });
         } catch (error) {
+            logger.error('CRITICAL RMA CREATE ERROR PAYLOAD DUMP:', { body: req.body });
             next(error);
         }
     }
