@@ -258,6 +258,32 @@ export class RmaRepository {
         const where = this.buildWhereClause(filters);
         return await prisma.rma.count({ where });
     }
+
+    /**
+     * B-2: Aggregate dashboard statistics from the DB — avoids loading all RMAs into memory.
+     */
+    async getStats(): Promise<{
+        total: number;
+        byStatus: Record<string, number>;
+        totalInjuryRelated: number;
+    }> {
+        const [total, statusGroups, totalInjuryRelated] = await Promise.all([
+            prisma.rma.count(),
+            prisma.serviceCycle.groupBy({
+                by: ['status'],
+                _count: { status: true },
+            }),
+            prisma.rma.count({ where: { isInjuryRelated: true } }),
+        ]);
+
+        const byStatus: Record<string, number> = {};
+        for (const group of statusGroups) {
+            byStatus[group.status] = group._count.status;
+        }
+
+        return { total, byStatus, totalInjuryRelated };
+    }
 }
 
 export default new RmaRepository();
+

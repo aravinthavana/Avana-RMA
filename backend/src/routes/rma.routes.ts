@@ -67,11 +67,19 @@ const validateStatusUpdate = (req: any, res: any, next: any) => {
 router.get('/', (req, res, next) => rmaController.getAll(req, res, next));
 
 /**
+ * @route   GET /api/rmas/stats
+ * @desc    Get aggregated RMA dashboard statistics (total, by-status, injury-related counts)
+ * @access  Authenticated
+ */
+router.get('/stats', (req, res, next) => rmaController.getStats(req, res, next));
+
+/**
  * @route   GET /api/rmas/export
  * @desc    Export RMAs to CSV
- * @access  Public
+ * @access  Authenticated
  */
 router.get('/export', (req, res, next) => rmaController.exportFilteredRmas(req, res, next));
+
 
 /**
  * @route   GET /api/rmas/:id

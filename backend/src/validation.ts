@@ -32,17 +32,32 @@ export const serviceCycleSchema = z.object({
 });
 
 // RMA creation validation schema
+// The frontend sends: { customer: { id }, devices: [...], serviceCycles: [...], dateOfIncident, ... }
+// The controller maps customer.id → customerId before calling the service.
 export const createRmaSchema = z.object({
     customer: z.object({
         id: z.string().min(1, 'Customer ID is required'),
-    }),
+        // Allow other customer fields from frontend without strict validation
+    }).passthrough().optional(),
+    customerId: z.string().min(1).optional(), // Alternative flat format
     devices: z.array(deviceSchema).min(1, 'At least one device is required').max(50, 'Too many devices'),
+    serviceCycles: z.array(z.object({
+        deviceSerialNumber: z.string().min(1),
+        issueDescription: z.string().min(1, 'Issue description is required').max(2000),
+        accessoriesIncluded: z.string().max(1000).optional(),
+        status: z.string().optional(),
+        creationDate: z.string().optional(),
+        statusDate: z.string().optional(),
+    })).min(1, 'At least one service cycle is required').optional(),
     dateOfIncident: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
     dateOfReport: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
     isInjuryRelated: z.boolean().optional(),
     injuryDetails: z.string().max(2000, 'Injury details are too long').optional(),
     attachment: z.string().max(500, 'Attachment path is too long').optional(),
-});
+}).refine(
+    (data) => !!(data.customerId || data.customer?.id),
+    { message: 'Customer ID is required (provide customer.id or customerId)' }
+);
 
 // RMA update validation schema
 export const updateRmaSchema = z.object({
@@ -62,5 +77,6 @@ export const updateRmaSchema = z.object({
 export const statusUpdateSchema = z.object({
     deviceSerialNumber: z.string().min(1, 'Device serial number is required'),
     newStatus: z.string().min(1, 'New status is required'),
-    notes: z.string().min(1, 'Notes are required').max(2000, 'Notes are too long'),
+    // Notes are optional — only required by the frontend when status is CLOSED
+    notes: z.string().max(2000, 'Notes are too long').optional(),
 });

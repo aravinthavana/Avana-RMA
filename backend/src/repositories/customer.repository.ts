@@ -88,31 +88,39 @@ export class CustomerRepository {
 
     /**
      * Delete a customer
+     * Wrapped in a transaction so the name-preservation step and the delete
+     * are atomic — no partial state if the connection drops between them.
      */
     async delete(id: string, deleteRmas: boolean = false): Promise<PrismaCustomer> {
         if (deleteRmas) {
-            // Delete customer and all associated RMAs (cascade)
-            await prisma.rma.deleteMany({
-                where: { customerId: id },
+            // Delete customer and all associated RMAs (cascade) in a transaction
+            return await prisma.$transaction(async (tx) => {
+                await tx.rma.deleteMany({
+                    where: { customerId: id },
+                });
+                return tx.customer.delete({
+                    where: { id },
+                });
             });
         } else {
-            // Before deleting customer, preserve customer info in RMAs
+            // Before deleting customer, atomically preserve customer info in all linked RMAs
             const customer = await this.findById(id);
-            if (customer) {
-                await prisma.rma.updateMany({
-                    where: { customerId: id },
-                    data: {
-                        customerName: customer.name,
-                        customerEmail: customer.email,
-                        customerPhone: customer.phone,
-                    },
+            return await prisma.$transaction(async (tx) => {
+                if (customer) {
+                    await tx.rma.updateMany({
+                        where: { customerId: id },
+                        data: {
+                            customerName: customer.name,
+                            customerEmail: customer.email,
+                            customerPhone: customer.phone,
+                        },
+                    });
+                }
+                return tx.customer.delete({
+                    where: { id },
                 });
-            }
+            });
         }
-
-        return await prisma.customer.delete({
-            where: { id },
-        });
     }
 
     /**
@@ -126,7 +134,7 @@ export class CustomerRepository {
     }
 
     /**
-     * Count customers
+     * Count customers matching optional filters
      */
     async count(filters: CustomerFilters = {}): Promise<number> {
         const { searchTerm } = filters;
@@ -134,9 +142,9 @@ export class CustomerRepository {
 
         if (searchTerm) {
             where.OR = [
-                { name: { contains: searchTerm } },
-                { contactPerson: { contains: searchTerm } },
-                { email: { contains: searchTerm } },
+                { name: { contains: searchTerm, mode: 'insensitive' } },
+                { contactPerson: { contains: searchTerm, mode: 'insensitive' } },
+                { email: { contains: searchTerm, mode: 'insensitive' } },
             ];
         }
 

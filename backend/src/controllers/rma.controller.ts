@@ -40,6 +40,19 @@ export class RmaController {
     }
 
     /**
+     * GET /api/rmas/stats
+     * B-2: Aggregate dashboard statistics from the DB (avoids loading all records into memory)
+     */
+    async getStats(req: Request, res: Response, next: NextFunction) {
+        try {
+            const stats = await this.rmaService.getStats();
+            res.json({ success: true, data: stats });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
      * GET /api/rmas/export
      * Export RMAs to CSV based on filters
      */
@@ -180,7 +193,7 @@ export class RmaController {
 
             res.json({
                 success: true,
-                data: { lastUpdateDate: updatedRma.lastUpdateDate },
+                data: updatedRma,
             });
         } catch (error) {
             next(error);

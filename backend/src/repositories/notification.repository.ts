@@ -1,6 +1,6 @@
-import { PrismaClient, Notification } from '@prisma/client';
+import { Notification } from '@prisma/client';
+import prisma from '../lib/prisma';
 
-const prisma = new PrismaClient();
 
 export class NotificationRepository {
     async findAll(limit: number = 50, offset: number = 0): Promise<Notification[]> {

@@ -48,6 +48,13 @@ export class RmaService {
     }
 
     /**
+     * B-2: Return aggregated dashboard stats without loading all RMA records
+     */
+    async getStats() {
+        return await this.rmaRepo.getStats();
+    }
+
+    /**
      * Export RMAs to CSV format based on filters
      */
     async exportRmasToCsv(filters: RmaFilters = {}): Promise<string> {
@@ -243,7 +250,8 @@ export class RmaService {
             lastUpdateDate: new Date().toISOString()
         });
 
-        return await this.rmaRepo.findById(rmaId);
+        // Return the updated cycle directly — no need for a second full findById round-trip (A-6)
+        return updatedCycle;
     }
 
     /**
