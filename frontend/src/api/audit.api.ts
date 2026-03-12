@@ -23,7 +23,7 @@ interface GetAuditLogsParams {
 
 export const auditApi = {
     getAll: async (params: GetAuditLogsParams = {}): Promise<GetAuditLogsResponse> => {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token') || localStorage.getItem('token');
 
         const queryParams = new URLSearchParams();
         if (params.page) queryParams.append('page', params.page.toString());
