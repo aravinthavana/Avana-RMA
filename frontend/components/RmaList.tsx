@@ -28,10 +28,10 @@ export const getStatusBadgeColor = (status: RmaStatus) => {
     case RmaStatus.PENDING: return 'bg-yellow-100 text-yellow-800 ring-yellow-600/20';
     case RmaStatus.RECEIVED: return 'bg-blue-100 text-blue-800 ring-blue-600/20';
     case RmaStatus.IN_REPAIR: return 'bg-indigo-100 text-indigo-800 ring-indigo-600/20';
-    case RmaStatus.REPAIRED: return 'bg-purple-100 text-purple-800 ring-purple-600/20';
-    case RmaStatus.SHIPPED: return 'bg-green-100 text-green-800 ring-green-600/20';
+    case RmaStatus.WAITING_APPROVAL: return 'bg-orange-100 text-orange-800 ring-orange-600/20';
+    case RmaStatus.PAYMENT_PROCESSING: return 'bg-purple-100 text-purple-800 ring-purple-600/20';
     case RmaStatus.CLOSED: return 'bg-slate-100 text-slate-800 ring-slate-600/20';
-    default: return 'bg-gray-100 text-gray-800 ring-gray-600/20';
+    default: return 'bg-teal-100 text-teal-800 ring-teal-600/20'; // Custom statuses
   }
 };
 

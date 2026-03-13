@@ -2,9 +2,10 @@ export enum RmaStatus {
   PENDING = 'Pending',
   RECEIVED = 'Received',
   IN_REPAIR = 'In Repair',
-  REPAIRED = 'Repaired',
-  SHIPPED = 'Shipped',
+  WAITING_APPROVAL = 'Waiting for Customer Approval',
+  PAYMENT_PROCESSING = 'Payment Under Process',
   CLOSED = 'Closed',
+  CUSTOM = 'Custom',
 }
 
 export interface StatusHistoryEvent {

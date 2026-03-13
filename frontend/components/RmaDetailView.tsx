@@ -17,9 +17,10 @@ const StatusBadge: React.FC<{ status: RmaStatus; date: string }> = ({ status, da
     [RmaStatus.PENDING]: { text: 'Pending', color: 'bg-slate-100 text-slate-800', icon: <ClockIcon className="w-4 h-4" /> },
     [RmaStatus.RECEIVED]: { text: 'Device Received', color: 'bg-blue-100 text-blue-800', icon: <EyeIcon className="w-4 h-4" /> },
     [RmaStatus.IN_REPAIR]: { text: 'In Repair', color: 'bg-yellow-100 text-yellow-800', icon: <PencilSquareIcon className="w-4 h-4" /> },
-    [RmaStatus.REPAIRED]: { text: 'Repaired', color: 'bg-green-100 text-green-800', icon: <PencilSquareIcon className="w-4 h-4" /> },
-    [RmaStatus.SHIPPED]: { text: 'Shipped', color: 'bg-purple-100 text-purple-800', icon: <PencilSquareIcon className="w-4 h-4" /> },
+    [RmaStatus.WAITING_APPROVAL]: { text: 'Waiting for Customer Approval', color: 'bg-orange-100 text-orange-800', icon: <PencilSquareIcon className="w-4 h-4" /> },
+    [RmaStatus.PAYMENT_PROCESSING]: { text: 'Payment Under Process', color: 'bg-purple-100 text-purple-800', icon: <PencilSquareIcon className="w-4 h-4" /> },
     [RmaStatus.CLOSED]: { text: 'Closed', color: 'bg-gray-100 text-gray-800', icon: <PencilSquareIcon className="w-4 h-4" /> },
+    [RmaStatus.CUSTOM]: { text: 'Custom', color: 'bg-teal-100 text-teal-800', icon: <PencilSquareIcon className="w-4 h-4" /> },
   };
 
   const { text, color, icon } = statusConfig[status] || statusConfig[RmaStatus.PENDING];

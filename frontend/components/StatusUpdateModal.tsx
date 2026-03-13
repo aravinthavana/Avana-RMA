@@ -2,75 +2,58 @@ import React, { useState, useEffect, useRef } from 'react';
 import { RmaStatus } from '../types';
 import { XMarkIcon } from './icons';
 
-/**
- * Props for the StatusUpdateModal component.
- */
 interface StatusUpdateModalProps {
-  currentStatus: RmaStatus; // The current status of the service cycle.
-  onClose: () => void; // Callback to close the modal.
-  onSave: (newStatus: RmaStatus, notes: string) => void; // Callback to save the status update.
+  currentStatus: RmaStatus;
+  onClose: () => void;
+  onSave: (newStatus: string, notes: string) => void;
 }
 
-/**
- * The data structure for the status update form.
- */
 interface FormData {
   newStatus: RmaStatus;
+  customStatus: string;
   notes: string;
 }
 
-/**
- * Shape of the validation errors object for the form.
- */
 interface Errors {
   notes?: string;
+  customStatus?: string;
 }
 
-/**
- * A modal form for updating the status of a service cycle and adding service notes.
- */
 const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({ currentStatus, onClose, onSave }) => {
-  // State for form data, initialized with the current status.
-  const [formData, setFormData] = useState<FormData>({ newStatus: currentStatus, notes: '' });
+  const [formData, setFormData] = useState<FormData>({
+    newStatus: currentStatus,
+    customStatus: '',
+    notes: ''
+  });
   const [errors, setErrors] = useState<Errors>({});
   const firstInputRef = useRef<HTMLSelectElement>(null);
 
-  // Service notes are only required if the user is moving the status to "CLOSED".
   const isNotesRequired = formData.newStatus === RmaStatus.CLOSED;
+  const isCustomStatus = formData.newStatus === RmaStatus.CUSTOM;
 
-  // Effect to auto-focus the first input field when the modal opens.
   useEffect(() => {
     firstInputRef.current?.focus();
   }, []);
 
-  /**
-   * Validates the form data.
-   * @returns An `Errors` object containing any validation messages.
-   */
   const validate = (): Errors => {
     const newErrors: Errors = {};
     if (isNotesRequired && !formData.notes.trim()) {
       newErrors.notes = 'Service notes are required to close a service ticket.';
     }
+    if (isCustomStatus && !formData.customStatus.trim()) {
+      newErrors.customStatus = 'Please enter a custom status.';
+    }
     return newErrors;
   }
 
-  /**
-   * Generic change handler for form inputs.
-   * Updates form state and clears any existing error for the field.
-   */
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLTextAreaElement | HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
-    if (id === 'notes' && errors.notes) {
-      setErrors(prev => ({ ...prev, notes: undefined }))
+    if (errors[id as keyof Errors]) {
+      setErrors(prev => ({ ...prev, [id]: undefined }));
     }
   };
 
-  /**
-   * Handles form submission.
-   * Validates the form and calls the onSave callback if successful.
-   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors = validate();
@@ -78,10 +61,12 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({ currentStatus, on
       setErrors(validationErrors);
       return;
     }
-    onSave(formData.newStatus, formData.notes);
+    // If Custom, pass the custom text. Otherwise pass the enum value string.
+    const statusToSave = isCustomStatus ? formData.customStatus.trim() : formData.newStatus;
+    onSave(statusToSave, formData.notes);
   };
 
-  // Defines the list of statuses available in the dropdown.
+  // Exclude CUSTOM from dropdown since we handle it specially below
   const availableStatuses = Object.values(RmaStatus);
 
   const inputStyles = "form-input";
@@ -115,6 +100,27 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({ currentStatus, on
               </select>
             </div>
           </div>
+
+          {isCustomStatus && (
+            <div>
+              <label htmlFor="customStatus" className={labelStyles}>
+                Custom Status <span className="text-red-500">*</span>
+              </label>
+              <div className="mt-2">
+                <input
+                  type="text"
+                  id="customStatus"
+                  value={formData.customStatus}
+                  onChange={handleChange}
+                  className={`${inputStyles} ${errors.customStatus ? errorInputStyles : ''}`}
+                  placeholder="e.g., Awaiting spare parts from vendor..."
+                  aria-invalid={!!errors.customStatus}
+                />
+              </div>
+              {errors.customStatus && <p className={errorTextStyles} role="alert">{errors.customStatus}</p>}
+            </div>
+          )}
+
           <div>
             <label htmlFor="notes" className={labelStyles}>Service Notes {isNotesRequired && <span className="text-red-500">*</span>}</label>
             <p className="text-xs text-slate-500">These notes will be added to the service history.</p>

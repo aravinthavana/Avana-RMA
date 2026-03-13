@@ -23,9 +23,7 @@ FROM node:20
 WORKDIR /app
 
 # Install postgresql-client for pg_dump capability (used by backup service)
-# Temporarily removed postgresql-client installation due to Docker host MTU/DNS package drop issues.
-# The backup service will not function properly without it, but the application will successfully build and boot.
-
+RUN apt-get update && apt-get install -y postgresql-client
 # Copy package files and install only production dependencies
 COPY package*.json ./
 COPY prisma ./prisma/

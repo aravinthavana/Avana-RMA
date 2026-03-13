@@ -292,8 +292,8 @@ const AddressSection = ({ rma }: { rma: Rma }) => (
   <View style={styles.addressSection} wrap={false}>
     <View style={styles.addressBlock}>
       <Text style={styles.addressTitle}>Return To:</Text>
-      <Text style={styles.addressText}>AVANA TECHNOLOGY SERVICES</Text>
-      <Text style={styles.addressText}>91, Ground Floor, Sundar Nagar 4th Avenue</Text>
+      <Text style={styles.addressText}>AVANA TECHNOLOGY SERVICES PVT. LTD.</Text>
+      <Text style={styles.addressText}>91, G Floor, Sundar Nagar 4th Avenue</Text>
       <Text style={styles.addressText}>Ekkaduthangal, Chennai</Text>
       <Text style={styles.addressText}>Tamil Nadu, 600032</Text>
       <Text style={styles.addressText}>India</Text>
@@ -372,9 +372,18 @@ export const ReturnAuthorizationDocument = ({ rma }: { rma: Rma }) => (
         </View>
       </View>
 
+      {rma.attachment && (
+        <View style={[styles.section, { marginTop: 8 }]} wrap={false}>
+          <Text style={styles.sectionHeader}>Attachment</Text>
+          <View style={{ padding: 8, borderWidth: 1, borderColor: '#000000' }}>
+            <Text style={{ fontSize: 9 }}>📎 {rma.attachment}</Text>
+          </View>
+        </View>
+      )}
+
       <View style={styles.footer}>
-        <Text>This is an official Return Merchandise Authorization from Avana Technology Services</Text>
-        <Text>For inquiries, contact us at support@avanamedical.com or call +91-XXXX-XXXXXX</Text>
+        <Text>This is an official Return Merchandise Authorization from Avana Technology Services Pvt. Ltd.</Text>
+        <Text>For inquiries, contact us at support@avanamedical.com</Text>
       </View>
     </Page>
   </Document>
@@ -470,8 +479,8 @@ export const ServiceReportDocument = ({ rma, device, cycle }: {
       </View>
 
       <View style={styles.footer}>
-        <Text>Service Report - Avana Technology Services | Confidential Document</Text>
-        <Text>Generated on {new Date().toLocaleDateString('en-GB')}</Text>
+        <Text>Service Report - Avana Technology Services Pvt. Ltd. | Confidential Document</Text>
+        <Text>For inquiries, contact: support@avanamedical.com | Generated on {new Date().toLocaleDateString('en-GB')}</Text>
       </View>
     </Page>
   </Document>

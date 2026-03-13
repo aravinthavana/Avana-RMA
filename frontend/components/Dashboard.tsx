@@ -27,7 +27,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNewRma }) => {
     const totalRmas = rmas.length;
     const pendingRmas = rmas.filter(r => r.serviceCycles?.some(c => c.status === RmaStatus.PENDING)).length;
     const inRepairRmas = rmas.filter(r => r.serviceCycles?.some(c => c.status === RmaStatus.IN_REPAIR)).length;
-    const completedRmas = rmas.filter(r => r.serviceCycles?.every(c => c.status === RmaStatus.CLOSED || c.status === RmaStatus.SHIPPED)).length;
+    const completedRmas = rmas.filter(r => r.serviceCycles?.every(c => c.status === RmaStatus.CLOSED)).length;
     const totalCustomers = customers.length;
 
     // Get recent RMAs (last 5)
@@ -137,12 +137,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onNewRma }) => {
                     <div className="space-y-2 sm:space-y-3">
                         {recentRmas.map((rma, index) => {
                             const latestStatus = rma.serviceCycles?.[rma.serviceCycles.length - 1]?.status || RmaStatus.PENDING;
-                            const statusColors = {
+                            const statusColors: Record<string, string> = {
                                 [RmaStatus.PENDING]: 'bg-yellow-100 text-yellow-800',
                                 [RmaStatus.RECEIVED]: 'bg-blue-100 text-blue-800',
                                 [RmaStatus.IN_REPAIR]: 'bg-orange-100 text-orange-800',
-                                [RmaStatus.REPAIRED]: 'bg-green-100 text-green-800',
-                                [RmaStatus.SHIPPED]: 'bg-purple-100 text-purple-800',
+                                [RmaStatus.WAITING_APPROVAL]: 'bg-orange-100 text-orange-800',
+                                [RmaStatus.PAYMENT_PROCESSING]: 'bg-purple-100 text-purple-800',
                                 [RmaStatus.CLOSED]: 'bg-gray-100 text-gray-800',
                             };
 

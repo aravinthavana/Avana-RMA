@@ -244,13 +244,12 @@ export class RmaRepository {
     }
 
     /**
-     * Generate a unique RMA ID (short 6-character alphanumeric)
+     * Generate a unique RMA ID (RMA followed by 8 random digits)
      */
     generateId(): string {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        // Use 6 random characters taken from a 30-byte random buffer to avoid Math.random() collisions
-        const randomPart = Array.from({ length: 6 }).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
-        return `RMA-${randomPart}`;
+        const chars = '0123456789';
+        const randomPart = Array.from({ length: 8 }).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+        return `RMA ${randomPart}`;
     }
 
     /**

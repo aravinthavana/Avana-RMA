@@ -601,7 +601,8 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
               </div>
               <div className="sm:col-span-2">
                 <label htmlFor="attachment" className={labelStyles}>Attachment Proof (optional)</label>
-                <input type="file" id="attachment" onChange={e => setAttachment(e.target.files ? e.target.files[0] : null)} className="mt-2 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100" />
+                <input type="file" id="attachment" onChange={e => setAttachment(e.target.files ? e.target.files[0] : null)} className="mt-2 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100" accept="image/*,.pdf,.doc,.docx" />
+                <p className="mt-1 text-xs text-slate-500">Accepted: images, PDF, Word documents. Maximum file size: <strong>5MB</strong>.</p>
               </div>
             </div>
           </section>

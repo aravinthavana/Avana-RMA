@@ -157,6 +157,13 @@ export class UserController {
             const { password, ...userWithoutPassword } = user;
             res.json({ success: true, data: userWithoutPassword, message: 'Password reset successfully' });
         } catch (error) {
+            // Validation errors from validatePassword() should be 400, not 500
+            if (error instanceof Error && (
+                error.message.includes('Password must') ||
+                error.message.includes('at least')
+            )) {
+                return res.status(400).json({ success: false, error: error.message });
+            }
             next(error);
         }
     };
