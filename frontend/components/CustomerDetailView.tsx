@@ -156,7 +156,7 @@ const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({ onNewRma }) => 
               <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} key={rma.id} onClick={() => navigate(`/rmas/${rma.id}`)} className="bg-white shadow-sm ring-1 ring-slate-200 rounded-xl p-4 cursor-pointer hover:bg-slate-50 hover:shadow-md transition-all duration-200">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-semibold text-primary-600">#{rma.id}</p>
+                    <p className="text-sm font-semibold text-primary-600">{rma.id}</p>
                     <p className="text-xs text-slate-500 mt-1">{rma.creationDate ? new Date(rma.creationDate).toLocaleDateString() : 'N/A'}</p>
                   </div>
                   <ChevronRightIcon className="w-5 h-5 text-slate-400" />
@@ -186,7 +186,7 @@ const CustomerDetailView: React.FC<CustomerDetailViewProps> = ({ onNewRma }) => 
 
         {/* Desktop Table View for RMAs */}
         <div className="hidden md:block bg-white/70 backdrop-blur-sm shadow-xl ring-1 ring-black/5 rounded-xl overflow-hidden">
-          <table className="min-w-full divide-y divide-slate-200/50"><thead className="bg-slate-50/50"><tr><th scope="col" className="py-4 pl-4 pr-3 text-left text-xs font-bold uppercase tracking-wider text-slate-500 sm:pl-6">RMA #</th><th scope="col" className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Device(s)</th><th scope="col" className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Status</th><th scope="col" className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Created Date</th><th scope="col" className="relative py-4 pl-3 pr-4 sm:pr-6"><span className="sr-only">View</span></th></tr></thead><tbody className="divide-y divide-slate-200 bg-white/50">{filteredRmas.map((rma) => {
+          <table className="min-w-full divide-y divide-slate-200/50"><thead className="bg-slate-50/50"><tr><th scope="col" className="py-4 pl-4 pr-3 text-left text-xs font-bold uppercase tracking-wider text-slate-500 sm:pl-6">RMA Number</th><th scope="col" className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Device(s)</th><th scope="col" className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Status</th><th scope="col" className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Created Date</th><th scope="col" className="relative py-4 pl-3 pr-4 sm:pr-6"><span className="sr-only">View</span></th></tr></thead><tbody className="divide-y divide-slate-200 bg-white/50">{filteredRmas.map((rma) => {
             if (!rma) return null;
             const uniqueStatuses = [...new Set((rma.serviceCycles || []).map(cycle => cycle.status))];
             const devices = rma.devices || [];

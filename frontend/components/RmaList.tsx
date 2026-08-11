@@ -255,7 +255,7 @@ const RmaList: React.FC<RmaListProps> = ({ onNewRma, onEditRma }) => {
         <table className="min-w-full divide-y divide-slate-200/50">
           <thead className="bg-slate-50/50">
             <tr>
-              <th scope="col" className="py-4 pl-4 pr-3 text-left text-xs font-bold uppercase tracking-wider text-slate-500 sm:pl-6">RMA #</th>
+              <th scope="col" className="py-4 pl-4 pr-3 text-left text-xs font-bold uppercase tracking-wider text-slate-500 sm:pl-6">RMA Number</th>
               <th scope="col" className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Customer</th>
               <th scope="col" className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Device(s)</th>
               <th scope="col" className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Status</th>
@@ -367,7 +367,7 @@ const RmaList: React.FC<RmaListProps> = ({ onNewRma, onEditRma }) => {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-primary-600 truncate">#{rma.id}</p>
+                    <p className="text-sm font-bold text-primary-600 truncate">{rma.id}</p>
                     <p className="text-xs text-slate-500 mt-0.5">{formatDate(rma.creationDate)}</p>
                   </div>
                   <div className="flex items-center gap-2 ml-2">

@@ -164,7 +164,7 @@ const AppContent: FC = () => {
       items.push({ label: 'RMAs', onClick: () => navigate('/rmas'), active: path === '/rmas' });
       const rmaId = path.split('/')[2];
       if (rmaId) {
-        items.push({ label: `RMA #${rmaId}`, active: true });
+        items.push({ label: `${rmaId}`, active: true });
       }
     } else if (path.startsWith('/customers')) {
       items.push({ label: 'Customers', onClick: () => navigate('/customers'), active: path === '/customers' });

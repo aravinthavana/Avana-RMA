@@ -249,7 +249,7 @@ export class RmaRepository {
     generateId(): string {
         const chars = '0123456789';
         const randomPart = Array.from({ length: 6 }).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
-        return `RMA ${randomPart}`;
+        return randomPart;
     }
 
     /**

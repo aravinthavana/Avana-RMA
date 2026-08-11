@@ -99,7 +99,7 @@ const NewCycleModal: React.FC<NewCycleModalProps> = ({ rma, onClose, onSave }) =
           </button>
         </header>
         <form onSubmit={handleSubmit} className="p-6 space-y-6" noValidate>
-          <p className="text-sm text-slate-600">Creating a ticket for #{rma.id}</p>
+          <p className="text-sm text-slate-600">Creating a ticket for {rma.id}</p>
           <div>
             <label htmlFor="selectedDeviceSn" className={labelStyles}>Device <span className="text-red-500">*</span></label>
             <select
