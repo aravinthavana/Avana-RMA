@@ -10,7 +10,7 @@ const MainDashboard: React.FC = () => {
         {
             id: 'rma',
             title: 'RMA Management',
-            description: 'Manage Return Merchandise Authorizations, track repair cycles, and view repair history.',
+            description: 'Manage Repair Material Authorizations, track repair cycles, and view repair history.',
             icon: WrenchScrewdriverIcon,
             path: '/rma-dashboard',
             color: 'bg-primary-500',

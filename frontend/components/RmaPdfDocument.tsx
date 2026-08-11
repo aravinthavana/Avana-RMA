@@ -382,7 +382,7 @@ export const ReturnAuthorizationDocument = ({ rma }: { rma: Rma }) => (
       )}
 
       <View style={styles.footer}>
-        <Text>This is an official Return Merchandise Authorization from Avana Technology Services Pvt. Ltd.</Text>
+        <Text>This is an official Repair Material Authorization from Avana Technology Services Pvt. Ltd.</Text>
         <Text>For inquiries, contact us at support@avanamedical.com</Text>
       </View>
     </Page>

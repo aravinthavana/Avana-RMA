@@ -244,11 +244,11 @@ export class RmaRepository {
     }
 
     /**
-     * Generate a unique RMA ID (RMA followed by 8 random digits)
+     * Generate a unique RMA ID (RMA followed by 6 random digits)
      */
     generateId(): string {
         const chars = '0123456789';
-        const randomPart = Array.from({ length: 8 }).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+        const randomPart = Array.from({ length: 6 }).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
         return `RMA ${randomPart}`;
     }
 

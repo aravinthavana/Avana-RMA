@@ -475,7 +475,7 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
         <header className="px-6 py-5 flex justify-between items-center border-b border-slate-200/60 shrink-0 bg-gradient-to-r from-primary-50/50 to-transparent">
           <div>
             <h2 id="rma-modal-title" className="text-2xl font-bold text-slate-900 font-display">{initialData ? 'Edit RMA' : 'Create New RMA'}</h2>
-            <p className="text-sm text-slate-500 mt-0.5">{initialData ? 'Update RMA details' : 'Register a new return merchandise authorization'}</p>
+            <p className="text-sm text-slate-500 mt-0.5">{initialData ? 'Update RMA details' : 'Register a new repair material authorization'}</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all" aria-label="Close modal"><XMarkIcon className="w-6 h-6" /></button>
         </header>

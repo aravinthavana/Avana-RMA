@@ -1,5 +1,5 @@
 {
   "name": "RMA Management Portal for Medical Devices",
-  "description": "A simple portal to create, track, and manage Return Merchandise Authorizations (RMAs) for medical devices. Features include filtering, status tracking, and options to print or export RMAs as PDFs.",
+  "description": "A simple portal to create, track, and manage Repair Material Authorizations (RMAs) for medical devices. Features include filtering, status tracking, and options to print or export RMAs as PDFs.",
   "requestFramePermissions": []
 }

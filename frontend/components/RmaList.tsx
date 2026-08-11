@@ -146,7 +146,7 @@ const RmaList: React.FC<RmaListProps> = ({ onNewRma, onEditRma }) => {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 font-display">RMAs</h1>
-          <p className="mt-2 text-sm text-slate-600">Manage your Return Merchandise Authorizations.</p>
+          <p className="mt-2 text-sm text-slate-600">Manage your Repair Material Authorizations.</p>
         </div>
         <div className="shrink-0 flex flex-col sm:flex-row items-center gap-3">
           <motion.button
