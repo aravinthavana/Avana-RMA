@@ -72,6 +72,7 @@ model ServiceCycle {
   
   rma                 Rma               @relation(fields: [rmaId], references: [id], onDelete: Cascade)
   history             ServiceHistory[]
+  testReport          TestReport?
   
   @@index([rmaId], name: "idx_service_cycles_rmaId")
   @@index([deviceSerialNumber], name: "idx_service_cycles_deviceSerialNumber")
@@ -91,12 +92,35 @@ model ServiceHistory {
   @@map("service_history")
 }
 
+model TestReport {
+  id                String        @id @default(uuid())
+  serviceCycleId    Int           @unique
+  testDate          DateTime      @default(now())
+  deviceType        String
+  mainsConnection   String
+  manufacturer      String
+  performedBy       String
+  testerName        String
+  kindOfTest        String
+  equipmentUsed     Json          // Array of { id: string, name: string }
+  testSteps         Json          // Array of { stepNo: number, name: string, criterion: string, unit: string, result: string, isOk: boolean }
+  overallAssessment String?
+  overallResult     String        // e.g. "Passed" or "Failed"
+  copyPrintedBy     String?
+  reportNo          String?
+  
+  serviceCycle      ServiceCycle  @relation(fields: [serviceCycleId], references: [id], onDelete: Cascade)
+
+  @@index([serviceCycleId], name: "idx_test_reports_serviceCycleId")
+  @@map("test_reports")
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password         String   // Hashed
   name             String
-  role             String   @default("ADMIN") // "ADMIN", "USER"
+  role             String   @default("ADMIN") // "ADMIN", "MANAGER", "COORDINATOR", "SERVICE_ENGINEER"
   isActive         Boolean  @default(true)
   resetToken       String?
   resetTokenExpiry DateTime?

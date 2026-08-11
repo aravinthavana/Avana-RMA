@@ -7,6 +7,8 @@ import notificationRoutes from './notification.routes';
 import auditRoutes from './audit.routes';
 import adminRoutes from './admin.routes';
 
+import testReportRoutes from './test-report.routes';
+
 const router = Router();
 
 // Mount route modules
@@ -17,6 +19,7 @@ router.use('/users', userRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/audit', auditRoutes);
 router.use('/admin', adminRoutes);
+router.use('/test-reports', testReportRoutes);
 
 // Health check endpoint
 router.get('/health', (req, res) => {

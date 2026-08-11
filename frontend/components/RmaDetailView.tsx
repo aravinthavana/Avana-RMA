@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { RmaStatus, ServiceCycle, StatusHistoryEvent } from '../types';
 import StatusUpdateModal from './StatusUpdateModal';
 import { RmaPreviewModal } from './RmaPreviewModal';
-import NewCycleModal from './NewCycleModal'; // Import NewCycleModal
+import NewCycleModal from './NewCycleModal';
+import TestReportModal from './TestReportModal';
+import TestReportPdfDocument from './TestReportPdfDocument';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 import { ArrowLeftIcon, PencilSquareIcon, PlusIcon, EyeIcon, ClockIcon } from './icons';
-import { useRmaContext } from '../src/context/RmaContext'; // Import Context
+import { useRmaContext } from '../src/context/RmaContext';
 import { motion } from 'framer-motion';
 import { getStatusBadgeColor } from './RmaList';
+import { testReportsApi, TestReport } from '../src/api/test-reports.api';
 
 /**
  * A detailed status badge component that shows the current status and the date of the last update.
@@ -104,10 +108,28 @@ const RmaDetailView: React.FC = () => {
   const rma = rmas.find(r => r.id === id);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isNewCycleModalOpen, setIsNewCycleModalOpen] = useState(false); // Local State for NewCycleModal
+  const [isNewCycleModalOpen, setIsNewCycleModalOpen] = useState(false);
   const [isHistoryVisible, setIsHistoryVisible] = useState<Record<string, boolean>>({});
   const [cycleToUpdate, setCycleToUpdate] = useState<ServiceCycle | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  // Test Report state
+  const [testReports, setTestReports] = useState<Record<number, TestReport | null>>({});
+  const [testReportModalCycle, setTestReportModalCycle] = useState<ServiceCycle | null>(null);
+
+  // Fetch test reports for each service cycle
+  useEffect(() => {
+    if (!rma) return;
+    rma.serviceCycles.forEach(async (cycle: any) => {
+      if (!cycle.id) return;
+      try {
+        const res = await testReportsApi.getByServiceCycleId(cycle.id);
+        setTestReports(prev => ({ ...prev, [cycle.id]: (res as any).data || null }));
+      } catch {
+        setTestReports(prev => ({ ...prev, [cycle.id]: null }));
+      }
+    });
+  }, [rma?.id]);
 
   if (!rma) {
     return (
@@ -247,12 +269,43 @@ const RmaDetailView: React.FC = () => {
                         </button>
                       </div>
                     </div>
-                    <div className="mt-2">
+                    <div className="mt-3 flex flex-wrap items-center gap-3">
                       <button onClick={() => toggleHistory(cycle.creationDate)} className="text-sm text-primary-600 hover:text-primary-800 font-medium">
                         {isHistoryVisible[cycle.creationDate] ? 'Hide History' : 'Show History'}
                       </button>
-                      {isHistoryVisible[cycle.creationDate] && <HistoryLog history={cycle.history} />}
+                      {/* Test Report buttons */}
+                      {(cycle as any).id && (
+                        <>
+                          <span className="text-slate-300">|</span>
+                          <button
+                            onClick={() => setTestReportModalCycle(cycle)}
+                            className={`text-sm font-medium px-3 py-1 rounded-md border transition-colors ${
+                              testReports[(cycle as any).id]
+                                ? 'border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100'
+                                : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-100'
+                            }`}
+                          >
+                            {testReports[(cycle as any).id] ? '📋 View / Edit Test Report' : '+ Create Test Report'}
+                          </button>
+                          {testReports[(cycle as any).id] && (
+                            <PDFDownloadLink
+                              document={
+                                <TestReportPdfDocument
+                                  report={testReports[(cycle as any).id]!}
+                                  deviceSerialNumber={cycle.deviceSerialNumber}
+                                  rmaId={rma.id}
+                                />
+                              }
+                              fileName={`TestReport-${rma.id}-${cycle.deviceSerialNumber}.pdf`}
+                              className="text-sm font-medium px-3 py-1 rounded-md border border-green-200 text-green-700 bg-green-50 hover:bg-green-100 transition-colors"
+                            >
+                              {({ loading }) => loading ? 'Preparing...' : '⬇ Download PDF'}
+                            </PDFDownloadLink>
+                          )}
+                        </>
+                      )}
                     </div>
+                    {isHistoryVisible[cycle.creationDate] && <HistoryLog history={cycle.history} />}
                   </div>
                 ))}
                 {(!cyclesByDevice[device.serialNumber] || cyclesByDevice[device.serialNumber].length === 0) && (
@@ -283,6 +336,19 @@ const RmaDetailView: React.FC = () => {
           rma={rma}
           onSave={handleSaveNewCycle}
           onClose={() => setIsNewCycleModalOpen(false)}
+        />
+      )}
+      {testReportModalCycle && (
+        <TestReportModal
+          serviceCycleId={(testReportModalCycle as any).id}
+          deviceSerialNumber={testReportModalCycle.deviceSerialNumber}
+          rmaId={rma.id}
+          existingReport={testReports[(testReportModalCycle as any).id] ?? null}
+          onClose={() => setTestReportModalCycle(null)}
+          onSaved={(saved) => {
+            setTestReports(prev => ({ ...prev, [(testReportModalCycle as any).id]: saved }));
+            setTestReportModalCycle(null);
+          }}
         />
       )}
     </>

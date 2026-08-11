@@ -41,7 +41,7 @@ const UserManagement: React.FC = () => {
         name: '',
         email: '',
         password: '',
-        role: 'USER',
+        role: 'SERVICE_ENGINEER',
         isActive: true
     });
 
@@ -69,7 +69,7 @@ const UserManagement: React.FC = () => {
             toast.success('User created successfully');
             setIsModalOpen(false);
             fetchUsers(); // Refresh list
-            setFormData({ name: '', email: '', password: '', role: 'USER', isActive: true });
+            setFormData({ name: '', email: '', password: '', role: 'SERVICE_ENGINEER', isActive: true });
         } catch (error) {
             console.error('Create user error:', error);
             toast.error('Failed to create user');
@@ -148,7 +148,12 @@ const UserManagement: React.FC = () => {
                                 </td>
                                 <td className="px-6 py-4 text-slate-600">{user.email}</td>
                                 <td className="px-6 py-4">
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                        ${user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' :
+                                            user.role === 'MANAGER' ? 'bg-indigo-100 text-indigo-800' :
+                                            user.role === 'COORDINATOR' ? 'bg-amber-100 text-amber-800' :
+                                            user.role === 'SERVICE_ENGINEER' ? 'bg-blue-100 text-blue-800' :
+                                            'bg-slate-100 text-slate-800'
                                         }`}>
                                         {user.role}
                                     </span>
@@ -246,8 +251,10 @@ const UserManagement: React.FC = () => {
                                     value={formData.role}
                                     onChange={e => setFormData({ ...formData, role: e.target.value })}
                                 >
-                                    <option value="USER">USER</option>
-                                    <option value="ADMIN">ADMIN</option>
+                                    <option value="SERVICE_ENGINEER">Service Engineer</option>
+                                    <option value="COORDINATOR">Coordinator</option>
+                                    <option value="MANAGER">Manager</option>
+                                    <option value="ADMIN">Admin</option>
                                 </select>
                             </div>
                             <div className="pt-4 flex justify-end gap-3">
