@@ -48,8 +48,8 @@ const ResetPassword: React.FC = () => {
     const handleOpenEmail = () => {
         if (!successData) return;
 
-        const subject = 'Your Password Has Been Reset - Avana RMA';
-        const body = `Hello ${successData.name},\n\nYour password for the Avana RMA system has been successfully reset by the administrator.\n\nYour new password is: ${password}\n\nPlease login and change it immediately for security purposes.\n\nLogin URL: ${window.location.origin}/login\n\nBest regards,\nAvana Administration`;
+        const subject = 'Your Password Has Been Reset - Avana Service Portal';
+        const body = `Hello ${successData.name},\n\nYour password for the Avana Service Portal has been successfully reset by the administrator.\n\nYour new password is: ${password}\n\nPlease login and change it immediately for security purposes.\n\nLogin URL: ${window.location.origin}/login\n\nBest regards,\nAvana Administration`;
 
         window.location.href = `mailto:${successData.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     };

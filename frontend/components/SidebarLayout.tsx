@@ -63,7 +63,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeVi
                                     <div className="absolute inset-0 bg-gradient-to-tr from-primary-500 to-indigo-500 rounded-lg blur opacity-70"></div>
                                     <img src="https://avanamedical.com/wp-content/themes/avana/assets/images/logo.png" alt="Logo" className="relative h-full w-full object-contain" />
                                 </div>
-                                <span className="font-display font-bold text-xl text-slate-900">Avana RMA</span>
+                                <span className="font-display font-bold text-xl text-slate-900">Avana Service Portal</span>
                             </div>
                             <button onClick={() => setIsMobileMenuOpen(false)} className="text-slate-500 hover:text-slate-700">
                                 <XMarkIcon className="w-6 h-6" />
@@ -142,7 +142,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeVi
                             exit={{ opacity: 0 }}
                             className="font-display font-bold text-xl text-slate-900 tracking-tight whitespace-nowrap overflow-hidden"
                         >
-                            Avana RMA
+                            Avana Service Portal
                         </motion.span>
                     )}
                 </div>
@@ -196,7 +196,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeVi
                         <span className="sr-only">Open sidebar</span>
                         <Bars3Icon className="h-6 w-6" />
                     </button>
-                    <div className="flex-1 text-sm font-semibold leading-6 text-slate-900 font-display">Avana RMA</div>
+                    <div className="flex-1 text-sm font-semibold leading-6 text-slate-900 font-display">Avana Service Portal</div>
                     {user?.role === 'ADMIN' && <NotificationBell />}
                     <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
                         {user?.name?.charAt(0) || 'U'}

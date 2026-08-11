@@ -14,6 +14,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { SidebarLayout } from './components/SidebarLayout';
 import { Breadcrumbs, BreadcrumbItem } from './components/Breadcrumbs';
 import Dashboard from './components/Dashboard';
+import MainDashboard from './components/MainDashboard';
 import UserManagement from './src/pages/UserManagement';
 import AuditLogsPage from './src/pages/AuditLogsPage';
 import ForgotPassword from './src/pages/ForgotPassword';
@@ -151,12 +152,14 @@ const AppContent: FC = () => {
     const items: BreadcrumbItem[] = [];
     const path = location.pathname;
 
-    if (path !== '/' && path !== '/dashboard') {
+    if (path !== '/') {
       items.push({ label: 'Home', onClick: () => navigate('/'), active: false });
     }
 
-    if (path === '/' || path === '/dashboard') {
-      items.push({ label: 'Dashboard', active: true });
+    if (path === '/') {
+      items.push({ label: 'Service Portal', active: true });
+    } else if (path === '/rma-dashboard' || path === '/dashboard') {
+      items.push({ label: 'RMA Dashboard', active: true });
     } else if (path.startsWith('/rmas')) {
       items.push({ label: 'RMAs', onClick: () => navigate('/rmas'), active: path === '/rmas' });
       const rmaId = path.split('/')[2];
@@ -181,7 +184,7 @@ const AppContent: FC = () => {
   }
 
   const getActiveView = (): 'dashboard' | 'rma' | 'customer' | 'users' | 'logs' | 'profile' => {
-    if (location.pathname === '/' || location.pathname === '/dashboard') return 'dashboard';
+    if (location.pathname === '/' || location.pathname === '/rma-dashboard' || location.pathname === '/dashboard') return 'dashboard';
     if (location.pathname.includes('rmas')) return 'rma';
     if (location.pathname.includes('customers')) return 'customer';
     if (location.pathname.includes('users')) return 'users';
@@ -212,6 +215,9 @@ const AppContent: FC = () => {
 
               <Routes>
                 <Route path="/" element={
+                  <MainDashboard />
+                } />
+                <Route path="/rma-dashboard" element={
                   <Dashboard onNewRma={openNewRmaModal} />
                 } />
                 <Route path="/rmas" element={
