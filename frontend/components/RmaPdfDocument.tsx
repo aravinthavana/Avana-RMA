@@ -197,7 +197,7 @@ const ModernHeader = ({ rma, documentType, pageNumber, totalPages }: {
 }) => (
   <View style={styles.header}>
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-      <Image src="/avana-logo.png" style={{ width: 140, height: 45, objectFit: 'contain' }} />
+      <Image src="/avana-logo.png" style={{ height: 50 }} />
       <View>
         <Text style={styles.companyName}>AVANA TECHNOLOGY SERVICES</Text>
         <Text style={styles.companySubtext}>Medical Device Service & Repair</Text>
