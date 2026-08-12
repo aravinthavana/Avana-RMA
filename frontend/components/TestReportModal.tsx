@@ -117,6 +117,7 @@ const TestReportModal: React.FC<Props> = ({
         try {
             const payload: CreateTestReportData = {
                 ...form,
+                testerName: existingReport ? form.testerName : (user?.name || form.testerName),
                 testDate: new Date(form.testDate).toISOString(),
                 serviceCycleId,
                 equipmentUsed: equipment.filter(e => e.name.trim() !== ''),
@@ -204,8 +205,10 @@ const TestReportModal: React.FC<Props> = ({
                                     <input className={inputClass} required value={form.performedBy} onChange={e => setForm({ ...form, performedBy: e.target.value })} placeholder="Engineer name or dept." />
                                 </div>
                                 <div>
-                                    <label className={labelClass}>Tester Name *</label>
-                                    <input className={inputClass} required value={form.testerName} onChange={e => setForm({ ...form, testerName: e.target.value })} placeholder="Name of tester" />
+                                    <label className={labelClass}>Tester Name</label>
+                                    <div className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 cursor-not-allowed">
+                                        {existingReport ? form.testerName : (user?.name || 'Loading...')}
+                                    </div>
                                 </div>
                             </div>
                         </section>
