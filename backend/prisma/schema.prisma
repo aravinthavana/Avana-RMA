@@ -161,6 +161,7 @@ model AuditLog {
 model Article {
   id        String   @id @default(uuid())
   articleNo String   @unique
+  name      String?
   createdAt DateTime @default(now())
 
   @@map("articles")

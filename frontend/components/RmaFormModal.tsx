@@ -115,13 +115,40 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
   const [hospital, setHospital] = useState(initialData?.customer.name || '');
 
   // Articles State
-  const [articles, setArticles] = useState<{ id: string, articleNo: string }[]>([]);
+  const [articles, setArticles] = useState<{ id: string, articleNo: string, name: string | null }[]>([]);
+
+  // New Article Modal State
+  const [showNewArticleModal, setShowNewArticleModal] = useState(false);
+  const [newArticleData, setNewArticleData] = useState({ articleNo: '', name: '' });
+  const [activeDeviceIndexForNewArticle, setActiveDeviceIndexForNewArticle] = useState<number | null>(null);
+  const [isSavingNewArticle, setIsSavingNewArticle] = useState(false);
+
+  const handleSaveNewArticle = async () => {
+    if (!newArticleData.articleNo) return;
+    setIsSavingNewArticle(true);
+    try {
+      const res = await apiClient.post('/api/articles', newArticleData);
+      const savedArticle = (res as any).data;
+      setArticles(prev => [...prev, savedArticle]);
+      if (activeDeviceIndexForNewArticle !== null) {
+        handleDeviceChange(activeDeviceIndexForNewArticle, 'articleNumber', savedArticle.articleNo);
+      }
+      setShowNewArticleModal(false);
+      setNewArticleData({ articleNo: '', name: '' });
+      setActiveDeviceIndexForNewArticle(null);
+    } catch (error) {
+      console.error('Failed to save article', error);
+      alert('Failed to save article');
+    } finally {
+      setIsSavingNewArticle(false);
+    }
+  };
 
   // --- Effects ---
 
   useEffect(() => {
     if (isOpen) {
-      apiClient.get<{ id: string, articleNo: string }[]>('/api/articles')
+      apiClient.get<{ id: string, articleNo: string, name: string | null }[]>('/api/articles')
         .then(res => {
           if (res.data) setArticles(res.data as any);
         })
@@ -419,11 +446,14 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
 
     const rmaDevices: Device[] = formData.devices.map(d => ({ articleNumber: d.articleNumber, serialNumber: d.serialNumber, quantity: d.quantity }));
 
-    // Register new articles dynamically
+    // Register new articles dynamically (removed since handled manually)
+    // Try to catch any ad-hoc articles if they still somehow bypassed the select
     try {
       const uniqueArticles = Array.from(new Set(rmaDevices.map(d => d.articleNumber).filter(Boolean)));
       for (const articleNo of uniqueArticles) {
-        await apiClient.post('/api/articles', { articleNo }).catch(console.error);
+        if (!articles.find(a => a.articleNo === articleNo)) {
+           await apiClient.post('/api/articles', { articleNo }).catch(console.error);
+        }
       }
     } catch (e) {
       console.error('Failed to auto-register articles:', e);
@@ -555,7 +585,23 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
                   <label htmlFor={`articleNumber-${index}`} className={labelStyles}>Article Number</label>
-                  <input type="text" list="articles-list" id={`articleNumber-${index}`} value={device.articleNumber} onChange={e => handleDeviceChange(index, 'articleNumber', e.target.value)} className={`mt-2 ${getInputStyles(false)}`} />
+                  <select
+                    id={`articleNumber-${index}`}
+                    value={device.articleNumber}
+                    onChange={e => {
+                      if (e.target.value === 'ADD_NEW') {
+                        setActiveDeviceIndexForNewArticle(index);
+                        setShowNewArticleModal(true);
+                      } else {
+                        handleDeviceChange(index, 'articleNumber', e.target.value);
+                      }
+                    }}
+                    className={`mt-2 ${getInputStyles(false)}`}
+                  >
+                    <option value="" disabled>Select Article No</option>
+                    {articles.map(a => <option key={a.id} value={a.articleNo}>{a.articleNo}</option>)}
+                    <option value="ADD_NEW">+ Add New Article</option>
+                  </select>
                 </div>
                 <div>
                   <label htmlFor={`serialNumber-${index}`} className={labelStyles}>Serial / Lot Number <span className="text-red-500">*</span></label>
@@ -633,11 +679,6 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
 
           {/* Actions */}
           <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3 bg-slate-50 flex-shrink-0">
-            <datalist id="articles-list">
-              {articles.map(a => (
-                <option key={a.id} value={a.articleNo} />
-              ))}
-            </datalist>
             <button type="button" onClick={onClose} className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 hover:ring-slate-400 transition-all">Cancel</button>
             <button type="submit" disabled={!isFormValid} className="rounded-lg bg-gradient-to-r from-primary-600 to-primary-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 hover:from-primary-500 hover:to-primary-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:from-slate-400 disabled:to-slate-400 disabled:shadow-none disabled:cursor-not-allowed transition-all">
               {initialData ? 'Save Changes' : 'Create RMA'}
@@ -645,6 +686,31 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
           </div>
         </form>
       </div>
+      
+      {/* New Article Modal Overlay */}
+      {showNewArticleModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[60]" onClick={() => setShowNewArticleModal(false)}>
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-medium text-slate-900 mb-4">Add New Article</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Article Number <span className="text-red-500">*</span></label>
+                <input type="text" value={newArticleData.articleNo} onChange={e => setNewArticleData(p => ({...p, articleNo: e.target.value}))} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" placeholder="e.g. AR-8330F" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Article Name</label>
+                <input type="text" value={newArticleData.name} onChange={e => setNewArticleData(p => ({...p, name: e.target.value}))} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" placeholder="e.g. Shaver Handpiece Footswitch Control" />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button type="button" onClick={() => setShowNewArticleModal(false)} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50">Cancel</button>
+              <button type="button" onClick={handleSaveNewArticle} disabled={!newArticleData.articleNo || isSavingNewArticle} className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50">
+                {isSavingNewArticle ? 'Saving...' : 'Save Article'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

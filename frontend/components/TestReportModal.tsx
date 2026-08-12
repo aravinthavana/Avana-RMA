@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { testReportsApi, TestReport, TestEquipment, TestStep, CreateTestReportData } from '../src/api/test-reports.api';
+import { apiClient } from '../src/api/client';
 import toast from 'react-hot-toast';
 import { useAuth } from '../src/context/AuthContext';
 
@@ -72,10 +73,25 @@ const TestReportModal: React.FC<Props> = ({
         overallAssessment: '',
         overallResult: 'Passed',
         copyPrintedBy: '',
-        reportNo: '',
+        reportNo: 'SH-002',
     });
     const [equipment, setEquipment] = useState<TestEquipment[]>(defaultEquipment);
     const [steps, setSteps] = useState<TestStep[]>(defaultSteps);
+
+    useEffect(() => {
+        if (!existingReport && initialDeviceType) {
+            // Attempt to fetch article name to combine with articleNo
+            apiClient.get<{ id: string, articleNo: string, name: string | null }[]>('/api/articles')
+                .then(res => {
+                    const articles = res.data || [];
+                    const found = (articles as any[]).find(a => a.articleNo === initialDeviceType);
+                    if (found && found.name) {
+                        setForm(f => ({ ...f, deviceType: `${initialDeviceType} - ${found.name}` }));
+                    }
+                })
+                .catch(err => console.error('Failed to fetch articles:', err));
+        }
+    }, [initialDeviceType, existingReport]);
 
     useEffect(() => {
         if (existingReport) {
@@ -183,8 +199,8 @@ const TestReportModal: React.FC<Props> = ({
                             </h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <div>
-                                    <label className={labelClass}>Report No.</label>
-                                    <input className={inputClass} value={form.reportNo} onChange={e => setForm({ ...form, reportNo: e.target.value })} placeholder="e.g. TR-001" />
+                                    <label className={labelClass}>Doc Ref No:</label>
+                                    <input className={inputClass} value={form.reportNo} onChange={e => setForm({ ...form, reportNo: e.target.value })} placeholder="e.g. SH-002" />
                                 </div>
                                 <div>
                                     <label className={labelClass}>Test Date *</label>

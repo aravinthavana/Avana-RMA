@@ -257,73 +257,70 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                 <View style={styles.header}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                         <Image src="/avana-logo.png" style={{ height: 50 }} />
-                        <View>
-                            <Text style={styles.companyName}>AVANA TECHNOLOGY SERVICES</Text>
-                            <Text style={styles.companySubtext}>Medical Device Service & Repair</Text>
-                            <Text style={styles.companySubtext}>www.avanamedical.com | support@avanamedical.com</Text>
-                        </View>
                     </View>
                     <View>
                         <Text style={styles.reportTitle}>TEST REPORT</Text>
                         <Text style={styles.reportNo}>
-                            {report.reportNo ? `Report No: ${report.reportNo}` : ''}
+                            {report.reportNo ? `Doc Ref No: ${report.reportNo}` : 'Doc Ref No: SH-002'}
                         </Text>
                         <Text style={styles.reportNo}>Date: {formatDate(report.testDate)}</Text>
-                        <Text style={styles.reportNo}>RMA: {rmaId}</Text>
                     </View>
                 </View>
 
-                {/* ---- DEVICE INFORMATION ---- */}
-                <View style={styles.sectionHeader}><Text>Device & Test Information</Text></View>
-                <View style={styles.infoGrid}>
-                    <View style={styles.infoCell}>
-                        <Text style={styles.infoLabel}>Device Type</Text>
-                        <Text style={styles.infoValue}>{report.deviceType}</Text>
+                {/* ---- DEVICE DATA ---- */}
+                <View style={[styles.infoGrid, { marginBottom: 12, flexDirection: 'column' }]}>
+                    <View style={[styles.sectionHeader, { marginTop: 0, marginBottom: 0, padding: '4 8' }]}><Text>Device Data</Text></View>
+                    <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: '#d1d5db' }}>
+                         <View style={{ width: '50%', padding: '4 7', borderRightWidth: 1, borderColor: '#d1d5db' }}>
+                              <Text style={styles.infoLabel}>Device Type/Name</Text>
+                              <Text style={styles.infoValue}>{report.deviceType}</Text>
+                         </View>
+                         <View style={{ width: '50%', padding: '4 7' }}>
+                              <Text style={styles.infoLabel}>Serial No:</Text>
+                              <Text style={styles.infoValue}>{deviceSerialNumber}</Text>
+                         </View>
                     </View>
-                    <View style={styles.infoCell}>
-                        <Text style={styles.infoLabel}>Serial Number</Text>
-                        <Text style={styles.infoValue}>{deviceSerialNumber}</Text>
-                    </View>
-                    <View style={[styles.infoCell, { borderRightWidth: 0 }]}>
-                        <Text style={styles.infoLabel}>Mains Connection</Text>
-                        <Text style={styles.infoValue}>{report.mainsConnection}</Text>
-                    </View>
-                    <View style={styles.infoCell}>
-                        <Text style={styles.infoLabel}>Kind of Test</Text>
-                        <Text style={styles.infoValue}>{report.kindOfTest}</Text>
-                    </View>
-                    <View style={[styles.infoCell, { borderRightWidth: 0 }]}>
-                        <Text style={styles.infoLabel}>Test Date</Text>
-                        <Text style={styles.infoValue}>{formatDate(report.testDate)}</Text>
-                    </View>
-                    <View style={styles.infoCellHalf}>
-                        <Text style={styles.infoLabel}>Performed By</Text>
-                        <Text style={styles.infoValue}>{report.performedBy}</Text>
-                    </View>
-                    <View style={[styles.infoCellHalf, { borderRightWidth: 0 }]}>
-                        <Text style={styles.infoLabel}>Tester</Text>
-                        <Text style={styles.infoValue}>{report.testerName}</Text>
+                    <View style={{ padding: '4 7' }}>
+                         <Text style={styles.infoLabel}>Mains Connection:</Text>
+                         <Text style={styles.infoValue}>{report.mainsConnection}</Text>
                     </View>
                 </View>
 
-                {/* ---- EQUIPMENT USED ---- */}
-                {equipment.length > 0 && (
-                    <>
-                        <View style={styles.sectionHeader}><Text>Test Equipment Used</Text></View>
-                        <View style={{ borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 3 }}>
-                            <View style={styles.tableHeader}>
-                                <Text style={[styles.tableHeaderCell, { width: '30%' }]}>Equipment ID / S/N</Text>
-                                <Text style={[styles.tableHeaderCell, { width: '70%' }]}>Equipment Name / Description</Text>
-                            </View>
-                            {equipment.map((eq, idx) => (
-                                <View key={idx} style={[styles.tableRow, idx % 2 === 1 ? styles.tableRowEven : {}]}>
-                                    <Text style={[styles.tableCell, { width: '30%' }]}>{eq.id || '-'}</Text>
-                                    <Text style={[styles.tableCell, { width: '70%' }]}>{eq.name}</Text>
-                                </View>
-                            ))}
-                        </View>
-                    </>
-                )}
+                {/* ---- TEST DATA & EQUIPMENT ---- */}
+                <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
+                     {/* Test Data */}
+                     <View style={{ flex: 1, borderWidth: 1, borderColor: '#d1d5db', borderRadius: 3 }}>
+                          <View style={[styles.sectionHeader, { marginTop: 0, marginBottom: 0, padding: '4 8' }]}><Text>Test Data</Text></View>
+                          <View style={{ borderBottomWidth: 1, borderColor: '#d1d5db', padding: '4 7' }}>
+                               <Text style={styles.infoLabel}>Performed by</Text>
+                               <Text style={styles.infoValue}>{report.performedBy}</Text>
+                          </View>
+                          <View style={{ borderBottomWidth: 1, borderColor: '#d1d5db', padding: '4 7' }}>
+                               <Text style={styles.infoLabel}>Tester Name</Text>
+                               <Text style={styles.infoValue}>{report.testerName}</Text>
+                          </View>
+                          <View style={{ padding: '4 7' }}>
+                               <Text style={styles.infoLabel}>Kind of Test</Text>
+                               <Text style={styles.infoValue}>{report.kindOfTest}</Text>
+                          </View>
+                     </View>
+
+                     {/* Test Equipment used */}
+                     <View style={{ flex: 1, borderWidth: 1, borderColor: '#d1d5db', borderRadius: 3 }}>
+                          <View style={[styles.sectionHeader, { marginTop: 0, marginBottom: 0, padding: '4 8' }]}><Text>Test Equipment used</Text></View>
+                          {equipment.map((eq, idx) => (
+                              <View key={idx} style={{ borderBottomWidth: idx === equipment.length - 1 ? 0 : 1, borderColor: '#d1d5db', padding: '4 7' }}>
+                                   <Text style={styles.infoLabel}>Test Equipment ID:</Text>
+                                   <Text style={styles.infoValue}>{eq.id || '-'} / {eq.name}</Text>
+                              </View>
+                          ))}
+                          {equipment.length === 0 && (
+                               <View style={{ padding: '4 7' }}>
+                                   <Text style={styles.infoLabel}>No equipment recorded.</Text>
+                               </View>
+                          )}
+                     </View>
+                </View>
 
                 {/* ---- TEST RESULTS ---- */}
                 <View style={styles.sectionHeader}><Text>Test Results</Text></View>
@@ -388,9 +385,14 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
 
                 {/* ---- FOOTER ---- */}
                 <View style={styles.footer} fixed>
-                    <Text style={styles.footerText}>
-                        Avana Technology Services Pvt. Ltd. | Confidential Test Document
-                    </Text>
+                    <View>
+                        <Text style={styles.footerText}>
+                            www.avanamedical.com | support@avanamedical.com
+                        </Text>
+                        <Text style={styles.footerText}>
+                            Avana Technology Services Pvt. Ltd. | Confidential Test Document
+                        </Text>
+                    </View>
                     <Text style={styles.footerText}>
                         Generated: {new Date().toLocaleDateString('en-GB')} | RMA: {rmaId} | S/N: {deviceSerialNumber}
                     </Text>

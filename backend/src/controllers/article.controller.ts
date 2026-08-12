@@ -18,21 +18,16 @@ export const articleController = {
   // Create a new article if it doesn't exist
   async createArticle(req: Request, res: Response) {
     try {
-      const { articleNo } = req.body;
+      const { articleNo, name } = req.body;
       if (!articleNo || typeof articleNo !== 'string') {
         return res.status(400).json({ success: false, error: 'Invalid articleNo' });
       }
 
-      // Check if it exists
-      let article = await prisma.article.findUnique({
+      const article = await prisma.article.upsert({
         where: { articleNo },
+        update: { name: name || null },
+        create: { articleNo, name: name || null },
       });
-
-      if (!article) {
-        article = await prisma.article.create({
-          data: { articleNo },
-        });
-      }
 
       res.json({ success: true, data: article });
     } catch (error) {
