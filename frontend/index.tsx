@@ -5,6 +5,9 @@ import App from './App';
 import { AuthProvider } from './src/context/AuthContext';
 import './src/style.css';
 
+import { Buffer } from 'buffer';
+(window as any).Buffer = Buffer;
+
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");
