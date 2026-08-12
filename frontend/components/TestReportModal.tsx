@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { testReportsApi, TestReport, TestEquipment, TestStep, CreateTestReportData } from '../src/api/test-reports.api';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 
 // --- Icons ---
 const XMarkIcon = ({ className }: { className?: string }) => (
@@ -56,14 +57,15 @@ const TestReportModal: React.FC<Props> = ({
     onClose,
     onSaved,
 }) => {
+    const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [form, setForm] = useState({
         testDate: new Date().toISOString().split('T')[0],
         deviceType: '',
         mainsConnection: '',
-        manufacturer: 'Avana Technology Services',
-        performedBy: '',
-        testerName: '',
+        manufacturer: 'Avana Technology Services Pvt. Ltd',
+        performedBy: 'Avana Technology Services Pvt. Ltd',
+        testerName: user?.name || '',
         kindOfTest: 'Safety & Functional Test',
         overallAssessment: '',
         overallResult: 'Passed',
@@ -198,20 +200,12 @@ const TestReportModal: React.FC<Props> = ({
                                     <input className={inputClass} required value={form.mainsConnection} onChange={e => setForm({ ...form, mainsConnection: e.target.value })} placeholder="e.g. 220V / 50Hz" />
                                 </div>
                                 <div>
-                                    <label className={labelClass}>Manufacturer *</label>
-                                    <input className={inputClass} required value={form.manufacturer} onChange={e => setForm({ ...form, manufacturer: e.target.value })} />
-                                </div>
-                                <div>
                                     <label className={labelClass}>Performed By *</label>
                                     <input className={inputClass} required value={form.performedBy} onChange={e => setForm({ ...form, performedBy: e.target.value })} placeholder="Engineer name or dept." />
                                 </div>
                                 <div>
                                     <label className={labelClass}>Tester Name *</label>
                                     <input className={inputClass} required value={form.testerName} onChange={e => setForm({ ...form, testerName: e.target.value })} placeholder="Name of tester" />
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Copy Printed By</label>
-                                    <input className={inputClass} value={form.copyPrintedBy} onChange={e => setForm({ ...form, copyPrintedBy: e.target.value })} placeholder="Name of person printing" />
                                 </div>
                             </div>
                         </section>

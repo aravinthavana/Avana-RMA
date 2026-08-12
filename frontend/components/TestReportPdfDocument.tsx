@@ -285,10 +285,6 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                         <Text style={styles.infoValue}>{deviceSerialNumber}</Text>
                     </View>
                     <View style={[styles.infoCell, { borderRightWidth: 0 }]}>
-                        <Text style={styles.infoLabel}>Manufacturer</Text>
-                        <Text style={styles.infoValue}>{report.manufacturer}</Text>
-                    </View>
-                    <View style={styles.infoCell}>
                         <Text style={styles.infoLabel}>Mains Connection</Text>
                         <Text style={styles.infoValue}>{report.mainsConnection}</Text>
                     </View>
@@ -388,16 +384,6 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                         <Text style={styles.signatureLabel}>Tested By</Text>
                         <Text style={styles.signatureName}>{report.testerName}</Text>
                     </View>
-                    <View style={styles.signatureBlock}>
-                        <Text style={styles.signatureLabel}>Authorized By</Text>
-                        <Text style={styles.signatureName}>{report.performedBy}</Text>
-                    </View>
-                    {report.copyPrintedBy && (
-                        <View style={styles.signatureBlock}>
-                            <Text style={styles.signatureLabel}>Copy Printed By</Text>
-                            <Text style={styles.signatureName}>{report.copyPrintedBy}</Text>
-                        </View>
-                    )}
                 </View>
 
                 {/* ---- FOOTER ---- */}
