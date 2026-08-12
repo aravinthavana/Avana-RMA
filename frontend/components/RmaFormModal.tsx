@@ -3,6 +3,7 @@ import { Rma, Customer, Device, ServiceCycle, RmaStatus } from '../types';
 import { XMarkIcon, PlusIcon } from './icons';
 import { API_BASE_URL } from '../config';
 import { LoadingSpinner } from '../src/components/ui/LoadingSpinner';
+import { apiClient } from '../src/api/client';
 
 const hospitals = [
   "General Hospital",
