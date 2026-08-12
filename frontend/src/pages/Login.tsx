@@ -58,8 +58,8 @@ const LoginPage: React.FC = () => {
                 className="w-full max-w-md p-8 bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 relative z-10"
             >
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg mb-4">
-                        <span className="text-white font-bold text-xl">A</span>
+                    <div className="inline-flex items-center justify-center w-20 h-20 mb-4">
+                        <img src="/avana-logo.png" alt="Avana Logo" className="w-full h-full object-contain" />
                     </div>
                     <h2 className="text-2xl font-bold text-slate-900 font-display">Welcome Back</h2>
                     <p className="text-slate-500 mt-2 text-sm">Sign in to access the RMA Dashboard</p>

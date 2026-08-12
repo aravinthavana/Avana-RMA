@@ -61,7 +61,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeVi
                             <div className="flex items-center gap-3">
                                 <div className="relative h-8 w-8">
                                     <div className="absolute inset-0 bg-gradient-to-tr from-primary-500 to-indigo-500 rounded-lg blur opacity-70"></div>
-                                    <img src="https://avanamedical.com/wp-content/themes/avana/assets/images/logo.png" alt="Logo" className="relative h-full w-full object-contain" />
+                                    <img src="/avana-logo.png" alt="Logo" className="relative h-full w-full object-contain" />
                                 </div>
                                 <span className="font-display font-bold text-xl text-slate-900">Avana Service Portal</span>
                             </div>
@@ -133,7 +133,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeVi
                 <div className={`flex items-center h-20 px-6 border-b border-slate-200/50 ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
                     <div className="relative h-8 w-8 flex-shrink-0">
                         <div className="absolute inset-0 bg-gradient-to-tr from-primary-500 to-indigo-500 rounded-lg blur opacity-70"></div>
-                        <img src="https://avanamedical.com/wp-content/themes/avana/assets/images/logo.png" alt="Logo" className="relative h-full w-full object-contain" />
+                        <img src="/avana-logo.png" alt="Logo" className="relative h-full w-full object-contain" />
                     </div>
                     {!isCollapsed && (
                         <motion.span
