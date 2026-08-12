@@ -256,7 +256,7 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                 {/* ---- HEADER ---- */}
                 <View style={styles.header}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                        <Image src="/avana-logo.png" style={{ width: 40, height: 40 }} />
+                        <Image src="/avana-logo.png" style={{ width: 140, height: 45, objectFit: 'contain' }} />
                         <View>
                             <Text style={styles.companyName}>AVANA TECHNOLOGY SERVICES</Text>
                             <Text style={styles.companySubtext}>Medical Device Service & Repair</Text>
