@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { TestReport, TestEquipment, TestStep } from '../src/api/test-reports.api';
 
 // --- Styles ---
@@ -255,10 +255,13 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
 
                 {/* ---- HEADER ---- */}
                 <View style={styles.header}>
-                    <View>
-                        <Text style={styles.companyName}>AVANA TECHNOLOGY SERVICES</Text>
-                        <Text style={styles.companySubtext}>Medical Device Service & Repair</Text>
-                        <Text style={styles.companySubtext}>www.avanamedical.com | support@avanamedical.com</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <Image src="/avana-logo.png" style={{ width: 40, height: 40 }} />
+                        <View>
+                            <Text style={styles.companyName}>AVANA TECHNOLOGY SERVICES</Text>
+                            <Text style={styles.companySubtext}>Medical Device Service & Repair</Text>
+                            <Text style={styles.companySubtext}>www.avanamedical.com | support@avanamedical.com</Text>
+                        </View>
                     </View>
                     <View>
                         <Text style={styles.reportTitle}>TEST REPORT</Text>

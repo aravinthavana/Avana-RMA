@@ -1,5 +1,5 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
 import { Rma, Device, RmaStatus, ServiceCycle } from '../types';
 
 // Matching the visually appealing styles from Test Report PDF + Amber theme
@@ -196,10 +196,13 @@ const ModernHeader = ({ rma, documentType, pageNumber, totalPages }: {
   totalPages: number;
 }) => (
   <View style={styles.header}>
-    <View>
-      <Text style={styles.companyName}>AVANA TECHNOLOGY SERVICES</Text>
-      <Text style={styles.companySubtext}>Medical Device Service & Repair</Text>
-      <Text style={styles.companySubtext}>www.avanamedical.com | support@avanamedical.com</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+      <Image src="/avana-logo.png" style={{ width: 40, height: 40 }} />
+      <View>
+        <Text style={styles.companyName}>AVANA TECHNOLOGY SERVICES</Text>
+        <Text style={styles.companySubtext}>Medical Device Service & Repair</Text>
+        <Text style={styles.companySubtext}>www.avanamedical.com | support@avanamedical.com</Text>
+      </View>
     </View>
     <View>
       <Text style={styles.reportTitle}>{documentType}</Text>
