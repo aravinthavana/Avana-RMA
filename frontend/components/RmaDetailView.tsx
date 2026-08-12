@@ -7,7 +7,7 @@ import NewCycleModal from './NewCycleModal';
 import TestReportModal from './TestReportModal';
 import TestReportPdfDocument from './TestReportPdfDocument';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-import { ArrowLeftIcon, PencilSquareIcon, PlusIcon, EyeIcon, ClockIcon } from './icons';
+import { ArrowLeftIcon, PencilSquareIcon, PlusIcon, EyeIcon, ClockIcon, TrashIcon } from './icons';
 import { useRmaContext } from '../src/context/RmaContext';
 import { motion } from 'framer-motion';
 import { getStatusBadgeColor } from './RmaList';
@@ -312,6 +312,23 @@ const RmaDetailView: React.FC = () => {
                               >
                                 {({ loading }) => loading ? 'Preparing...' : '⬇ Download PDF'}
                               </PDFDownloadLink>
+                              <button
+                                onClick={async () => {
+                                  if (window.confirm('Are you sure you want to delete this test report? This action cannot be undone.')) {
+                                    try {
+                                      await testReportsApi.delete(testReports[(cycle as any).id]!.id);
+                                      setTestReports(prev => ({ ...prev, [cycle.id]: null }));
+                                    } catch (err) {
+                                      console.error('Failed to delete test report', err);
+                                      alert('Failed to delete test report. Please try again.');
+                                    }
+                                  }
+                                }}
+                                className="p-1.5 rounded-md border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+                                title="Delete Test Report"
+                              >
+                                <TrashIcon className="w-5 h-5" />
+                              </button>
                             </>
                           )}
                         </>
