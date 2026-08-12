@@ -30,6 +30,7 @@ interface Props {
     serviceCycleId: number;
     deviceSerialNumber: string;
     rmaId: string;
+    initialDeviceType?: string;
     existingReport?: TestReport | null;
     onClose: () => void;
     onSaved: (report: TestReport) => void;
@@ -53,6 +54,7 @@ const TestReportModal: React.FC<Props> = ({
     serviceCycleId,
     deviceSerialNumber,
     rmaId,
+    initialDeviceType,
     existingReport,
     onClose,
     onSaved,
@@ -61,7 +63,7 @@ const TestReportModal: React.FC<Props> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [form, setForm] = useState({
         testDate: new Date().toISOString().split('T')[0],
-        deviceType: '',
+        deviceType: initialDeviceType || '',
         mainsConnection: '',
         manufacturer: 'Avana Technology Services Pvt. Ltd',
         performedBy: 'Avana Technology Services Pvt. Ltd',

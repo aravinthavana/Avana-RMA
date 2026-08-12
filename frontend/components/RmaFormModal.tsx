@@ -113,7 +113,20 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
 
   const [hospital, setHospital] = useState(initialData?.customer.name || '');
 
+  // Articles State
+  const [articles, setArticles] = useState<{ id: string, articleNo: string }[]>([]);
+
   // --- Effects ---
+
+  useEffect(() => {
+    if (isOpen) {
+      apiClient.get<{ id: string, articleNo: string }[]>('/api/articles')
+        .then(res => {
+          if (res.data) setArticles(res.data as any);
+        })
+        .catch(err => console.error('Failed to fetch articles:', err));
+    }
+  }, [isOpen]);
 
   // Reset form when opening/closing or changing initialData
   useEffect(() => {
@@ -377,7 +390,7 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
     setErrors(prev => ({ ...prev, customerId: error }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors = validateForm(formData);
     setErrors(validationErrors);
@@ -404,6 +417,16 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
     }
 
     const rmaDevices: Device[] = formData.devices.map(d => ({ articleNumber: d.articleNumber, serialNumber: d.serialNumber, quantity: d.quantity }));
+
+    // Register new articles dynamically
+    try {
+      const uniqueArticles = Array.from(new Set(rmaDevices.map(d => d.articleNumber).filter(Boolean)));
+      for (const articleNo of uniqueArticles) {
+        await apiClient.post('/api/articles', { articleNo }).catch(console.error);
+      }
+    } catch (e) {
+      console.error('Failed to auto-register articles:', e);
+    }
 
     let serviceCyclesData;
     if (initialData) {
@@ -531,7 +554,7 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
                   <label htmlFor={`articleNumber-${index}`} className={labelStyles}>Article Number</label>
-                  <input type="text" id={`articleNumber-${index}`} value={device.articleNumber} onChange={e => handleDeviceChange(index, 'articleNumber', e.target.value)} className={`mt-2 ${getInputStyles(false)}`} />
+                  <input type="text" list="articles-list" id={`articleNumber-${index}`} value={device.articleNumber} onChange={e => handleDeviceChange(index, 'articleNumber', e.target.value)} className={`mt-2 ${getInputStyles(false)}`} />
                 </div>
                 <div>
                   <label htmlFor={`serialNumber-${index}`} className={labelStyles}>Serial / Lot Number <span className="text-red-500">*</span></label>
@@ -608,7 +631,12 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
           </section>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-6 border-t border-slate-200/60 shrink-0">
+          <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3 bg-slate-50 flex-shrink-0">
+            <datalist id="articles-list">
+              {articles.map(a => (
+                <option key={a.id} value={a.articleNo} />
+              ))}
+            </datalist>
             <button type="button" onClick={onClose} className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 hover:ring-slate-400 transition-all">Cancel</button>
             <button type="submit" disabled={!isFormValid} className="rounded-lg bg-gradient-to-r from-primary-600 to-primary-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 hover:from-primary-500 hover:to-primary-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:from-slate-400 disabled:to-slate-400 disabled:shadow-none disabled:cursor-not-allowed transition-all">
               {initialData ? 'Save Changes' : 'Create RMA'}

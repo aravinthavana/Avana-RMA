@@ -378,6 +378,7 @@ const RmaDetailView: React.FC = () => {
           serviceCycleId={(testReportModalCycle as any).id}
           deviceSerialNumber={testReportModalCycle.deviceSerialNumber}
           rmaId={rma.id}
+          initialDeviceType={rma.devices.find(d => d.serialNumber === testReportModalCycle.deviceSerialNumber)?.articleNumber || ''}
           existingReport={testReports[(testReportModalCycle as any).id] ?? null}
           onClose={() => setTestReportModalCycle(null)}
           onSaved={(saved) => {

@@ -6,8 +6,8 @@ import userRoutes from './user.routes';
 import notificationRoutes from './notification.routes';
 import auditRoutes from './audit.routes';
 import adminRoutes from './admin.routes';
-
 import testReportRoutes from './test-report.routes';
+import articleRoutes from './article.routes';
 
 const router = Router();
 
@@ -20,6 +20,7 @@ router.use('/notifications', notificationRoutes);
 router.use('/audit', auditRoutes);
 router.use('/admin', adminRoutes);
 router.use('/test-reports', testReportRoutes);
+router.use('/articles', articleRoutes);
 
 // Health check endpoint
 router.get('/health', (req, res) => {
