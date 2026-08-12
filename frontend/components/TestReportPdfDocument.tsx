@@ -255,14 +255,14 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
 
                 {/* ---- HEADER ---- */}
                 <View style={styles.header}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <View style={{ flexDirection: 'column', gap: 5 }}>
                         <Image src="/avana-logo.png" style={{ height: 50 }} />
+                        <Text style={[styles.reportNo, { textAlign: 'left', marginTop: 0 }]}>
+                            {report.reportNo ? `Doc Ref No: ${report.reportNo}` : 'Doc Ref No: SH-002'}
+                        </Text>
                     </View>
                     <View>
                         <Text style={styles.reportTitle}>TEST REPORT</Text>
-                        <Text style={styles.reportNo}>
-                            {report.reportNo ? `Doc Ref No: ${report.reportNo}` : 'Doc Ref No: SH-002'}
-                        </Text>
                         <Text style={styles.reportNo}>Date: {formatDate(report.testDate)}</Text>
                     </View>
                 </View>
@@ -384,17 +384,9 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                 </View>
 
                 {/* ---- FOOTER ---- */}
-                <View style={styles.footer} fixed>
-                    <View>
-                        <Text style={styles.footerText}>
-                            www.avanamedical.com | support@avanamedical.com
-                        </Text>
-                        <Text style={styles.footerText}>
-                            Avana Technology Services Pvt. Ltd. | Confidential Test Document
-                        </Text>
-                    </View>
+                <View style={[styles.footer, { justifyContent: 'flex-end' }]} fixed>
                     <Text style={styles.footerText}>
-                        Generated: {new Date().toLocaleDateString('en-GB')} | RMA: {rmaId} | S/N: {deviceSerialNumber}
+                        Generated: {new Date().toLocaleDateString('en-GB')}
                     </Text>
                 </View>
             </Page>
