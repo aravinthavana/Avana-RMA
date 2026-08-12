@@ -328,6 +328,7 @@ const RmaDetailView: React.FC = () => {
       {isPreviewOpen && (
         <RmaPreviewModal
           rma={rma}
+          testReports={testReports}
           onClose={() => setIsPreviewOpen(false)}
         />
       )}
