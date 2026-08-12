@@ -9,6 +9,8 @@ import TestReportPdfDocument from './TestReportPdfDocument';
 interface RmaPreviewModalProps {
     rma: Rma | null | undefined;
     testReports?: Record<number, TestReport>;
+    initialView?: 'main' | 'select_report' | 'service_report' | 'test_report';
+    initialSelectedTestReport?: { device: Device, cycle: ServiceCycle, report: TestReport } | null;
     onClose: () => void;
 }
 
@@ -69,10 +71,10 @@ const SelectReportView: React.FC<{
     )
 }
 
-export const RmaPreviewModal: React.FC<RmaPreviewModalProps> = ({ rma, testReports = {}, onClose }) => {
-    const [view, setView] = useState<'main' | 'select_report' | 'service_report' | 'test_report'>('main');
+export const RmaPreviewModal: React.FC<RmaPreviewModalProps> = ({ rma, testReports = {}, initialView, initialSelectedTestReport, onClose }) => {
+    const [view, setView] = useState<'main' | 'select_report' | 'service_report' | 'test_report'>(initialView || 'main');
     const [selectedServiceReport, setSelectedServiceReport] = useState<{ device: Device, cycle: ServiceCycle } | null>(null);
-    const [selectedTestReport, setSelectedTestReport] = useState<{ device: Device, cycle: ServiceCycle, report: TestReport } | null>(null);
+    const [selectedTestReport, setSelectedTestReport] = useState<{ device: Device, cycle: ServiceCycle, report: TestReport } | null>(initialSelectedTestReport || null);
 
     if (!rma) return null;
 

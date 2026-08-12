@@ -116,6 +116,7 @@ const RmaDetailView: React.FC = () => {
   // Test Report state
   const [testReports, setTestReports] = useState<Record<number, TestReport | null>>({});
   const [testReportModalCycle, setTestReportModalCycle] = useState<ServiceCycle | null>(null);
+  const [previewTestReport, setPreviewTestReport] = useState<{ device: Device, cycle: ServiceCycle, report: TestReport } | null>(null);
 
   // Fetch test reports for each service cycle
   useEffect(() => {
@@ -288,19 +289,30 @@ const RmaDetailView: React.FC = () => {
                             {testReports[(cycle as any).id] ? '📋 View / Edit Test Report' : '+ Create Test Report'}
                           </button>
                           {testReports[(cycle as any).id] && (
-                            <PDFDownloadLink
-                              document={
-                                <TestReportPdfDocument
-                                  report={testReports[(cycle as any).id]!}
-                                  deviceSerialNumber={cycle.deviceSerialNumber}
-                                  rmaId={rma.id}
-                                />
-                              }
-                              fileName={`TestReport-${rma.id}-${cycle.deviceSerialNumber}.pdf`}
-                              className="text-sm font-medium px-3 py-1 rounded-md border border-green-200 text-green-700 bg-green-50 hover:bg-green-100 transition-colors"
-                            >
-                              {({ loading }) => loading ? 'Preparing...' : '⬇ Download PDF'}
-                            </PDFDownloadLink>
+                            <>
+                              <button
+                                onClick={() => {
+                                  setPreviewTestReport({ device, cycle, report: testReports[(cycle as any).id]! });
+                                  setIsPreviewOpen(true);
+                                }}
+                                className="text-sm font-medium px-3 py-1 rounded-md border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors"
+                              >
+                                👁 Preview PDF
+                              </button>
+                              <PDFDownloadLink
+                                document={
+                                  <TestReportPdfDocument
+                                    report={testReports[(cycle as any).id]!}
+                                    deviceSerialNumber={cycle.deviceSerialNumber}
+                                    rmaId={rma.id}
+                                  />
+                                }
+                                fileName={`TestReport-${rma.id}-${cycle.deviceSerialNumber}.pdf`}
+                                className="text-sm font-medium px-3 py-1 rounded-md border border-green-200 text-green-700 bg-green-50 hover:bg-green-100 transition-colors"
+                              >
+                                {({ loading }) => loading ? 'Preparing...' : '⬇ Download PDF'}
+                              </PDFDownloadLink>
+                            </>
                           )}
                         </>
                       )}
@@ -328,8 +340,13 @@ const RmaDetailView: React.FC = () => {
       {isPreviewOpen && (
         <RmaPreviewModal
           rma={rma}
-          testReports={testReports}
-          onClose={() => setIsPreviewOpen(false)}
+          testReports={testReports as Record<number, TestReport>}
+          initialView={previewTestReport ? 'test_report' : 'main'}
+          initialSelectedTestReport={previewTestReport}
+          onClose={() => {
+            setIsPreviewOpen(false);
+            setPreviewTestReport(null);
+          }}
         />
       )}
       {isNewCycleModalOpen && (
