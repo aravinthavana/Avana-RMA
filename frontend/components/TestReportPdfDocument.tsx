@@ -18,14 +18,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        borderBottom: '2.5px solid #1e3a5f',
+        borderBottom: '2.5px solid #d48a07',
         paddingBottom: 10,
         marginBottom: 14,
     },
     companyName: {
         fontSize: 13,
         fontFamily: 'Helvetica-Bold',
-        color: '#1e3a5f',
+        color: '#d48a07',
     },
     companySubtext: {
         fontSize: 7.5,
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     reportTitle: {
         fontSize: 15,
         fontFamily: 'Helvetica-Bold',
-        color: '#1e3a5f',
+        color: '#d48a07',
         textAlign: 'right',
     },
     reportNo: {
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     },
     // --- Section headers ---
     sectionHeader: {
-        backgroundColor: '#1e3a5f',
+        backgroundColor: '#d48a07',
         color: '#ffffff',
         fontFamily: 'Helvetica-Bold',
         fontSize: 8,
@@ -145,12 +145,12 @@ const styles = StyleSheet.create({
     assessmentBox: {
         marginTop: 12,
         borderWidth: 1.5,
-        borderColor: '#1e3a5f',
+        borderColor: '#d48a07',
         borderRadius: 4,
         overflow: 'hidden',
     },
     assessmentHeader: {
-        backgroundColor: '#1e3a5f',
+        backgroundColor: '#d48a07',
         padding: '4 8',
     },
     assessmentHeaderText: {
