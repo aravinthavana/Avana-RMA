@@ -47,6 +47,17 @@ const defaultSteps: TestStep[] = [
     { stepNo: 4, name: 'Alarm Test', criterion: 'All alarms trigger correctly', unit: '-', result: '', isOk: true },
 ];
 
+const ar8330fSteps: TestStep[] = [
+    { stepNo: 1, name: 'Serial Number Check', criterion: 'Does the lasered serial number match the documentation?', unit: 'Yes', result: 'Yes', isOk: true },
+    { stepNo: 2, name: 'Locking Pin Mechanism', criterion: 'Does the locking pin mechanism work properly? (with test gage IG-0026)', unit: 'Yes', result: 'Yes', isOk: true },
+    { stepNo: 3, name: 'Shaver Handpiece Condition', criterion: 'Is the device free of any damage and dirt? (incl. silicone warranty seal)', unit: 'Yes', result: 'Yes', isOk: true },
+    { stepNo: 4, name: 'Suction Valve', criterion: 'Can the suction valve be operated smoothly back and forth?', unit: 'Yes', result: 'Yes', isOk: true },
+    { stepNo: 5, name: 'O-Ring', criterion: 'Is the O-ring properly seated on the connector?', unit: 'Yes', result: 'Yes', isOk: true },
+    { stepNo: 6, name: 'Water Bubble Leak Test', criterion: 'Did the leak test pass? (according to work instruction WI-000101081)', unit: 'Yes', result: 'Yes', isOk: true },
+    { stepNo: 7, name: 'Shaver Blade', criterion: 'Can a shaver blade be inserted smoothly and locked properly?', unit: 'Yes', result: 'Yes', isOk: true },
+    { stepNo: 8, name: 'F-Shaver Handpiece Function', criterion: 'Is the device working properly? (no abnormal noise)', unit: 'Yes', result: 'Yes', isOk: true },
+];
+
 const defaultEquipment: TestEquipment[] = [
     { id: '', name: '' },
 ];
@@ -80,6 +91,9 @@ const TestReportModal: React.FC<Props> = ({
 
     useEffect(() => {
         if (!existingReport && initialDeviceType) {
+            if (initialDeviceType.startsWith('AR-8330F')) {
+                setSteps(ar8330fSteps);
+            }
             // Attempt to fetch article name to combine with articleNo
             apiClient.get<{ id: string, articleNo: string, name: string | null }[]>('/api/articles')
                 .then(res => {
