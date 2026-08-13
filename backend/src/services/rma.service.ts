@@ -159,7 +159,7 @@ export class RmaService {
         }
 
         // Generate RMA ID
-        const rmaId = this.rmaRepo.generateId();
+        const rmaId = await this.rmaRepo.generateId();
 
         // Create RMA — creationDate and lastUpdateDate default to now() in DB (A-2)
         const rmaData: CreateRmaData = {

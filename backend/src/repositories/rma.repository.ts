@@ -244,12 +244,45 @@ export class RmaRepository {
     }
 
     /**
-     * Generate a unique RMA ID (RMA followed by 6 random digits)
+     * Generate a unique RMA ID based on YYMM and sequence
+     * YY mapped to A-J (0->A, 1->B... 9->J), MM padded, plus 3-digit sequence resetting monthly.
+     * Example for March 2026: CG03001
      */
-    generateId(): string {
-        const chars = '0123456789';
-        const randomPart = Array.from({ length: 6 }).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
-        return randomPart;
+    async generateId(): Promise<string> {
+        const now = new Date();
+        const yearStr = now.getFullYear().toString().slice(-2);
+        const monthStr = (now.getMonth() + 1).toString().padStart(2, '0');
+
+        const letterMap: Record<string, string> = {
+            '0': 'A', '1': 'B', '2': 'C', '3': 'D', '4': 'E',
+            '5': 'F', '6': 'G', '7': 'H', '8': 'I', '9': 'J'
+        };
+
+        const yearPrefix = yearStr.split('').map(digit => letterMap[digit]).join('');
+        const prefix = `${yearPrefix}${monthStr}`;
+
+        const latestRma = await prisma.rma.findFirst({
+            where: {
+                id: {
+                    startsWith: prefix
+                }
+            },
+            orderBy: {
+                id: 'desc' // highest sequence number first
+            }
+        });
+
+        let nextSeq = 1;
+        if (latestRma && latestRma.id.length >= prefix.length + 3) {
+            const latestSeqStr = latestRma.id.slice(-3);
+            const latestSeq = parseInt(latestSeqStr, 10);
+            if (!isNaN(latestSeq)) {
+                nextSeq = latestSeq + 1;
+            }
+        }
+
+        const seqStr = nextSeq.toString().padStart(3, '0');
+        return `${prefix}${seqStr}`;
     }
 
     /**
