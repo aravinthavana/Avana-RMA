@@ -48,25 +48,25 @@ const defaultSteps: TestStep[] = [
 ];
 
 const ar8330fSteps: TestStep[] = [
-    { stepNo: 1, name: 'Serial Number Check', criterion: 'Does the lasered serial number match the documentation?', unit: 'Yes', result: 'Yes', isOk: true },
-    { stepNo: 2, name: 'Locking Pin Mechanism', criterion: 'Does the locking pin mechanism work properly? (with test gage IG-0026)', unit: 'Yes', result: 'Yes', isOk: true },
-    { stepNo: 3, name: 'Shaver Handpiece Condition', criterion: 'Is the device free of any damage and dirt? (incl. silicone warranty seal)', unit: 'Yes', result: 'Yes', isOk: true },
-    { stepNo: 4, name: 'Suction Valve', criterion: 'Can the suction valve be operated smoothly back and forth?', unit: 'Yes', result: 'Yes', isOk: true },
-    { stepNo: 5, name: 'O-Ring', criterion: 'Is the O-ring properly seated on the connector?', unit: 'Yes', result: 'Yes', isOk: true },
-    { stepNo: 6, name: 'Water Bubble Leak Test', criterion: 'Did the leak test pass? (according to work instruction WI-000101081)', unit: 'Yes', result: 'Yes', isOk: true },
-    { stepNo: 7, name: 'Shaver Blade', criterion: 'Can a shaver blade be inserted smoothly and locked properly?', unit: 'Yes', result: 'Yes', isOk: true },
-    { stepNo: 8, name: 'F-Shaver Handpiece Function', criterion: 'Is the device working properly? (no abnormal noise)', unit: 'Yes', result: 'Yes', isOk: true },
+    { stepNo: 1, name: 'Serial Number Check\nDoes the lasered serial number match the documentation?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 2, name: 'Locking Pin Mechanism\nDoes the locking pin mechanism work properly? (with test gage IG-0026)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 3, name: 'Shaver Handpiece Condition\nIs the device free of any damage and dirt? (incl. silicone warranty seal)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 4, name: 'Suction Valve\nCan the suction valve be operated smoothly back and forth?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 5, name: 'O-Ring\nIs the O-ring properly seated on the connector?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 6, name: 'Water Bubble Leak Test\nDid the leak test pass? (according to work instruction WI-000101081)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 7, name: 'Shaver Blade\nCan a shaver blade be inserted smoothly and locked properly?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 8, name: 'F-Shaver Handpiece Function\nIs the device working properly? (no abnormal noise)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
 ];
 
 const ar8332hSteps: TestStep[] = [
-    { stepNo: 1, name: 'Serial Number Check', criterion: 'Does the lasered serial number match the documentation?', unit: 'Yes', result: 'Yes', isOk: true },
-    { stepNo: 2, name: 'Locking Pin Mechanism', criterion: 'Does the locking pin mechanism work properly? (with test gage IG-0026)', unit: 'Yes', result: 'Yes', isOk: true },
-    { stepNo: 3, name: 'Shaver Handpiece Condition', criterion: 'Is the device free of any damage and dirt? (incl. silicone warranty seal)', unit: 'Yes', result: 'Yes', isOk: true },
-    { stepNo: 4, name: 'Suction Valve', criterion: 'Can the suction valve be operated smoothly back and forth?', unit: 'Yes', result: 'Yes', isOk: true },
-    { stepNo: 5, name: 'O-Ring', criterion: 'Is the O-ring properly seated on the connector?', unit: 'Yes', result: 'Yes', isOk: true },
-    { stepNo: 6, name: 'Water Bubble Leak Test', criterion: 'Did the leak test pass? (according to work instruction WI-000101081)', unit: 'Yes', result: 'Yes', isOk: true },
-    { stepNo: 7, name: 'Shaver Blade', criterion: 'Can a shaver blade be inserted smoothly and locked properly?', unit: 'Yes', result: 'Yes', isOk: true },
-    { stepNo: 8, name: 'H-Shaver Handpiece Function', criterion: 'Is the device working properly? (hand control buttons, no abnormal noise)', unit: 'Yes', result: 'Yes', isOk: true },
+    { stepNo: 1, name: 'Serial Number Check\nDoes the lasered serial number match the documentation?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 2, name: 'Locking Pin Mechanism\nDoes the locking pin mechanism work properly? (with test gage IG-0026)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 3, name: 'Shaver Handpiece Condition\nIs the device free of any damage and dirt? (incl. silicone warranty seal)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 4, name: 'Suction Valve\nCan the suction valve be operated smoothly back and forth?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 5, name: 'O-Ring\nIs the O-ring properly seated on the connector?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 6, name: 'Water Bubble Leak Test\nDid the leak test pass? (according to work instruction WI-000101081)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 7, name: 'Shaver Blade\nCan a shaver blade be inserted smoothly and locked properly?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 8, name: 'H-Shaver Handpiece Function\nIs the device working properly? (hand control buttons, no abnormal noise)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
 ];
 
 const defaultEquipment: TestEquipment[] = [
@@ -308,9 +308,9 @@ const TestReportModal: React.FC<Props> = ({
                                 <table className="w-full text-sm">
                                     <thead className="bg-slate-50 border-b border-slate-200">
                                         <tr>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-10">No.</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Test Name</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Criterion / Limit</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-10">Sl. No.</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Test Step</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Criterion</th>
                                             <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-24">Unit</th>
                                             <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-32">Result</th>
                                             <th className="px-3 py-3 text-center text-xs font-semibold text-slate-500 uppercase w-16">OK?</th>
@@ -320,24 +320,25 @@ const TestReportModal: React.FC<Props> = ({
                                     <tbody className="divide-y divide-slate-100">
                                         {steps.map((step, idx) => (
                                             <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                                                <td className="px-3 py-2 text-slate-500 text-center font-mono text-xs">{step.stepNo}</td>
+                                                <td className="px-3 py-2 text-slate-500 text-center font-mono text-xs">{step.stepNo}.</td>
                                                 <td className="px-3 py-2">
-                                                    <input
-                                                        className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none"
+                                                    <textarea
+                                                        className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none resize-none overflow-hidden"
                                                         value={step.name}
                                                         onChange={e => updateStep(idx, 'name', e.target.value)}
-                                                        placeholder="Test name"
+                                                        placeholder="Test Name / Question"
+                                                        rows={2}
                                                     />
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-3 py-2 align-top">
                                                     <input
                                                         className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none"
                                                         value={step.criterion}
                                                         onChange={e => updateStep(idx, 'criterion', e.target.value)}
-                                                        placeholder="Pass criterion"
+                                                        placeholder="Criterion"
                                                     />
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-3 py-2 align-top">
                                                     <input
                                                         className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none"
                                                         value={step.unit}
@@ -345,7 +346,7 @@ const TestReportModal: React.FC<Props> = ({
                                                         placeholder="Unit"
                                                     />
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-3 py-2 align-top">
                                                     <input
                                                         className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none"
                                                         value={step.result}
@@ -353,19 +354,19 @@ const TestReportModal: React.FC<Props> = ({
                                                         placeholder="Measured value"
                                                     />
                                                 </td>
-                                                <td className="px-3 py-2 text-center">
+                                                <td className="px-3 py-2 text-center align-top">
                                                     <button
                                                         type="button"
                                                         onClick={() => updateStep(idx, 'isOk', !step.isOk)}
                                                         className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold transition-colors ${step.isOk
                                                             ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                            : 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                            : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
                                                             }`}
                                                     >
-                                                        {step.isOk ? '✓' : '✗'}
+                                                        {step.isOk ? '✓' : ''}
                                                     </button>
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-3 py-2 align-top">
                                                     <button
                                                         type="button"
                                                         onClick={() => removeStep(idx)}
