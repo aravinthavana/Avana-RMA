@@ -243,7 +243,7 @@ const formatDate = (dateStr: string) => {
 };
 
 // Column widths for test steps table
-const stepColWidths = ['5%', '41%', '15%', '12%', '16%', '11%'];
+const stepColWidths = ['5%', '48%', '12%', '10%', '15%', '10%'];
 
 const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rmaId }) => {
     const equipment = (report.equipmentUsed || []) as TestEquipment[];
@@ -268,7 +268,7 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                 </View>
 
                 {/* ---- DEVICE DATA ---- */}
-                <View style={[styles.infoGrid, { marginBottom: 12, flexDirection: 'column' }]}>
+                <View style={[styles.infoGrid, { marginBottom: 6, flexDirection: 'column' }]}>
                     <View style={[styles.sectionHeader, { marginTop: 0, marginBottom: 0, padding: '4 8' }]}><Text>Device Data</Text></View>
                     <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: '#d1d5db' }}>
                          <View style={{ width: '50%', padding: '4 7', borderRightWidth: 1, borderColor: '#d1d5db' }}>
@@ -287,7 +287,7 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                 </View>
 
                 {/* ---- TEST DATA & EQUIPMENT ---- */}
-                <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
+                <View style={{ flexDirection: 'row', gap: 12, marginBottom: 8 }}>
                      {/* Test Data */}
                      <View style={{ flex: 1, borderWidth: 1, borderColor: '#d1d5db', borderRadius: 3 }}>
                           <View style={[styles.sectionHeader, { marginTop: 0, marginBottom: 0, padding: '4 8' }]}><Text>Test Data</Text></View>
