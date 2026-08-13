@@ -40,7 +40,7 @@ export default function TemplateManagement() {
     // Form states
     const [newArticle, setNewArticle] = useState({ articleNo: '', name: '' });
     const [newEquipment, setNewEquipment] = useState({ equipmentId: '', name: '' });
-    const [newStep, setNewStep] = useState({ name: '', criterion: '' });
+    const [newStep, setNewStep] = useState({ name: '', question: '', criterion: '' });
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editData, setEditData] = useState<any>({});
 
@@ -312,7 +312,8 @@ export default function TemplateManagement() {
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-16">No.</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Test Name</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Question / Criterion</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Question</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Criterion (Result type)</th>
                                         <th className="px-6 py-3 text-right"></th>
                                     </tr>
                                 </thead>
@@ -324,6 +325,9 @@ export default function TemplateManagement() {
                                             </td>
                                             <td className="px-6 py-4 text-sm text-slate-900 whitespace-pre-line">
                                                 {editingId === s.id ? <input className="rounded-md border-slate-300 w-full" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} /> : s.name}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-slate-900 whitespace-pre-line">
+                                                {editingId === s.id ? <input className="rounded-md border-slate-300 w-full" value={editData.question} onChange={e => setEditData({...editData, question: e.target.value})} /> : s.question}
                                             </td>
                                             <td className="px-6 py-4 text-sm text-slate-500">
                                                 {editingId === s.id ? <input className="rounded-md border-slate-300 w-full" value={editData.criterion} onChange={e => setEditData({...editData, criterion: e.target.value})} /> : s.criterion}
@@ -343,7 +347,7 @@ export default function TemplateManagement() {
                                             </td>
                                         </tr>
                                     ))}
-                                    {steps.length === 0 && <tr><td colSpan={4} className="px-6 py-4 text-center text-slate-500">No steps found</td></tr>}
+                                    {steps.length === 0 && <tr><td colSpan={5} className="px-6 py-4 text-center text-slate-500">No steps found</td></tr>}
                                 </tbody>
                             </table>
                         </div>

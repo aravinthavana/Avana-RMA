@@ -19,9 +19,9 @@ export const templateController = {
 
   async createTestStep(req: Request, res: Response) {
     try {
-      const { articleNo, stepNo, name, criterion } = req.body;
+      const { articleNo, stepNo, name, question, criterion } = req.body;
       const step = await prisma.testStepTemplate.create({
-        data: { articleNo, stepNo, name, criterion },
+        data: { articleNo, stepNo, name, question, criterion },
       });
       res.json({ success: true, data: step });
     } catch (error) {
@@ -33,10 +33,10 @@ export const templateController = {
   async updateTestStep(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { stepNo, name, criterion } = req.body;
+      const { stepNo, name, question, criterion } = req.body;
       const step = await prisma.testStepTemplate.update({
         where: { id },
-        data: { stepNo, name, criterion },
+        data: { stepNo, name, question, criterion },
       });
       res.json({ success: true, data: step });
     } catch (error) {

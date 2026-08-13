@@ -173,6 +173,7 @@ model TestStepTemplate {
   articleNo  String
   stepNo     Int
   name       String
+  question   String?
   criterion  String?
   createdAt  DateTime @default(now())
 
