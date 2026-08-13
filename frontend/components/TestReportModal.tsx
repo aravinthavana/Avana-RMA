@@ -111,7 +111,7 @@ const TestReportModal: React.FC<Props> = ({
                         setSteps(templateSteps.map((s: any) => ({
                             stepNo: s.stepNo,
                             name: s.question ? `${s.name}\n${s.question}` : s.name,
-                            criterion: s.criterion || 'Yes/No',
+                            criterion: s.criterion && s.criterion !== 'Yes/No' ? s.criterion : '',
                             unit: '',
                             result: '',
                             isOk: true
