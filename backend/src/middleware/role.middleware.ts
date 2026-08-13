@@ -12,7 +12,9 @@ export const roleMiddleware = (allowedRoles: string[]) => {
             return res.status(401).json({ success: false, error: 'Unauthorized' });
         }
 
-        if (!allowedRoles.includes(user.role)) {
+        const isExplicitlyAdmin = allowedRoles.includes('ADMIN') && user.isAdmin;
+
+        if (!allowedRoles.includes(user.role) && !isExplicitlyAdmin) {
             return res.status(403).json({ success: false, error: 'Access denied: Insufficient permissions' });
         }
 

@@ -120,7 +120,8 @@ model User {
   email     String   @unique
   password         String   // Hashed
   name             String
-  role             String   @default("ADMIN") // "ADMIN", "MANAGER", "COORDINATOR", "SERVICE_ENGINEER"
+  role             String   @default("MANAGER") // "MANAGER", "COORDINATOR", "SERVICE_ENGINEER"
+  isAdmin          Boolean  @default(false)
   isActive         Boolean  @default(true)
   resetToken       String?
   resetTokenExpiry DateTime?
@@ -165,4 +166,25 @@ model Article {
   createdAt DateTime @default(now())
 
   @@map("articles")
+}
+
+model TestStepTemplate {
+  id         String   @id @default(uuid())
+  articleNo  String
+  stepNo     Int
+  name       String
+  criterion  String?
+  createdAt  DateTime @default(now())
+
+  @@index([articleNo])
+  @@map("test_step_templates")
+}
+
+model TestEquipmentTemplate {
+  id          String   @id @default(uuid())
+  equipmentId String
+  name        String
+  createdAt   DateTime @default(now())
+
+  @@map("test_equipment_templates")
 }

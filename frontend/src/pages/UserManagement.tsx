@@ -16,7 +16,7 @@ const UserManagement: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        if (user && user.role !== 'ADMIN') {
+        if (user && !(user.isAdmin || user.role === 'ADMIN')) {
             navigate('/');
             toast.error('Access denied');
         } else {
@@ -42,6 +42,7 @@ const UserManagement: React.FC = () => {
         email: '',
         password: '',
         role: 'SERVICE_ENGINEER',
+        isAdmin: false,
         isActive: true
     });
 
@@ -69,7 +70,7 @@ const UserManagement: React.FC = () => {
             toast.success('User created successfully');
             setIsModalOpen(false);
             fetchUsers(); // Refresh list
-            setFormData({ name: '', email: '', password: '', role: 'SERVICE_ENGINEER', isActive: true });
+            setFormData({ name: '', email: '', password: '', role: 'SERVICE_ENGINEER', isAdmin: false, isActive: true });
         } catch (error) {
             console.error('Create user error:', error);
             toast.error('Failed to create user');
@@ -149,13 +150,13 @@ const UserManagement: React.FC = () => {
                                 <td className="px-6 py-4 text-slate-600">{user.email}</td>
                                 <td className="px-6 py-4">
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                        ${user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' :
+                                        ${user.isAdmin ? 'bg-purple-100 text-purple-800' :
                                             user.role === 'MANAGER' ? 'bg-indigo-100 text-indigo-800' :
                                             user.role === 'COORDINATOR' ? 'bg-amber-100 text-amber-800' :
                                             user.role === 'SERVICE_ENGINEER' ? 'bg-blue-100 text-blue-800' :
                                             'bg-slate-100 text-slate-800'
                                         }`}>
-                                        {user.role}
+                                        {user.isAdmin ? `Admin (${user.role})` : user.role}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4">
@@ -254,8 +255,19 @@ const UserManagement: React.FC = () => {
                                     <option value="SERVICE_ENGINEER">Service Engineer</option>
                                     <option value="COORDINATOR">Coordinator</option>
                                     <option value="MANAGER">Manager</option>
-                                    <option value="ADMIN">Admin</option>
                                 </select>
+                            </div>
+                            <div className="flex items-center pt-2">
+                                <input
+                                    type="checkbox"
+                                    id="isAdmin"
+                                    className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                    checked={formData.isAdmin}
+                                    onChange={e => setFormData({ ...formData, isAdmin: e.target.checked })}
+                                />
+                                <label htmlFor="isAdmin" className="ml-2 block text-sm font-medium text-slate-700">
+                                    Grant Admin Access (Full System Permissions)
+                                </label>
                             </div>
                             <div className="pt-4 flex justify-end gap-3">
                                 <button

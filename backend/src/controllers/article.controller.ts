@@ -35,4 +35,32 @@ export const articleController = {
       res.status(500).json({ success: false, error: 'Failed to create article' });
     }
   },
+
+  // Update an article
+  async updateArticle(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { articleNo, name } = req.body;
+      const article = await prisma.article.update({
+        where: { id },
+        data: { articleNo, name },
+      });
+      res.json({ success: true, data: article });
+    } catch (error) {
+      console.error('Error updating article:', error);
+      res.status(500).json({ success: false, error: 'Failed to update article' });
+    }
+  },
+
+  // Delete an article
+  async deleteArticle(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      await prisma.article.delete({ where: { id } });
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting article:', error);
+      res.status(500).json({ success: false, error: 'Failed to delete article' });
+    }
+  },
 };

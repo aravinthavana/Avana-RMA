@@ -48,22 +48,29 @@ export class AuthController {
         }
     };
 
-    /**
-     * Get current user profile (protected route test)
-     */
     me = async (req: Request, res: Response, next: NextFunction) => {
         try {
             // req.user is set by authMiddleware
-            const user = (req as any).user;
+            const decodedUser = (req as any).user;
 
-            if (!user) {
+            if (!decodedUser || !decodedUser.id) {
                 res.status(401).json({ error: 'Not authenticated' });
                 return;
             }
 
+            // Fetch latest user details from DB
+            const user = await userService.getUserById(decodedUser.id);
+            if (!user) {
+                res.status(404).json({ error: 'User not found' });
+                return;
+            }
+            
+            // Remove password
+            const { password, ...userWithoutPassword } = user as any;
+
             res.json({
                 success: true,
-                data: user
+                data: userWithoutPassword
             });
         } catch (error) {
             next(error);

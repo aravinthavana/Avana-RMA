@@ -47,27 +47,7 @@ const defaultSteps: TestStep[] = [
     { stepNo: 4, name: 'Alarm Test', criterion: 'All alarms trigger correctly', unit: '-', result: '', isOk: true },
 ];
 
-const ar8330fSteps: TestStep[] = [
-    { stepNo: 1, name: 'Serial Number Check\nDoes the lasered serial number match the documentation?', criterion: '', unit: '', result: '', isOk: false },
-    { stepNo: 2, name: 'Locking Pin Mechanism\nDoes the locking pin mechanism work properly? (with test gage IG-0026)', criterion: '', unit: '', result: '', isOk: false },
-    { stepNo: 3, name: 'Shaver Handpiece Condition\nIs the device free of any damage and dirt? (incl. silicone warranty seal)', criterion: '', unit: '', result: '', isOk: false },
-    { stepNo: 4, name: 'Suction Valve\nCan the suction valve be operated smoothly back and forth?', criterion: '', unit: '', result: '', isOk: false },
-    { stepNo: 5, name: 'O-Ring\nIs the O-ring properly seated on the connector?', criterion: '', unit: '', result: '', isOk: false },
-    { stepNo: 6, name: 'Water Bubble Leak Test\nDid the leak test pass? (according to work instruction WI-000101081)', criterion: '', unit: '', result: '', isOk: false },
-    { stepNo: 7, name: 'Shaver Blade\nCan a shaver blade be inserted smoothly and locked properly?', criterion: '', unit: '', result: '', isOk: false },
-    { stepNo: 8, name: 'F-Shaver Handpiece Function\nIs the device working properly? (no abnormal noise)', criterion: '', unit: '', result: '', isOk: false },
-];
-
-const ar8332hSteps: TestStep[] = [
-    { stepNo: 1, name: 'Serial Number Check\nDoes the lasered serial number match the documentation?', criterion: '', unit: '', result: '', isOk: false },
-    { stepNo: 2, name: 'Locking Pin Mechanism\nDoes the locking pin mechanism work properly? (with test gage IG-0026)', criterion: '', unit: '', result: '', isOk: false },
-    { stepNo: 3, name: 'Shaver Handpiece Condition\nIs the device free of any damage and dirt? (incl. silicone warranty seal)', criterion: '', unit: '', result: '', isOk: false },
-    { stepNo: 4, name: 'Suction Valve\nCan the suction valve be operated smoothly back and forth?', criterion: '', unit: '', result: '', isOk: false },
-    { stepNo: 5, name: 'O-Ring\nIs the O-ring properly seated on the connector?', criterion: '', unit: '', result: '', isOk: false },
-    { stepNo: 6, name: 'Water Bubble Leak Test\nDid the leak test pass? (according to work instruction WI-000101081)', criterion: '', unit: '', result: '', isOk: false },
-    { stepNo: 7, name: 'Shaver Blade\nCan a shaver blade be inserted smoothly and locked properly?', criterion: '', unit: '', result: '', isOk: false },
-    { stepNo: 8, name: 'H-Shaver Handpiece Function\nIs the device working properly? (hand control buttons, no abnormal noise)', criterion: '', unit: '', result: '', isOk: false },
-];
+// Note: Default templates will now be fetched from API instead of hardcoded
 
 const defaultEquipment: TestEquipment[] = [
     { id: '', name: '' },
@@ -99,24 +79,51 @@ const TestReportModal: React.FC<Props> = ({
     });
     const [equipment, setEquipment] = useState<TestEquipment[]>(defaultEquipment);
     const [steps, setSteps] = useState<TestStep[]>(defaultSteps);
+    const [equipmentTemplates, setEquipmentTemplates] = useState<any[]>([]);
+
+    useEffect(() => {
+        // Fetch equipment templates
+        apiClient.get('/api/templates/equipment')
+            .then(res => {
+                setEquipmentTemplates((res.data as any).data || []);
+            })
+            .catch(err => console.error('Failed to fetch equipment templates:', err));
+    }, []);
 
     useEffect(() => {
         if (!existingReport && initialDeviceType) {
-            if (initialDeviceType.startsWith('AR-8330F')) {
-                setSteps(ar8330fSteps);
-            } else if (initialDeviceType.startsWith('AR-8332H')) {
-                setSteps(ar8332hSteps);
-            }
             // Attempt to fetch article name to combine with articleNo
-            apiClient.get<{ id: string, articleNo: string, name: string | null }[]>('/api/articles')
+            apiClient.get('/api/articles')
                 .then(res => {
-                    const articles = res.data || [];
+                    const articles = (res.data as any).data || res.data || [];
                     const found = (articles as any[]).find(a => a.articleNo === initialDeviceType);
                     if (found && found.name) {
                         setForm(f => ({ ...f, deviceType: `${initialDeviceType} - ${found.name}` }));
                     }
                 })
                 .catch(err => console.error('Failed to fetch articles:', err));
+                
+            // Fetch test step templates
+            apiClient.get(`/api/templates/test-steps/${initialDeviceType}`)
+                .then(res => {
+                    const templateSteps = (res.data as any).data || [];
+                    if (templateSteps.length > 0) {
+                        setSteps(templateSteps.map((s: any) => ({
+                            stepNo: s.stepNo,
+                            name: s.name,
+                            criterion: s.criterion || '',
+                            unit: '',
+                            result: '',
+                            isOk: true
+                        })));
+                    } else {
+                        setSteps(defaultSteps);
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to fetch test step templates:', err);
+                    setSteps(defaultSteps);
+                });
         }
     }, [initialDeviceType, existingReport]);
 
@@ -144,7 +151,20 @@ const TestReportModal: React.FC<Props> = ({
     const addEquipment = () => setEquipment(prev => [...prev, { id: '', name: '' }]);
     const removeEquipment = (idx: number) => setEquipment(prev => prev.filter((_, i) => i !== idx));
     const updateEquipment = (idx: number, field: keyof TestEquipment, value: string) => {
-        setEquipment(prev => prev.map((e, i) => i === idx ? { ...e, [field]: value } : e));
+        setEquipment(prev => prev.map((e, i) => {
+            if (i === idx) {
+                const updated = { ...e, [field]: value };
+                // Auto-fill name if a template ID is selected
+                if (field === 'id') {
+                    const template = equipmentTemplates.find(t => t.equipmentId === value);
+                    if (template && !e.name) {
+                        updated.name = template.name;
+                    }
+                }
+                return updated;
+            }
+            return e;
+        }));
     };
 
     // --- Step handlers ---
@@ -238,8 +258,8 @@ const TestReportModal: React.FC<Props> = ({
                                     <input className={inputClass} required value={form.kindOfTest} onChange={e => setForm({ ...form, kindOfTest: e.target.value })} placeholder="e.g. Safety & Functional Test" />
                                 </div>
                                 <div>
-                                    <label className={labelClass}>Device Type *</label>
-                                    <input className={inputClass} required value={form.deviceType} onChange={e => setForm({ ...form, deviceType: e.target.value })} placeholder="e.g. Infusion Pump" />
+                                    <label className={labelClass}>Device Type / Name</label>
+                                    <input className={`${inputClass} bg-slate-100 cursor-not-allowed`} readOnly value={form.deviceType} title="Fetched automatically from RMA device" />
                                 </div>
                                 <div>
                                     <label className={labelClass}>Mains Connection *</label>
@@ -271,7 +291,13 @@ const TestReportModal: React.FC<Props> = ({
                                     <div key={idx} className="flex gap-3 items-center">
                                         <div className="flex-1">
                                             <label className={labelClass}>Equipment ID / Serial No.</label>
-                                            <input className={inputClass} value={eq.id} onChange={e => updateEquipment(idx, 'id', e.target.value)} placeholder="e.g. FLUKE-ESA620-001" />
+                                            <input 
+                                                className={inputClass} 
+                                                value={eq.id} 
+                                                onChange={e => updateEquipment(idx, 'id', e.target.value)} 
+                                                placeholder="e.g. FLUKE-ESA620-001" 
+                                                list="equipment-templates-list"
+                                            />
                                         </div>
                                         <div className="flex-[2]">
                                             <label className={labelClass}>Equipment Name / Description</label>
@@ -294,6 +320,11 @@ const TestReportModal: React.FC<Props> = ({
                                     <PlusIcon className="w-4 h-4" /> Add Equipment
                                 </button>
                             </div>
+                            <datalist id="equipment-templates-list">
+                                {equipmentTemplates.map(t => (
+                                    <option key={t.id} value={t.equipmentId}>{t.name}</option>
+                                ))}
+                            </datalist>
                         </section>
 
                         <div className="border-t border-slate-100" />

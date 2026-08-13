@@ -46,15 +46,15 @@ export class UserController {
             }
 
             // Prevent self-demotion
-            if (userToUpdate.id === currentUser.id && req.body.role && req.body.role !== 'ADMIN') {
+            if (userToUpdate.id === currentUser.id && req.body.isAdmin === false) {
                 return res.status(403).json({
                     success: false,
-                    error: 'Cannot change your own role'
+                    error: 'Cannot remove your own admin access'
                 });
             }
 
             // Prevent demoting last admin
-            if (userToUpdate.role === 'ADMIN' && req.body.role === 'USER') {
+            if ((userToUpdate.isAdmin || userToUpdate.role === 'ADMIN') && req.body.isAdmin === false) {
                 const adminCount = await this.userService.getAdminCount();
                 if (adminCount <= 1) {
                     return res.status(403).json({
@@ -90,7 +90,7 @@ export class UserController {
             }
 
             // Prevent deactivating last admin
-            if (userToToggle.role === 'ADMIN' && req.body.isActive === false) {
+            if ((userToToggle.isAdmin || userToToggle.role === 'ADMIN') && req.body.isActive === false) {
                 const adminCount = await this.userService.getAdminCount();
                 if (adminCount <= 1) {
                     return res.status(403).json({

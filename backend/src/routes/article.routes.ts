@@ -8,5 +8,7 @@ router.use(authenticate); // Require authentication for all article routes
 
 router.get('/', articleController.getArticles);
 router.post('/', articleController.createArticle);
+router.put('/:id', articleController.updateArticle);
+router.delete('/:id', articleController.deleteArticle);
 
 export default router;

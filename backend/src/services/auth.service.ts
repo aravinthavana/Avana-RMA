@@ -55,7 +55,7 @@ export class AuthService {
      */
     private generateToken(user: User): string {
         return jwt.sign(
-            { id: user.id, email: user.email, role: user.role },
+            { id: user.id, email: user.email, role: user.role, isAdmin: user.isAdmin },
             this.getJwtSecret(),
             { expiresIn: JWT_EXPIRES_IN }
         );

@@ -20,6 +20,7 @@ import AuditLogsPage from './src/pages/AuditLogsPage';
 import ForgotPassword from './src/pages/ForgotPassword';
 import ResetPassword from './src/pages/ResetPassword';
 import ProfilePage from './src/pages/ProfilePage';
+import TemplateManagement from './src/pages/TemplateManagement';
 
 // Context Providers
 import { CustomerProvider, useCustomerContext } from './src/context/CustomerContext';
@@ -139,13 +140,14 @@ const AppContent: FC = () => {
 
   // -- Navigation Helpers --
 
-  const handleNavigate = (view: 'rma' | 'customer' | 'dashboard' | 'users' | 'logs' | 'profile') => {
+  const handleNavigate = (view: 'rma' | 'customer' | 'dashboard' | 'users' | 'logs' | 'profile' | 'templates' | any) => {
     if (view === 'rma') navigate('/rmas');
     if (view === 'customer') navigate('/customers');
     if (view === 'dashboard') navigate('/');
     if (view === 'users') navigate('/users');
     if (view === 'logs') navigate('/system-logs');
     if (view === 'profile') navigate('/profile');
+    if (view === 'templates') navigate('/templates');
   }
 
   const getBreadcrumbs = (): BreadcrumbItem[] => {
@@ -190,6 +192,7 @@ const AppContent: FC = () => {
     if (location.pathname.includes('users')) return 'users';
     if (location.pathname.includes('system-logs')) return 'logs';
     if (location.pathname.includes('profile')) return 'profile';
+    if (location.pathname.includes('templates')) return 'templates' as any;
     return 'dashboard';
   };
 
@@ -246,6 +249,9 @@ const AppContent: FC = () => {
                 } />
                 <Route path="/profile" element={
                   <ProfilePage />
+                } />
+                <Route path="/templates" element={
+                  <TemplateManagement />
                 } />
               </Routes>
 

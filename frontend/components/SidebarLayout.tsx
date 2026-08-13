@@ -6,8 +6,8 @@ import { NotificationBell } from './NotificationBell';
 
 interface SidebarLayoutProps {
     children: React.ReactNode;
-    activeView: 'dashboard' | 'rma' | 'customer' | 'users' | 'logs' | 'profile';
-    onNavigate: (view: 'rma' | 'customer' | 'users' | 'dashboard' | 'logs' | 'profile') => void;
+    activeView: 'dashboard' | 'rma' | 'customer' | 'users' | 'logs' | 'profile' | 'templates';
+    onNavigate: (view: 'rma' | 'customer' | 'users' | 'dashboard' | 'logs' | 'profile' | 'templates') => void;
     onGoHome?: () => void;
 }
 
@@ -26,7 +26,8 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeVi
         { id: 'home' as const, label: 'Dashboard', icon: HomeIcon, callback: onGoHome },
         { id: 'rma' as const, label: 'RMAs', icon: WrenchScrewdriverIcon, callback: () => onNavigate('rma') },
         { id: 'customer' as const, label: 'Customers', icon: BuildingOffice2Icon, callback: () => onNavigate('customer') },
-        ...(user?.role === 'ADMIN' ? [
+        ...(user?.isAdmin || user?.role === 'ADMIN' ? [
+            { id: 'templates' as const, label: 'Master Data', icon: WrenchScrewdriverIcon, callback: () => onNavigate('templates' as any) },
             { id: 'users' as const, label: 'Users', icon: BuildingOffice2Icon, callback: () => onNavigate('users') },
             { id: 'logs' as const, label: 'System Logs', icon: WrenchScrewdriverIcon, callback: () => window.location.href = '/system-logs' }
         ] : []),

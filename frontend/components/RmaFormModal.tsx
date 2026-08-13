@@ -128,7 +128,7 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
     setIsSavingNewArticle(true);
     try {
       const res = await apiClient.post('/api/articles', newArticleData);
-      const savedArticle = (res as any).data;
+      const savedArticle = (res as any).data.data || (res as any).data;
       setArticles(prev => [...prev, savedArticle]);
       if (activeDeviceIndexForNewArticle !== null) {
         handleDeviceChange(activeDeviceIndexForNewArticle, 'articleNumber', savedArticle.articleNo);
@@ -150,7 +150,7 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
     if (isOpen) {
       apiClient.get<{ id: string, articleNo: string, name: string | null }[]>('/api/articles')
         .then(res => {
-          if (res.data) setArticles(res.data as any);
+          if (res.data) setArticles((res.data as any).data || res.data);
         })
         .catch(err => console.error('Failed to fetch articles:', err));
     }
@@ -697,8 +697,8 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
                 <label className="block text-sm font-medium text-slate-700 mb-1">Article Number <span className="text-red-500">*</span></label>
                 <input type="text" value={newArticleData.articleNo} onChange={e => setNewArticleData(p => ({...p, articleNo: e.target.value}))} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" placeholder="e.g. AR-8330F" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Article Name</label>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name of AR No.</label>
                 <input type="text" value={newArticleData.name} onChange={e => setNewArticleData(p => ({...p, name: e.target.value}))} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" placeholder="e.g. Shaver Handpiece Footswitch Control" />
               </div>
             </div>

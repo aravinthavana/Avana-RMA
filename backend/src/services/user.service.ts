@@ -81,7 +81,7 @@ export class UserService {
 
     async getAdminCount(): Promise<number> {
         const users = await this.userRepository.findAll();
-        return users.filter(u => u.role === 'ADMIN').length;
+        return users.filter(u => u.isAdmin || u.role === 'ADMIN').length;
     }
 }
 
