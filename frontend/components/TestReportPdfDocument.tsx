@@ -8,8 +8,8 @@ const styles = StyleSheet.create({
         fontFamily: 'Helvetica',
         fontSize: 9,
         backgroundColor: '#ffffff',
-        paddingTop: 20,
-        paddingBottom: 25,
+        paddingTop: 15,
+        paddingBottom: 20,
         paddingHorizontal: 25,
         color: '#1a1a1a',
     },
@@ -19,8 +19,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'flex-start',
         borderBottom: '2.5px solid #b27f0d',
-        paddingBottom: 10,
-        marginBottom: 14,
+        paddingBottom: 6,
+        marginBottom: 10,
     },
     companyName: {
         fontSize: 13,
@@ -70,20 +70,20 @@ const styles = StyleSheet.create({
         borderRightWidth: 1,
         borderBottomWidth: 1,
         borderColor: '#d1d5db',
-        padding: '4 7',
+        padding: '3 6',
     },
     infoCellHalf: {
         width: '50%',
         borderRightWidth: 1,
         borderBottomWidth: 1,
         borderColor: '#d1d5db',
-        padding: '4 7',
+        padding: '3 6',
     },
     infoCellFull: {
         width: '100%',
         borderBottomWidth: 1,
         borderColor: '#d1d5db',
-        padding: '4 7',
+        padding: '3 6',
     },
     infoLabel: {
         fontSize: 7,
@@ -108,7 +108,8 @@ const styles = StyleSheet.create({
         color: '#ffffff',
         fontFamily: 'Helvetica-Bold',
         fontSize: 7.5,
-        paddingHorizontal: 6,
+        paddingHorizontal: 4,
+        paddingVertical: 2,
         textTransform: 'uppercase',
         letterSpacing: 0.3,
     },
@@ -116,7 +117,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         borderBottomWidth: 1,
         borderColor: '#e5e7eb',
-        minHeight: 18,
+        minHeight: 16,
         alignItems: 'center',
     },
     tableRowEven: {
@@ -124,8 +125,8 @@ const styles = StyleSheet.create({
     },
     tableCell: {
         fontSize: 8.5,
-        paddingHorizontal: 6,
-        paddingVertical: 4,
+        paddingHorizontal: 4,
+        paddingVertical: 2,
         color: '#1f2937',
     },
     tableCellCenter: {
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
     },
     // --- Assessment box ---
     assessmentBox: {
-        marginTop: 12,
+        marginTop: 8,
         borderWidth: 1.5,
         borderColor: '#d48a07',
         borderRadius: 4,
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0.5,
     },
     assessmentBody: {
-        padding: 10,
+        padding: 6,
         flexDirection: 'row',
         gap: 20,
     },
@@ -189,7 +190,7 @@ const styles = StyleSheet.create({
     // --- Signatures ---
     signatureRow: {
         flexDirection: 'row',
-        marginTop: 30,
+        marginTop: 15,
         gap: 20,
     },
     signatureBlock: {
