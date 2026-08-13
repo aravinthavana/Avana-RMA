@@ -603,24 +603,30 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
               </div>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
-                  <label htmlFor={`articleNumber-${index}`} className={labelStyles}>Article Number</label>
-                  <select
-                    id={`articleNumber-${index}`}
-                    value={device.articleNumber}
-                    onChange={e => {
-                      if (e.target.value === 'ADD_NEW') {
-                        setActiveDeviceIndexForNewArticle(index);
-                        setShowNewArticleModal(true);
-                      } else {
-                        handleDeviceChange(index, 'articleNumber', e.target.value);
-                      }
-                    }}
-                    className={`mt-2 ${getInputStyles(false)}`}
-                  >
-                    <option value="" disabled>Select Article No</option>
-                    {articles.map(a => <option key={a.id} value={a.articleNo}>{a.articleNo}</option>)}
-                    <option value="ADD_NEW">+ Add New Article</option>
-                  </select>
+                    <label htmlFor={`articleNumber-${index}`} className={labelStyles}>Article Number</label>
+                    <Select
+                      inputId={`articleNumber-${index}`}
+                      value={device.articleNumber ? { value: device.articleNumber, label: device.articleNumber } : null}
+                      onChange={option => {
+                        if (option && option.value === 'ADD_NEW') {
+                          setActiveDeviceIndexForNewArticle(index);
+                          setShowNewArticleModal(true);
+                        } else {
+                          handleDeviceChange(index, 'articleNumber', option ? option.value : '');
+                        }
+                      }}
+                      className="mt-2 w-full"
+                      classNames={{
+                        control: () => `border-slate-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm rounded-md shadow-sm min-h-[38px]`,
+                      }}
+                      options={[
+                        ...articles.map(a => ({ value: a.articleNo, label: `${a.articleNo}${a.name ? ` - ${a.name}` : ''}` })),
+                        { value: 'ADD_NEW', label: '+ Add New Article' }
+                      ]}
+                      isDisabled={!!preselectedArticleNo}
+                      isClearable
+                      placeholder="Search Article No..."
+                    />
                 </div>
                 <div>
                   <label htmlFor={`serialNumber-${index}`} className={labelStyles}>Serial / Lot Number <span className="text-red-500">*</span></label>
