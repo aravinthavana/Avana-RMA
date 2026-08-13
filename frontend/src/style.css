@@ -207,3 +207,45 @@ select.form-select {
   padding-right: 2.5rem;
   appearance: none;
 }
+
+/* =========================================
+   React-Select Overrides
+   Match the gold primary color scheme
+   ========================================= */
+
+/* Remove the default blue focus border — use gold instead */
+.css-t3ipsp-control,
+.css-t3ipsp-control:hover {
+  border-color: var(--color-primary-500) !important;
+  box-shadow: 0 0 0 1px var(--color-primary-500) !important;
+}
+
+/* Remove browser focus-visible outline on the react-select container */
+[class*="-control"]:focus-within {
+  border-color: var(--color-primary-500) !important;
+  box-shadow: 0 0 0 1px var(--color-primary-500) !important;
+}
+
+/* Remove the golden outline ring that appears on react-select internal elements */
+[class*="-Input"] input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Option hover — light gold background */
+[class*="-option"]:hover,
+[class*="-option--is-focused"] {
+  background-color: var(--color-primary-50) !important;
+  color: var(--color-primary-900) !important;
+}
+
+/* Selected option — gold */
+[class*="-option--is-selected"] {
+  background-color: var(--color-primary-600) !important;
+  color: #fff !important;
+}
+
+/* Clear and dropdown indicator hover */
+[class*="-indicatorContainer"]:hover {
+  color: var(--color-primary-600) !important;
+}
