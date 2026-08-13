@@ -325,7 +325,7 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                 {/* ---- TEST RESULTS ---- */}
                 <View style={styles.sectionHeader}><Text>Test Results</Text></View>
                 <View style={{ borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 3 }}>
-                    <View style={styles.tableHeader}>
+                    <View style={styles.tableHeader} fixed>
                         <Text style={[styles.tableHeaderCell, { width: stepColWidths[0] }]}>Sl. No.</Text>
                         <Text style={[styles.tableHeaderCell, { width: stepColWidths[1] }]}>Test Step</Text>
                         <Text style={[styles.tableHeaderCell, { width: stepColWidths[2] }]}>Criterion</Text>
@@ -339,7 +339,7 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                         const question = parts.slice(1).join('\n') || '';
 
                         return (
-                            <View key={idx} style={[idx % 2 === 1 ? styles.tableRowEven : {}, { borderBottomWidth: 1, borderColor: '#e5e7eb' }]}>
+                            <View key={idx} style={[idx % 2 === 1 ? styles.tableRowEven : {}, { borderBottomWidth: 1, borderColor: '#e5e7eb' }]} wrap={false}>
                                 {/* Row 1: Title */}
                                 <View style={{ flexDirection: 'row', minHeight: 22, alignItems: 'center' }}>
                                     <Text style={[styles.tableCell, { width: stepColWidths[0], textAlign: 'center', color: '#6b7280', fontFamily: 'Helvetica-Bold' }]}>{step.stepNo}.</Text>
@@ -393,7 +393,7 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                 </View>
 
                 {/* ---- SIGNATURES ---- */}
-                <View style={styles.signatureRow}>
+                <View style={styles.signatureRow} wrap={false}>
                     <View style={styles.signatureBlock}>
                         <Text style={styles.signatureLabel}>Tested By</Text>
                         <Text style={styles.signatureName}>{report.testerName}</Text>
