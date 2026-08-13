@@ -362,42 +362,48 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                     })}
                 </View>
 
-                {/* ---- OVERALL ASSESSMENT ---- */}
-                <View style={styles.assessmentBox} wrap={false}>
-                    <View style={styles.assessmentHeader}>
-                        <Text style={styles.assessmentHeaderText}>Overall Assessment</Text>
-                    </View>
-                    <View style={styles.assessmentBody}>
-                        <View style={{ alignItems: 'center' }}>
-                            <Text style={
-                                report.overallResult === 'Passed' ? styles.assessmentResultPass :
-                                    report.overallResult === 'Failed' ? styles.assessmentResultFail :
-                                        styles.assessmentResultConditional
-                            }>
-                                {report.overallResult === 'Passed' ? '✓ PASSED' :
-                                    report.overallResult === 'Failed' ? '✗ FAILED' : '⚠ CONDITIONAL'}
-                            </Text>
-                            <Text style={{ fontSize: 7, color: '#6b7280', marginTop: 2 }}>Overall Result</Text>
+                {/* ---- OVERALL ASSESSMENT & SIGNATURES ---- */}
+                <View wrap={false}>
+                    {/* Assessment Box */}
+                    <View style={styles.assessmentBox}>
+                        <View style={styles.assessmentHeader}>
+                            <Text style={styles.assessmentHeaderText}>Overall Assessment</Text>
                         </View>
-                        {report.overallAssessment ? (
-                            <View style={{ flex: 1 }}>
-                                <Text style={styles.infoLabel}>Remarks:</Text>
-                                <Text style={styles.assessmentRemarks}>{report.overallAssessment}</Text>
+                        <View style={styles.assessmentBody}>
+                            <View style={{ alignItems: 'center' }}>
+                                <Text style={
+                                    report.overallResult === 'Passed' ? styles.assessmentResultPass :
+                                        report.overallResult === 'Failed' ? styles.assessmentResultFail :
+                                            styles.assessmentResultConditional
+                                }>
+                                    {report.overallResult === 'Passed' ? '✓ PASSED' :
+                                        report.overallResult === 'Failed' ? '✗ FAILED' : '⚠ CONDITIONAL'}
+                                </Text>
+                                <Text style={{ fontSize: 7, color: '#6b7280', marginTop: 2 }}>Overall Result</Text>
                             </View>
-                        ) : null}
+                            {report.overallAssessment ? (
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.infoLabel}>Remarks:</Text>
+                                    <Text style={styles.assessmentRemarks}>{report.overallAssessment}</Text>
+                                </View>
+                            ) : null}
+                        </View>
                     </View>
-                </View>
 
-                {/* ---- SIGNATURES ---- */}
-                <View style={styles.signatureRow} wrap={false}>
-                    <View style={styles.signatureBlock}>
-                        <Text style={styles.signatureLabel}>Tested By</Text>
-                        <Text style={styles.signatureName}>{report.testerName}</Text>
+                    {/* Signatures */}
+                    <View style={styles.signatureRow}>
+                        <View style={styles.signatureBlock}>
+                            <Text style={styles.signatureLabel}>Tested By</Text>
+                            <Text style={styles.signatureName}>{report.testerName}</Text>
+                        </View>
                     </View>
                 </View>
 
                 {/* ---- FOOTER ---- */}
-                <View style={[styles.footer, { justifyContent: 'flex-end' }]} fixed>
+                <View style={[styles.footer, { justifyContent: 'space-between' }]} fixed>
+                    <Text style={styles.footerText} render={({ pageNumber, totalPages }) => (
+                        totalPages > 1 ? `Page ${pageNumber} of ${totalPages}` : ''
+                    )} />
                     <Text style={styles.footerText}>
                         Generated: {new Date().toLocaleDateString('en-GB')}
                     </Text>
