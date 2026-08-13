@@ -14,6 +14,8 @@ const UserManagement: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [editUserId, setEditUserId] = useState<string | null>(null);
 
     useEffect(() => {
         if (user && !(user.isAdmin || user.role === 'ADMIN')) {
@@ -66,15 +68,44 @@ const UserManagement: React.FC = () => {
     const handleCreateUser = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await apiClient.post('/api/users', formData);
-            toast.success('User created successfully');
+            if (isEditMode && editUserId) {
+                // Update existing user
+                const { password, ...updateData } = formData;
+                await apiClient.put(`/api/users/${editUserId}`, updateData);
+                toast.success('User updated successfully');
+            } else {
+                // Create new user
+                await apiClient.post('/api/users', formData);
+                toast.success('User created successfully');
+            }
             setIsModalOpen(false);
             fetchUsers(); // Refresh list
             setFormData({ name: '', email: '', password: '', role: 'SERVICE_ENGINEER', isAdmin: false, isActive: true });
         } catch (error) {
-            console.error('Create user error:', error);
-            toast.error('Failed to create user');
+            console.error('Save user error:', error);
+            toast.error(`Failed to ${isEditMode ? 'update' : 'create'} user`);
         }
+    };
+
+    const openEditModal = (user: User) => {
+        setFormData({
+            name: user.name,
+            email: user.email,
+            password: '', // Leave blank, password change handled elsewhere
+            role: user.role,
+            isAdmin: user.isAdmin,
+            isActive: user.isActive
+        });
+        setEditUserId(user.id);
+        setIsEditMode(true);
+        setIsModalOpen(true);
+    };
+
+    const openCreateModal = () => {
+        setFormData({ name: '', email: '', password: '', role: 'SERVICE_ENGINEER', isAdmin: false, isActive: true });
+        setEditUserId(null);
+        setIsEditMode(false);
+        setIsModalOpen(true);
     };
 
     const toggleUserStatus = async (user: User) => {
@@ -122,7 +153,7 @@ const UserManagement: React.FC = () => {
                     <p className="text-slate-500">Manage system access and roles</p>
                 </div>
                 <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={openCreateModal}
                     className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors shadow-md"
                 >
                     <UserPlus className="w-5 h-5" />
@@ -174,6 +205,13 @@ const UserManagement: React.FC = () => {
                                         {user.isActive ? <Ban className="w-5 h-5" /> : <CheckCircle className="w-5 h-5" />}
                                     </button>
                                     <button
+                                        onClick={() => openEditModal(user)}
+                                        title="Edit User"
+                                        className="p-1 rounded hover:bg-slate-100 text-blue-600"
+                                    >
+                                        <Pencil className="w-5 h-5" />
+                                    </button>
+                                    <button
                                         onClick={() => {
                                             setSelectedUser(user);
                                             setIsResetPasswordModalOpen(true);
@@ -211,7 +249,7 @@ const UserManagement: React.FC = () => {
                         className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden"
                     >
                         <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                            <h3 className="text-lg font-bold text-slate-900">Create New User</h3>
+                            <h3 className="text-lg font-bold text-slate-900">{isEditMode ? 'Edit User' : 'Create New User'}</h3>
                             <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">✕</button>
                         </div>
                         <form onSubmit={handleCreateUser} className="p-6 space-y-4">
@@ -235,16 +273,18 @@ const UserManagement: React.FC = () => {
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                                <input
-                                    type="password"
-                                    required
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-                                    value={formData.password}
-                                    onChange={e => setFormData({ ...formData, password: e.target.value })}
-                                />
-                            </div>
+                            {!isEditMode && (
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                                    <input
+                                        type="password"
+                                        required
+                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                                        value={formData.password}
+                                        onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                    />
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
                                 <select
@@ -269,19 +309,19 @@ const UserManagement: React.FC = () => {
                                     Grant Admin Access (Full System Permissions)
                                 </label>
                             </div>
-                            <div className="pt-4 flex justify-end gap-3">
+                            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg"
+                                    className="px-4 py-2 text-slate-600 hover:text-slate-900 font-medium"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium"
                                 >
-                                    Create User
+                                    {isEditMode ? 'Save Changes' : 'Create User'}
                                 </button>
                             </div>
                         </form>

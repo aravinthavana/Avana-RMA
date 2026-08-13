@@ -12,6 +12,9 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
 
+// Trust proxy (required for express-rate-limit when behind reverse proxy)
+app.set('trust proxy', 1);
+
 // Security: Add HTTP security headers
 app.use(helmet());
 
