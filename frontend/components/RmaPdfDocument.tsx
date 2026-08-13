@@ -198,11 +198,6 @@ const ModernHeader = ({ rma, documentType, pageNumber, totalPages }: {
   <View style={styles.header}>
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
       <Image src="/avana-logo.png" style={{ height: 50 }} />
-      <View>
-        <Text style={styles.companyName}>AVANA TECHNOLOGY SERVICES</Text>
-        <Text style={styles.companySubtext}>Medical Device Service & Repair</Text>
-        <Text style={styles.companySubtext}>www.avanamedical.com | support@avanamedical.com</Text>
-      </View>
     </View>
     <View>
       <Text style={styles.reportTitle}>{documentType}</Text>
@@ -241,11 +236,11 @@ const AddressSection = ({ rma }: { rma: Rma }) => (
   </>
 );
 
-// Return Authorization Document
+// Repair Material Authorization Document
 export const ReturnAuthorizationDocument = ({ rma }: { rma: Rma }) => (
   <Document title={`RMA - ${rma.id}`} author="Avana Technology Services">
     <Page size="A4" style={styles.page}>
-      <ModernHeader rma={rma} documentType="RETURN AUTHORIZATION" pageNumber={1} totalPages={1} />
+      <ModernHeader rma={rma} documentType="REPAIR MATERIAL AUTHORIZATION" pageNumber={1} totalPages={1} />
 
       {rma.isInjuryRelated && (
         <View style={styles.safetyAlert} wrap={false}>
@@ -299,7 +294,7 @@ export const ReturnAuthorizationDocument = ({ rma }: { rma: Rma }) => (
 
       <View style={styles.footer} fixed>
         <Text style={styles.footerText}>
-          Avana Technology Services Pvt. Ltd. | Official Return Authorization
+          Avana Technology Services Pvt. Ltd.
         </Text>
         <Text style={styles.footerText}>
           Generated: {new Date().toLocaleDateString('en-GB')} | RMA: {rma.id}
