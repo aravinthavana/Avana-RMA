@@ -33,7 +33,7 @@ export default function TemplateManagement() {
     // Form states
     const [newArticle, setNewArticle] = useState({ articleNo: '', name: '' });
     const [newEquipment, setNewEquipment] = useState({ equipmentId: '', name: '' });
-    const [newStep, setNewStep] = useState({ stepNo: 1, name: '', criterion: '' });
+    const [newStep, setNewStep] = useState({ name: '', criterion: '' });
 
     useEffect(() => {
         if (!isAdmin) return;
@@ -134,9 +134,10 @@ export default function TemplateManagement() {
         if (!newStep.name) return toast.error('Step name required');
         try {
             setIsLoading(true);
-            await apiClient.post('/api/templates/test-steps', { ...newStep, articleNo: selectedArticleNo });
+            const stepNo = steps.length + 1;
+            await apiClient.post('/api/templates/test-steps', { ...newStep, stepNo, articleNo: selectedArticleNo });
             toast.success('Added Step');
-            setNewStep({ stepNo: steps.length + 2, name: '', criterion: '' });
+            setNewStep({ name: '', criterion: '' });
             fetchSteps(selectedArticleNo);
         } catch (err) {
             toast.error('Failed to add step');
@@ -241,26 +242,24 @@ export default function TemplateManagement() {
                     {selectedArticleNo && (
                         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                             <div className="p-5 border-b border-slate-200 bg-slate-50 flex gap-4 items-end flex-wrap">
-                                <div className="w-20">
-                                    <label className="block text-xs font-medium text-slate-700 mb-1">Step No.</label>
-                                    <input type="number" className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" value={newStep.stepNo} onChange={e => setNewStep({...newStep, stepNo: parseInt(e.target.value) || 1})} />
-                                </div>
                                 <div className="flex-[2] min-w-[200px]">
-                                    <label className="block text-xs font-medium text-slate-700 mb-1">Test Name & Question (separated by newline)</label>
-                                    <textarea className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" rows={2} value={newStep.name} onChange={e => setNewStep({...newStep, name: e.target.value})} placeholder="e.g. Serial Number Check&#10;Does it match?" />
+                                    <label className="block text-xs font-medium text-slate-700 mb-1">Test Name</label>
+                                    <input type="text" className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" value={newStep.name} onChange={e => setNewStep({...newStep, name: e.target.value})} placeholder="e.g. Visual Inspection" />
                                 </div>
-                                <div className="flex-1 min-w-[150px]">
-                                    <label className="block text-xs font-medium text-slate-700 mb-1">Criterion Placeholder</label>
-                                    <input className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" value={newStep.criterion} onChange={e => setNewStep({...newStep, criterion: e.target.value})} placeholder="e.g. Yes/No" />
+                                <div className="flex-[3] min-w-[300px]">
+                                    <label className="block text-xs font-medium text-slate-700 mb-1">Question / Criterion</label>
+                                    <input type="text" className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" value={newStep.criterion} onChange={e => setNewStep({...newStep, criterion: e.target.value})} placeholder="e.g. No physical damage" />
                                 </div>
-                                <button onClick={handleAddStep} disabled={isLoading} className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 h-10 mb-0.5">Add Step</button>
+                                <div className="w-auto pb-0.5">
+                                    <button onClick={handleAddStep} disabled={isLoading} className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 whitespace-nowrap">Add Step</button>
+                                </div>
                             </div>
                             <table className="min-w-full divide-y divide-slate-200">
                                 <thead className="bg-slate-50">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-16">No.</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name & Question</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Criterion</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Test Name</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Question / Criterion</th>
                                         <th className="px-6 py-3 text-right"></th>
                                     </tr>
                                 </thead>
