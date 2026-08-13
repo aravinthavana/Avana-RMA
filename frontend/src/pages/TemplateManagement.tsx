@@ -61,7 +61,7 @@ export default function TemplateManagement() {
     const fetchArticles = async () => {
         try {
             const res = await apiClient.get('/api/articles');
-            setArticles((res.data as any).data || res.data || []);
+            setArticles(res.data || []);
         } catch (error) {
             toast.error('Failed to fetch articles');
         }
@@ -70,7 +70,7 @@ export default function TemplateManagement() {
     const fetchEquipment = async () => {
         try {
             const res = await apiClient.get('/api/templates/equipment');
-            setEquipment((res.data as any).data || []);
+            setEquipment(res.data || []);
         } catch (error) {
             toast.error('Failed to fetch equipment');
         }
@@ -79,7 +79,7 @@ export default function TemplateManagement() {
     const fetchSteps = async (articleNo: string) => {
         try {
             const res = await apiClient.get(`/api/templates/test-steps/${articleNo}`);
-            setSteps((res.data as any).data || []);
+            setSteps(res.data || []);
         } catch (error) {
             toast.error('Failed to fetch test steps');
         }

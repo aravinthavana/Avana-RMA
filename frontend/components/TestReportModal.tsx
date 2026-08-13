@@ -106,7 +106,7 @@ const TestReportModal: React.FC<Props> = ({
             // Fetch test step templates
             apiClient.get(`/api/templates/test-steps/${initialDeviceType}`)
                 .then(res => {
-                    const templateSteps = (res.data as any).data || [];
+                    const templateSteps = res.data || [];
                     if (templateSteps.length > 0) {
                         setSteps(templateSteps.map((s: any) => ({
                             stepNo: s.stepNo,
