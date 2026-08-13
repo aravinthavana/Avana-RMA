@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import Select from 'react-select';
+import { useState, useEffect, useRef } from 'react';
 import { Rma, Customer, Device, ServiceCycle, RmaStatus } from '../types';
 import { XMarkIcon, PlusIcon } from './icons';
 import { API_BASE_URL } from '../config';
@@ -567,10 +569,18 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
             {initialData && (
               <div className="mt-4">
                 <label htmlFor="hospital" className={labelStyles}>Hospital</label>
-                <select id="hospital" value={hospital} onChange={e => setHospital(e.target.value)} className={`mt-2 ${getInputStyles(false)}`}>
-                  <option value="" disabled>Select a hospital</option>
-                  {hospitals.map(h => <option key={h} value={h}>{h}</option>)}
-                </select>
+                <Select
+                  id="hospital"
+                  value={hospital ? { value: hospital, label: hospital } : null}
+                  onChange={option => setHospital(option ? option.value : '')}
+                  options={hospitals.map(h => ({ value: h, label: h }))}
+                  className="mt-2"
+                  classNames={{
+                    control: () => `border-slate-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm rounded-md shadow-sm`,
+                  }}
+                  isClearable
+                  placeholder="Select or search a hospital..."
+                />
               </div>
             )}
           </section>

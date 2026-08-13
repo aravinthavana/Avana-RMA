@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import Select from 'react-select';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { testReportsApi, TestReport, TestEquipment, TestStep, CreateTestReportData } from '../src/api/test-reports.api';
 import { apiClient } from '../src/api/client';
@@ -263,7 +265,7 @@ const TestReportModal: React.FC<Props> = ({
                                 </div>
                                 <div>
                                     <label className={labelClass}>Mains Connection *</label>
-                                    <input className={inputClass} required value={form.mainsConnection} onChange={e => setForm({ ...form, mainsConnection: e.target.value })} placeholder="e.g. 220V / 50Hz" />
+                                    <input className={inputClass} value={form.mainsConnection} onChange={e => setForm({ ...form, mainsConnection: e.target.value })} placeholder="e.g. 220V / 50Hz (Optional)" />
                                 </div>
                                 <div>
                                     <label className={labelClass}>Performed By *</label>
@@ -291,12 +293,22 @@ const TestReportModal: React.FC<Props> = ({
                                     <div key={idx} className="flex gap-3 items-center">
                                         <div className="flex-1">
                                             <label className={labelClass}>Equipment ID / Serial No.</label>
-                                            <input 
-                                                className={inputClass} 
-                                                value={eq.id} 
-                                                onChange={e => updateEquipment(idx, 'id', e.target.value)} 
-                                                placeholder="e.g. FLUKE-ESA620-001" 
-                                                list="equipment-templates-list"
+                                            <Select
+                                                value={eq.id ? { value: eq.id, label: eq.id } : null}
+                                                onChange={(option) => {
+                                                    updateEquipment(idx, 'id', option ? option.value : '');
+                                                    if (option) {
+                                                        const t = equipmentTemplates.find(t => t.equipmentId === option.value);
+                                                        if (t) updateEquipment(idx, 'name', t.name);
+                                                    }
+                                                }}
+                                                options={equipmentTemplates.map(t => ({ value: t.equipmentId, label: t.equipmentId + ' - ' + t.name }))}
+                                                className="mt-1"
+                                                classNames={{
+                                                    control: () => `border-slate-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm rounded-md shadow-sm min-h-[38px]`,
+                                                }}
+                                                isClearable
+                                                placeholder="Search equipment ID..."
                                             />
                                         </div>
                                         <div className="flex-[2]">
@@ -320,11 +332,7 @@ const TestReportModal: React.FC<Props> = ({
                                     <PlusIcon className="w-4 h-4" /> Add Equipment
                                 </button>
                             </div>
-                            <datalist id="equipment-templates-list">
-                                {equipmentTemplates.map(t => (
-                                    <option key={t.id} value={t.equipmentId}>{t.name}</option>
-                                ))}
-                            </datalist>
+                            
                         </section>
 
                         <div className="border-t border-slate-100" />
