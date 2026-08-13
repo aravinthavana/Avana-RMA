@@ -623,7 +623,6 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
                         ...articles.map(a => ({ value: a.articleNo, label: `${a.articleNo}${a.name ? ` - ${a.name}` : ''}` })),
                         { value: 'ADD_NEW', label: '+ Add New Article' }
                       ]}
-                      isDisabled={!!preselectedArticleNo}
                       isClearable
                       placeholder="Search Article No..."
                     />
