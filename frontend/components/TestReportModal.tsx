@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
+import CreatableSelect from 'react-select/creatable';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { testReportsApi, TestReport, TestEquipment, TestStep, CreateTestReportData } from '../src/api/test-reports.api';
@@ -87,7 +88,7 @@ const TestReportModal: React.FC<Props> = ({
         // Fetch equipment templates
         apiClient.get('/api/templates/equipment')
             .then(res => {
-                setEquipmentTemplates((res.data as any).data || []);
+                setEquipmentTemplates((res.data as any).data || res.data || []);
             })
             .catch(err => console.error('Failed to fetch equipment templates:', err));
     }, []);
@@ -292,25 +293,33 @@ const TestReportModal: React.FC<Props> = ({
                                 {equipment.map((eq, idx) => (
                                     <div key={idx} className="flex gap-3 items-center">
                                         <div className="flex-1">
-                                            <label className={labelClass}>Test Equipment</label>
-                                            <Select
-                                                value={eq.id ? { value: eq.id, label: eq.name ? `${eq.id} - ${eq.name}` : eq.id } : null}
+                                            <label className={labelClass}>Equipment ID / Serial No.</label>
+                                            <CreatableSelect
+                                                value={eq.id ? { value: eq.id, label: eq.id } : null}
                                                 onChange={(option) => {
                                                     updateEquipment(idx, 'id', option ? option.value : '');
                                                     if (option) {
                                                         const t = equipmentTemplates.find(t => t.equipmentId === option.value);
                                                         if (t) updateEquipment(idx, 'name', t.name);
-                                                    } else {
-                                                        updateEquipment(idx, 'name', '');
                                                     }
                                                 }}
-                                                options={equipmentTemplates.map(t => ({ value: t.equipmentId, label: `${t.equipmentId} - ${t.name}` }))}
+                                                options={equipmentTemplates.map(t => ({ value: t.equipmentId, label: t.equipmentId + ' - ' + t.name }))}
                                                 className="mt-1"
                                                 classNames={{
                                                     control: () => `border-slate-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm rounded-md shadow-sm min-h-[38px]`,
                                                 }}
                                                 isClearable
-                                                placeholder="Search and select equipment..."
+                                                placeholder="Search or type custom ID..."
+                                                formatCreateLabel={(inputValue) => `Use custom ID: "${inputValue}"`}
+                                            />
+                                        </div>
+                                        <div className="flex-[2]">
+                                            <label className={labelClass}>Equipment Name / Description</label>
+                                            <input 
+                                                className={inputClass} 
+                                                value={eq.name} 
+                                                onChange={e => updateEquipment(idx, 'name', e.target.value)} 
+                                                placeholder="e.g. Electrical Safety Analyser" 
                                             />
                                         </div>
                                         <button
