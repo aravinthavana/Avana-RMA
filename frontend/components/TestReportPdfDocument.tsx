@@ -8,9 +8,9 @@ const styles = StyleSheet.create({
         fontFamily: 'Helvetica',
         fontSize: 9,
         backgroundColor: '#ffffff',
-        paddingTop: 20,
-        paddingBottom: 25,
-        paddingHorizontal: 25,
+        paddingTop: 30,
+        paddingBottom: 40,
+        paddingHorizontal: 35,
         color: '#1a1a1a',
     },
     // --- Header ---
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         borderBottomWidth: 1,
         borderColor: '#e5e7eb',
-        minHeight: 18,
+        minHeight: 14,
         alignItems: 'center',
     },
     tableRowEven: {
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     tableCell: {
         fontSize: 8.5,
         paddingHorizontal: 6,
-        paddingVertical: 4,
+        paddingVertical: 2,
         color: '#1f2937',
     },
     tableCellCenter: {
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     // --- Footer ---
     footer: {
         position: 'absolute',
-        bottom: 18,
+        bottom: 25,
         left: 35,
         right: 35,
         borderTopWidth: 1,
@@ -337,12 +337,12 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                         return (
                             <View key={idx} style={[idx % 2 === 1 ? styles.tableRowEven : {}, { borderBottomWidth: 1, borderColor: '#e5e7eb' }]} wrap={false}>
                                 {/* Row 1: Title */}
-                                <View style={{ flexDirection: 'row', minHeight: 22, alignItems: 'center' }}>
+                                <View style={{ flexDirection: 'row', minHeight: 14, alignItems: 'center', marginTop: 2 }}>
                                     <Text style={[styles.tableCell, { width: stepColWidths[0], textAlign: 'center', color: '#6b7280', fontFamily: 'Helvetica-Bold' }]}>{step.stepNo}.</Text>
                                     <Text style={[styles.tableCell, { flex: 1, fontFamily: 'Helvetica-Bold' }]}>{title}</Text>
                                 </View>
                                 {/* Row 2: Details */}
-                                <View style={{ flexDirection: 'row', minHeight: 22, alignItems: 'flex-start', paddingBottom: 4 }}>
+                                <View style={{ flexDirection: 'row', minHeight: 14, alignItems: 'flex-start', paddingBottom: 2 }}>
                                     <View style={{ width: stepColWidths[0] }} /> {/* spacer */}
                                     <Text style={[styles.tableCell, { width: stepColWidths[1], paddingTop: 0 }]}>{question}</Text>
                                     <Text style={[styles.tableCell, { width: stepColWidths[2], paddingTop: 0 }]}>{step.criterion}</Text>
