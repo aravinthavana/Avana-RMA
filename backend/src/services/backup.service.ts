@@ -70,6 +70,8 @@ export class BackupService {
                 reject(new Error(`Failed to start pg_dump process: ${err.message}`));
             });
         });
+    }
+
     /**
      * Restores a PostgreSQL database from a given SQL dump file using psql.
      * WARNING: This is a destructive operation that completely overwrites existing data!
