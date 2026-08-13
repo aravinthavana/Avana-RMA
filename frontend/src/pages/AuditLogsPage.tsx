@@ -26,9 +26,11 @@ const AuditLogsPage: React.FC = () => {
                 entity: entityFilter || undefined
             });
 
-            setLogs(response.data);
-            setTotalPages(response.pagination.totalPages);
-            setTotal(response.pagination.total);
+            setLogs(response.data || []);
+            if (response.pagination) {
+                setTotalPages(response.pagination.totalPages || 1);
+                setTotal(response.pagination.total || 0);
+            }
         } catch (error) {
             console.error('Failed to fetch logs', error);
             toast.error('Failed to load audit logs');
