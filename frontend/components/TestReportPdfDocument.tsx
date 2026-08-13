@@ -333,23 +333,37 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                         <Text style={[styles.tableHeaderCell, { width: stepColWidths[4] }]}>Result</Text>
                         <Text style={[styles.tableHeaderCell, { width: stepColWidths[5], textAlign: 'center' }]}>Pass/Fail</Text>
                     </View>
-                    {steps.map((step, idx) => (
-                        <View key={idx} style={[styles.tableRow, idx % 2 === 1 ? styles.tableRowEven : {}]}>
-                            <Text style={[styles.tableCell, { width: stepColWidths[0], textAlign: 'center', color: '#6b7280' }]}>{step.stepNo}</Text>
-                            <Text style={[styles.tableCell, { width: stepColWidths[1] }]}>{step.name}</Text>
-                            <Text style={[styles.tableCell, { width: stepColWidths[2] }]}>{step.criterion}</Text>
-                            <Text style={[styles.tableCell, { width: stepColWidths[3] }]}>{step.unit}</Text>
-                            <Text style={[styles.tableCell, { width: stepColWidths[4] }]}>{step.result}</Text>
-                            <Text style={[
-                                styles.tableCell,
-                                styles.tableCellCenter,
-                                { width: stepColWidths[5] },
-                                step.isOk ? styles.okPass : styles.okFail
-                            ]}>
-                                {step.isOk ? '✓ PASS' : '✗ FAIL'}
-                            </Text>
-                        </View>
-                    ))}
+                    {steps.map((step, idx) => {
+                        const parts = step.name.split('\n');
+                        const title = parts[0] || '';
+                        const question = parts.slice(1).join('\n') || '';
+
+                        return (
+                            <View key={idx} style={[idx % 2 === 1 ? styles.tableRowEven : {}, { borderBottomWidth: 1, borderColor: '#e5e7eb' }]}>
+                                {/* Row 1: Title */}
+                                <View style={{ flexDirection: 'row', minHeight: 22, alignItems: 'center' }}>
+                                    <Text style={[styles.tableCell, { width: stepColWidths[0], textAlign: 'center', color: '#6b7280', fontFamily: 'Helvetica-Bold' }]}>{step.stepNo}.</Text>
+                                    <Text style={[styles.tableCell, { flex: 1, fontFamily: 'Helvetica-Bold' }]}>{title}</Text>
+                                </View>
+                                {/* Row 2: Details */}
+                                <View style={{ flexDirection: 'row', minHeight: 22, alignItems: 'flex-start', paddingBottom: 4 }}>
+                                    <View style={{ width: stepColWidths[0] }} /> {/* spacer */}
+                                    <Text style={[styles.tableCell, { width: stepColWidths[1], paddingTop: 0 }]}>{question}</Text>
+                                    <Text style={[styles.tableCell, { width: stepColWidths[2], paddingTop: 0 }]}>{step.criterion}</Text>
+                                    <Text style={[styles.tableCell, { width: stepColWidths[3], paddingTop: 0 }]}>{step.unit}</Text>
+                                    <Text style={[styles.tableCell, { width: stepColWidths[4], paddingTop: 0 }]}>{step.result}</Text>
+                                    <Text style={[
+                                        styles.tableCell,
+                                        styles.tableCellCenter,
+                                        { width: stepColWidths[5], paddingTop: 0 },
+                                        step.isOk ? styles.okPass : styles.okFail
+                                    ]}>
+                                        {step.isOk ? '✓ PASS' : '✗ FAIL'}
+                                    </Text>
+                                </View>
+                            </View>
+                        );
+                    })}
                 </View>
 
                 {/* ---- OVERALL ASSESSMENT ---- */}

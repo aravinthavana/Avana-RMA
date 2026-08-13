@@ -48,25 +48,25 @@ const defaultSteps: TestStep[] = [
 ];
 
 const ar8330fSteps: TestStep[] = [
-    { stepNo: 1, name: 'Serial Number Check\nDoes the lasered serial number match the documentation?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
-    { stepNo: 2, name: 'Locking Pin Mechanism\nDoes the locking pin mechanism work properly? (with test gage IG-0026)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
-    { stepNo: 3, name: 'Shaver Handpiece Condition\nIs the device free of any damage and dirt? (incl. silicone warranty seal)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
-    { stepNo: 4, name: 'Suction Valve\nCan the suction valve be operated smoothly back and forth?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
-    { stepNo: 5, name: 'O-Ring\nIs the O-ring properly seated on the connector?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
-    { stepNo: 6, name: 'Water Bubble Leak Test\nDid the leak test pass? (according to work instruction WI-000101081)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
-    { stepNo: 7, name: 'Shaver Blade\nCan a shaver blade be inserted smoothly and locked properly?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
-    { stepNo: 8, name: 'F-Shaver Handpiece Function\nIs the device working properly? (no abnormal noise)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 1, name: 'Serial Number Check\nDoes the lasered serial number match the documentation?', criterion: '', unit: '', result: '', isOk: false },
+    { stepNo: 2, name: 'Locking Pin Mechanism\nDoes the locking pin mechanism work properly? (with test gage IG-0026)', criterion: '', unit: '', result: '', isOk: false },
+    { stepNo: 3, name: 'Shaver Handpiece Condition\nIs the device free of any damage and dirt? (incl. silicone warranty seal)', criterion: '', unit: '', result: '', isOk: false },
+    { stepNo: 4, name: 'Suction Valve\nCan the suction valve be operated smoothly back and forth?', criterion: '', unit: '', result: '', isOk: false },
+    { stepNo: 5, name: 'O-Ring\nIs the O-ring properly seated on the connector?', criterion: '', unit: '', result: '', isOk: false },
+    { stepNo: 6, name: 'Water Bubble Leak Test\nDid the leak test pass? (according to work instruction WI-000101081)', criterion: '', unit: '', result: '', isOk: false },
+    { stepNo: 7, name: 'Shaver Blade\nCan a shaver blade be inserted smoothly and locked properly?', criterion: '', unit: '', result: '', isOk: false },
+    { stepNo: 8, name: 'F-Shaver Handpiece Function\nIs the device working properly? (no abnormal noise)', criterion: '', unit: '', result: '', isOk: false },
 ];
 
 const ar8332hSteps: TestStep[] = [
-    { stepNo: 1, name: 'Serial Number Check\nDoes the lasered serial number match the documentation?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
-    { stepNo: 2, name: 'Locking Pin Mechanism\nDoes the locking pin mechanism work properly? (with test gage IG-0026)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
-    { stepNo: 3, name: 'Shaver Handpiece Condition\nIs the device free of any damage and dirt? (incl. silicone warranty seal)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
-    { stepNo: 4, name: 'Suction Valve\nCan the suction valve be operated smoothly back and forth?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
-    { stepNo: 5, name: 'O-Ring\nIs the O-ring properly seated on the connector?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
-    { stepNo: 6, name: 'Water Bubble Leak Test\nDid the leak test pass? (according to work instruction WI-000101081)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
-    { stepNo: 7, name: 'Shaver Blade\nCan a shaver blade be inserted smoothly and locked properly?', criterion: 'Yes/No', unit: '', result: '', isOk: false },
-    { stepNo: 8, name: 'H-Shaver Handpiece Function\nIs the device working properly? (hand control buttons, no abnormal noise)', criterion: 'Yes/No', unit: '', result: '', isOk: false },
+    { stepNo: 1, name: 'Serial Number Check\nDoes the lasered serial number match the documentation?', criterion: '', unit: '', result: '', isOk: false },
+    { stepNo: 2, name: 'Locking Pin Mechanism\nDoes the locking pin mechanism work properly? (with test gage IG-0026)', criterion: '', unit: '', result: '', isOk: false },
+    { stepNo: 3, name: 'Shaver Handpiece Condition\nIs the device free of any damage and dirt? (incl. silicone warranty seal)', criterion: '', unit: '', result: '', isOk: false },
+    { stepNo: 4, name: 'Suction Valve\nCan the suction valve be operated smoothly back and forth?', criterion: '', unit: '', result: '', isOk: false },
+    { stepNo: 5, name: 'O-Ring\nIs the O-ring properly seated on the connector?', criterion: '', unit: '', result: '', isOk: false },
+    { stepNo: 6, name: 'Water Bubble Leak Test\nDid the leak test pass? (according to work instruction WI-000101081)', criterion: '', unit: '', result: '', isOk: false },
+    { stepNo: 7, name: 'Shaver Blade\nCan a shaver blade be inserted smoothly and locked properly?', criterion: '', unit: '', result: '', isOk: false },
+    { stepNo: 8, name: 'H-Shaver Handpiece Function\nIs the device working properly? (hand control buttons, no abnormal noise)', criterion: '', unit: '', result: '', isOk: false },
 ];
 
 const defaultEquipment: TestEquipment[] = [
@@ -318,65 +318,81 @@ const TestReportModal: React.FC<Props> = ({
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
-                                        {steps.map((step, idx) => (
-                                            <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                                                <td className="px-3 py-2 text-slate-500 text-center font-mono text-xs">{step.stepNo}.</td>
-                                                <td className="px-3 py-2">
-                                                    <textarea
-                                                        className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none resize-none overflow-hidden"
-                                                        value={step.name}
-                                                        onChange={e => updateStep(idx, 'name', e.target.value)}
-                                                        placeholder="Test Name / Question"
-                                                        rows={2}
-                                                    />
-                                                </td>
-                                                <td className="px-3 py-2 align-top">
-                                                    <input
-                                                        className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none"
-                                                        value={step.criterion}
-                                                        onChange={e => updateStep(idx, 'criterion', e.target.value)}
-                                                        placeholder="Criterion"
-                                                    />
-                                                </td>
-                                                <td className="px-3 py-2 align-top">
-                                                    <input
-                                                        className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none"
-                                                        value={step.unit}
-                                                        onChange={e => updateStep(idx, 'unit', e.target.value)}
-                                                        placeholder="Unit"
-                                                    />
-                                                </td>
-                                                <td className="px-3 py-2 align-top">
-                                                    <input
-                                                        className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none"
-                                                        value={step.result}
-                                                        onChange={e => updateStep(idx, 'result', e.target.value)}
-                                                        placeholder="Measured value"
-                                                    />
-                                                </td>
-                                                <td className="px-3 py-2 text-center align-top">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => updateStep(idx, 'isOk', !step.isOk)}
-                                                        className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold transition-colors ${step.isOk
-                                                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                            : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
-                                                            }`}
-                                                    >
-                                                        {step.isOk ? '✓' : ''}
-                                                    </button>
-                                                </td>
-                                                <td className="px-3 py-2 align-top">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeStep(idx)}
-                                                        className="p-1 text-slate-300 hover:text-red-500 transition-colors"
-                                                    >
-                                                        <TrashIcon className="w-4 h-4" />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {steps.map((step, idx) => {
+                                            const parts = step.name.split('\n');
+                                            const title = parts[0] || '';
+                                            const question = parts.slice(1).join('\n') || '';
+                                            return (
+                                                <React.Fragment key={idx}>
+                                                    <tr className="bg-slate-50 border-t border-slate-200">
+                                                        <td className="px-3 py-2 text-slate-500 text-center font-mono text-xs font-bold" rowSpan={2}>{step.stepNo}.</td>
+                                                        <td colSpan={5} className="px-3 pt-2 pb-1 text-xs font-bold text-slate-700">
+                                                            <input
+                                                                className="w-full bg-transparent outline-none font-bold"
+                                                                value={title}
+                                                                onChange={e => updateStep(idx, 'name', `${e.target.value}\n${question}`)}
+                                                                placeholder="Test Name"
+                                                            />
+                                                        </td>
+                                                        <td className="px-3 py-2 align-top text-center" rowSpan={2}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeStep(idx)}
+                                                                className="p-1 text-slate-300 hover:text-red-500 transition-colors"
+                                                            >
+                                                                <TrashIcon className="w-4 h-4" />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    <tr className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                                                        <td className="px-3 py-1 pb-2">
+                                                            <input
+                                                                className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none text-sm text-slate-600"
+                                                                value={question}
+                                                                onChange={e => updateStep(idx, 'name', `${title}\n${e.target.value}`)}
+                                                                placeholder="Question / Detail"
+                                                            />
+                                                        </td>
+                                                        <td className="px-3 py-1 pb-2 align-top">
+                                                            <input
+                                                                className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none"
+                                                                value={step.criterion}
+                                                                onChange={e => updateStep(idx, 'criterion', e.target.value)}
+                                                                placeholder="Yes/No"
+                                                            />
+                                                        </td>
+                                                        <td className="px-3 py-1 pb-2 align-top">
+                                                            <input
+                                                                className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none"
+                                                                value={step.unit}
+                                                                onChange={e => updateStep(idx, 'unit', e.target.value)}
+                                                                placeholder="Unit"
+                                                            />
+                                                        </td>
+                                                        <td className="px-3 py-1 pb-2 align-top">
+                                                            <input
+                                                                className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none"
+                                                                value={step.result}
+                                                                onChange={e => updateStep(idx, 'result', e.target.value)}
+                                                                placeholder="Result"
+                                                            />
+                                                        </td>
+                                                        <td className="px-3 py-1 pb-2 text-center align-top">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => updateStep(idx, 'isOk', !step.isOk)}
+                                                                className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold transition-colors ${step.isOk
+                                                                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                                    : 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                                    }`}
+                                                            >
+                                                                {step.isOk ? '✓' : '✗'}
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </React.Fragment>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                                 <div className="px-4 py-3 bg-slate-50 border-t border-slate-200">
