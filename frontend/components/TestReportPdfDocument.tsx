@@ -8,9 +8,9 @@ const styles = StyleSheet.create({
         fontFamily: 'Helvetica',
         fontSize: 9,
         backgroundColor: '#ffffff',
-        paddingTop: 30,
-        paddingBottom: 40,
-        paddingHorizontal: 35,
+        paddingTop: 20,
+        paddingBottom: 25,
+        paddingHorizontal: 25,
         color: '#1a1a1a',
     },
     // --- Header ---
@@ -51,8 +51,8 @@ const styles = StyleSheet.create({
         fontFamily: 'Helvetica-Bold',
         fontSize: 8,
         padding: '4 8',
-        marginBottom: 6,
-        marginTop: 12,
+        marginBottom: 4,
+        marginTop: 8,
         textTransform: 'uppercase',
         letterSpacing: 0.5,
     },
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         borderBottomWidth: 1,
         borderColor: '#e5e7eb',
-        minHeight: 22,
+        minHeight: 18,
         alignItems: 'center',
     },
     tableRowEven: {
@@ -243,7 +243,7 @@ const formatDate = (dateStr: string) => {
 };
 
 // Column widths for test steps table
-const stepColWidths = ['5%', '28%', '28%', '12%', '16%', '11%'];
+const stepColWidths = ['5%', '46%', '10%', '12%', '16%', '11%'];
 
 const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rmaId }) => {
     const equipment = (report.equipmentUsed || []) as TestEquipment[];
@@ -372,7 +372,7 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                         <Text style={styles.assessmentHeaderText}>Overall Assessment</Text>
                     </View>
                     <View style={styles.assessmentBody}>
-                        <View>
+                        <View style={{ alignItems: 'center' }}>
                             <Text style={
                                 report.overallResult === 'Passed' ? styles.assessmentResultPass :
                                     report.overallResult === 'Failed' ? styles.assessmentResultFail :
@@ -384,7 +384,10 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                             <Text style={{ fontSize: 7, color: '#6b7280', marginTop: 2 }}>Overall Result</Text>
                         </View>
                         {report.overallAssessment ? (
-                            <Text style={styles.assessmentRemarks}>{report.overallAssessment}</Text>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.infoLabel}>Remarks:</Text>
+                                <Text style={styles.assessmentRemarks}>{report.overallAssessment}</Text>
+                            </View>
                         ) : null}
                     </View>
                 </View>

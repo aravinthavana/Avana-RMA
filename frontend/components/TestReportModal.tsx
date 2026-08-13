@@ -325,7 +325,7 @@ const TestReportModal: React.FC<Props> = ({
                                             return (
                                                 <React.Fragment key={idx}>
                                                     <tr className="bg-slate-50 border-t border-slate-200">
-                                                        <td className="px-3 py-2 text-slate-500 text-center font-mono text-xs font-bold" rowSpan={2}>{step.stepNo}.</td>
+                                                        <td className="px-3 py-2 text-slate-500 text-center font-mono text-xs font-bold align-middle" rowSpan={2}>{step.stepNo}.</td>
                                                         <td colSpan={5} className="px-3 pt-2 pb-1 text-xs font-bold text-slate-700">
                                                             <input
                                                                 className="w-full bg-transparent outline-none font-bold"
@@ -334,7 +334,7 @@ const TestReportModal: React.FC<Props> = ({
                                                                 placeholder="Test Name"
                                                             />
                                                         </td>
-                                                        <td className="px-3 py-2 align-top text-center" rowSpan={2}>
+                                                        <td className="px-3 py-2 align-middle text-center" rowSpan={2}>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => removeStep(idx)}
