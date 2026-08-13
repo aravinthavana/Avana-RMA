@@ -83,6 +83,34 @@ const TestReportModal: React.FC<Props> = ({
     const [equipment, setEquipment] = useState<TestEquipment[]>(defaultEquipment);
     const [steps, setSteps] = useState<TestStep[]>(defaultSteps);
     const [equipmentTemplates, setEquipmentTemplates] = useState<any[]>([]);
+    const [showNewEqModal, setShowNewEqModal] = useState(false);
+    const [newEqData, setNewEqData] = useState({ equipmentId: '', name: '' });
+    const [activeEqIdx, setActiveEqIdx] = useState<number | null>(null);
+    const [isSavingNewEq, setIsSavingNewEq] = useState(false);
+
+    const handleSaveNewEquipment = async () => {
+        if (!newEqData.equipmentId || !newEqData.name) return;
+        setIsSavingNewEq(true);
+        try {
+            await apiClient.post('/api/templates/equipment', newEqData);
+            const res = await apiClient.get('/api/templates/equipment');
+            const latest = (res.data as any).data || res.data || [];
+            setEquipmentTemplates(latest);
+            if (activeEqIdx !== null) {
+                updateEquipment(activeEqIdx, 'id', newEqData.equipmentId);
+                updateEquipment(activeEqIdx, 'name', newEqData.name);
+            }
+            setShowNewEqModal(false);
+            setNewEqData({ equipmentId: '', name: '' });
+            setActiveEqIdx(null);
+            toast.success('Equipment added to master data');
+        } catch (error) {
+            console.error('Failed to save equipment', error);
+            toast.error('Failed to save equipment');
+        } finally {
+            setIsSavingNewEq(false);
+        }
+    };
 
     useEffect(() => {
         // Fetch equipment templates
@@ -212,6 +240,7 @@ const TestReportModal: React.FC<Props> = ({
     };
 
     return (
+        <>
         <AnimatePresence>
             <div className="fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto">
                 <motion.div
@@ -291,48 +320,51 @@ const TestReportModal: React.FC<Props> = ({
                             </h3>
                             <div className="space-y-3">
                                 {equipment.map((eq, idx) => (
-                                    <div key={idx} className="flex gap-3 items-center">
+                                    <div key={idx} className="flex gap-3 items-end">
                                         <div className="flex-1">
-                                            <label className={labelClass}>Test Equipment</label>
-                                            <CreatableSelect
-                                                value={eq.id ? { value: eq.id, label: eq.name ? `${eq.id} - ${eq.name}` : eq.id } : null}
+                                            <label className={labelClass}>Equipment ID</label>
+                                            <Select
+                                                value={eq.id ? { value: eq.id, label: eq.id } : null}
                                                 onChange={(option) => {
                                                     if (option) {
                                                         updateEquipment(idx, 'id', option.value);
                                                         const t = equipmentTemplates.find(t => t.equipmentId === option.value);
                                                         if (t) updateEquipment(idx, 'name', t.name);
-                                                        else updateEquipment(idx, 'name', option.value);
+                                                        else updateEquipment(idx, 'name', '');
                                                     } else {
                                                         updateEquipment(idx, 'id', '');
                                                         updateEquipment(idx, 'name', '');
                                                     }
                                                 }}
-                                                onCreateOption={async (inputValue) => {
-                                                    updateEquipment(idx, 'id', inputValue);
-                                                    updateEquipment(idx, 'name', inputValue);
-                                                    try {
-                                                        await apiClient.post('/api/templates/equipment', { equipmentId: inputValue, name: inputValue });
-                                                        const res = await apiClient.get('/api/templates/equipment');
-                                                        setEquipmentTemplates((res.data as any).data || res.data || []);
-                                                        toast.success('Added to master list');
-                                                    } catch (e) {
-                                                        console.error('Failed to auto-save new equipment', e);
-                                                    }
-                                                }}
-                                                options={equipmentTemplates.map(t => ({ value: t.equipmentId, label: `${t.equipmentId} - ${t.name}` }))}
+                                                noOptionsMessage={({ inputValue }) => (
+                                                    <div className="flex items-center justify-between">
+                                                        <span>No equipment found</span>
+                                                        <button type="button" onClick={() => { setActiveEqIdx(idx); setNewEqData({ equipmentId: inputValue, name: '' }); setShowNewEqModal(true); }} className="ml-2 text-sm font-medium text-primary-600 hover:text-primary-800">+ Add New Equipment</button>
+                                                    </div>
+                                                )}
+                                                options={equipmentTemplates.map(t => ({ value: t.equipmentId, label: t.equipmentId }))}
                                                 className="mt-1"
                                                 classNames={{
                                                     control: () => `border-slate-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm rounded-md shadow-sm min-h-[38px]`,
                                                 }}
                                                 isClearable
-                                                placeholder="Search or add equipment..."
-                                                formatCreateLabel={(inputValue) => `+ Add "${inputValue}"`}
+                                                placeholder="Search Equipment ID..."
+                                            />
+                                        </div>
+                                        <div className="flex-1">
+                                            <label className={labelClass}>Equipment Name</label>
+                                            <input 
+                                                className={`${inputClass} bg-slate-50 cursor-not-allowed`} 
+                                                value={eq.name} 
+                                                readOnly
+                                                tabIndex={-1}
+                                                placeholder="Auto-filled from Equipment ID" 
                                             />
                                         </div>
                                         <button
                                             type="button"
                                             onClick={() => removeEquipment(idx)}
-                                            className="mt-5 p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors mb-[2px]"
                                         >
                                             <TrashIcon className="w-4 h-4" />
                                         </button>
@@ -511,6 +543,32 @@ const TestReportModal: React.FC<Props> = ({
                 </motion.div>
             </div>
         </AnimatePresence>
+
+        {/* Add New Equipment Modal */}
+        {showNewEqModal && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[70]" onClick={() => setShowNewEqModal(false)}>
+                <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+                    <h3 className="text-lg font-medium text-slate-900 mb-4">Add New Test Equipment</h3>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Equipment ID <span className="text-red-500">*</span></label>
+                            <input type="text" value={newEqData.equipmentId} onChange={e => setNewEqData(p => ({...p, equipmentId: e.target.value}))} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" placeholder="e.g. FLUKE-001" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Equipment Name <span className="text-red-500">*</span></label>
+                            <input type="text" value={newEqData.name} onChange={e => setNewEqData(p => ({...p, name: e.target.value}))} className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" placeholder="e.g. Electrical Safety Analyser" />
+                        </div>
+                    </div>
+                    <div className="mt-6 flex justify-end space-x-3">
+                        <button type="button" onClick={() => setShowNewEqModal(false)} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50">Cancel</button>
+                        <button type="button" onClick={handleSaveNewEquipment} disabled={!newEqData.equipmentId || !newEqData.name || isSavingNewEq} className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50">
+                            {isSavingNewEq ? 'Saving...' : 'Save Equipment'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     );
 };
 

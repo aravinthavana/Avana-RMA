@@ -544,7 +544,7 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
               <label htmlFor="customer" className={labelStyles}>Customer <span className="text-red-500">*</span></label>
               <div className="mt-2 flex items-center gap-2">
                 <div className="relative grow">
-                    <CreatableSelect
+                    <Select
                       inputId="customer"
                       value={formData.customerId ? { value: formData.customerId, label: customerSearchTerm || 'Selected Customer' } : null}
                       onChange={(option) => {
@@ -556,22 +556,17 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
                               setCustomerSearchTerm('');
                           }
                       }}
-                      onCreateOption={async (inputValue) => {
-                          try {
-                              const res = await apiClient.post('/api/customers', { name: inputValue });
-                              const savedCust = (res as any).data?.data || (res as any).data || { id: inputValue, name: inputValue };
-                              setCustomerOptions(prev => [savedCust, ...prev]);
-                              handleSelectCustomer(savedCust);
-                              toast.success('Added new Customer');
-                          } catch (e) {
-                              console.error('Failed to auto-save new customer', e);
-                          }
-                      }}
                       onInputChange={(value, { action }) => {
                           if (action === 'input-change') {
                               setCustomerSearchTerm(value);
                           }
                       }}
+                      noOptionsMessage={({ inputValue }) => (
+                          <div className="flex items-center justify-between">
+                              <span>No customer found</span>
+                              <button type="button" onClick={() => onAddNewCustomer()} className="ml-2 text-sm font-medium text-primary-600 hover:text-primary-800">+ Add New Customer</button>
+                          </div>
+                      )}
                       options={customerOptions.map(c => ({ value: c.id, label: c.name + (c.contactPerson ? ` (${c.contactPerson})` : '') }))}
                       isDisabled={!!preselectedCustomerId || !!initialData}
                       isLoading={isSearchingCustomers}
@@ -580,8 +575,7 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
                           control: () => `border-slate-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm rounded-md shadow-sm ${!!errors.customerId && !!touched.customerId ? 'border-red-300 ring-red-500' : ''}`,
                       }}
                       isClearable
-                      placeholder="Search or add a customer..."
-                      formatCreateLabel={(inputValue) => `+ Add "${inputValue}"`}
+                      placeholder="Search customer..."
                     />
                 </div>
                 {!preselectedCustomerId && !initialData && (<button type="button" onClick={onAddNewCustomer} title="Add New Customer" className="inline-flex items-center gap-x-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50"><PlusIcon className="h-5 w-5 text-slate-500" /> New</button>)}
@@ -617,31 +611,25 @@ const RmaFormModal: React.FC<RmaFormModalProps> = ({
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
                     <label htmlFor={`articleNumber-${index}`} className={labelStyles}>Article Number</label>
-                    <CreatableSelect
+                    <Select
                       inputId={`articleNumber-${index}`}
                       value={device.articleNumber ? { value: device.articleNumber, label: device.articleNumber } : null}
                       onChange={option => {
                         handleDeviceChange(index, 'articleNumber', option ? option.value : '');
                       }}
-                      onCreateOption={async (inputValue) => {
-                        handleDeviceChange(index, 'articleNumber', inputValue);
-                        try {
-                            const res = await apiClient.post('/api/articles', { articleNo: inputValue });
-                            const savedArticle = (res as any).data?.data || (res as any).data || { articleNo: inputValue };
-                            setArticles(prev => [...prev, savedArticle]);
-                            toast.success('Added new Article Number');
-                        } catch (e) {
-                            console.error('Failed to auto-save new article', e);
-                        }
-                      }}
+                      noOptionsMessage={({ inputValue }) => (
+                          <div className="flex items-center justify-between">
+                              <span>No article found</span>
+                              <button type="button" onClick={() => { setActiveDeviceIndexForNewArticle(index); setNewArticleData(p => ({...p, articleNo: inputValue})); setShowNewArticleModal(true); }} className="ml-2 text-sm font-medium text-primary-600 hover:text-primary-800">+ Add New Article</button>
+                          </div>
+                      )}
                       className="mt-2 w-full"
                       classNames={{
                         control: () => `border-slate-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm rounded-md shadow-sm min-h-[38px]`,
                       }}
                       options={articles.map(a => ({ value: a.articleNo, label: `${a.articleNo}${a.name ? ` - ${a.name}` : ''}` }))}
                       isClearable
-                      placeholder="Search or add Article No..."
-                      formatCreateLabel={(inputValue) => `+ Add "${inputValue}"`}
+                      placeholder="Search Article No..."
                     />
                 </div>
                 <div>
