@@ -286,10 +286,6 @@ const TestReportModal: React.FC<Props> = ({
                                     <input type="date" className={inputClass} required value={form.testDate} onChange={e => setForm({ ...form, testDate: e.target.value })} />
                                 </div>
                                 <div>
-                                    <label className={labelClass}>Kind of Test *</label>
-                                    <input className={inputClass} required value={form.kindOfTest} onChange={e => setForm({ ...form, kindOfTest: e.target.value })} placeholder="e.g. Safety & Functional Test" />
-                                </div>
-                                <div>
                                     <label className={labelClass}>Device Type / Name</label>
                                     <input className={`${inputClass} bg-slate-100 cursor-not-allowed`} readOnly value={form.deviceType} title="Fetched automatically from RMA device" />
                                 </div>

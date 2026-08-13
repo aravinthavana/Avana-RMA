@@ -295,13 +295,9 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                                <Text style={styles.infoLabel}>Performed by</Text>
                                <Text style={styles.infoValue}>{report.performedBy}</Text>
                           </View>
-                          <View style={{ borderBottomWidth: 1, borderColor: '#d1d5db', padding: '4 7' }}>
+                          <View style={{ padding: '4 7' }}>
                                <Text style={styles.infoLabel}>Tester Name</Text>
                                <Text style={styles.infoValue}>{report.testerName}</Text>
-                          </View>
-                          <View style={{ padding: '4 7' }}>
-                               <Text style={styles.infoLabel}>Kind of Test</Text>
-                               <Text style={styles.infoValue}>{report.kindOfTest}</Text>
                           </View>
                      </View>
 

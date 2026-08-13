@@ -226,10 +226,16 @@ select.form-select {
   box-shadow: 0 0 0 1px var(--color-primary-500) !important;
 }
 
-/* Remove the golden outline ring that appears on react-select internal elements */
-[class*="-Input"] input:focus {
+/* Remove ALL inner outlines/rings inside react-select */
+[class*="-Input"] input,
+[class*="-Input"] input:focus,
+[class*="-Input"] input:focus-visible,
+[class*="-control"] *:focus,
+[class*="-control"] *:focus-visible {
   outline: none !important;
   box-shadow: none !important;
+  ring: none !important;
+  border: none !important;
 }
 
 /* Option hover — light gold background */
