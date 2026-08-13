@@ -21,6 +21,7 @@ import ForgotPassword from './src/pages/ForgotPassword';
 import ResetPassword from './src/pages/ResetPassword';
 import ProfilePage from './src/pages/ProfilePage';
 import TemplateManagement from './src/pages/TemplateManagement';
+import DatabaseManagerPage from './src/pages/DatabaseManagerPage';
 
 // Context Providers
 import { CustomerProvider, useCustomerContext } from './src/context/CustomerContext';
@@ -193,6 +194,7 @@ const AppContent: FC = () => {
     if (location.pathname.includes('system-logs')) return 'logs';
     if (location.pathname.includes('profile')) return 'profile';
     if (location.pathname.includes('templates')) return 'templates' as any;
+    if (location.pathname.includes('database')) return 'database' as any;
     return 'dashboard';
   };
 
@@ -246,6 +248,9 @@ const AppContent: FC = () => {
                 } />
                 <Route path="/system-logs" element={
                   <AuditLogsPage />
+                } />
+                <Route path="/database" element={
+                  <DatabaseManagerPage />
                 } />
                 <Route path="/profile" element={
                   <ProfilePage />

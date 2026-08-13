@@ -6,8 +6,8 @@ import { NotificationBell } from './NotificationBell';
 
 interface SidebarLayoutProps {
     children: React.ReactNode;
-    activeView: 'dashboard' | 'rma' | 'customer' | 'users' | 'logs' | 'profile' | 'templates';
-    onNavigate: (view: 'rma' | 'customer' | 'users' | 'dashboard' | 'logs' | 'profile' | 'templates') => void;
+    activeView: 'dashboard' | 'rma' | 'customer' | 'users' | 'logs' | 'profile' | 'templates' | 'database';
+    onNavigate: (view: 'rma' | 'customer' | 'users' | 'dashboard' | 'logs' | 'profile' | 'templates' | 'database') => void;
     onGoHome?: () => void;
 }
 
@@ -29,6 +29,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeVi
         ...(user?.isAdmin || user?.role === 'ADMIN' ? [
             { id: 'templates' as const, label: 'Master Data', icon: WrenchScrewdriverIcon, callback: () => onNavigate('templates' as any) },
             { id: 'users' as const, label: 'Users', icon: BuildingOffice2Icon, callback: () => onNavigate('users') },
+            { id: 'database' as const, label: 'Database Manager', icon: WrenchScrewdriverIcon, callback: () => window.location.href = '/database' },
             { id: 'logs' as const, label: 'System Logs', icon: WrenchScrewdriverIcon, callback: () => window.location.href = '/system-logs' }
         ] : []),
     ];

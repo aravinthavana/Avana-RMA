@@ -18,7 +18,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onNewRma }) => {
     const { rmas } = useRmaContext();
     const { customers } = useCustomerContext();
     const { user } = useAuth();
-    const [isBackingUp, setIsBackingUp] = React.useState(false);
 
     // Navigation handlers
     const onNavigateToRmas = () => navigate('/rmas');
@@ -34,18 +33,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNewRma }) => {
     // Create shallow copy before sorting to avoid mutating state
     const recentRmas = [...rmas].sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()).slice(0, 5);
 
-    const handleBackup = async () => {
-        setIsBackingUp(true);
-        try {
-            await adminApi.downloadDatabaseBackup();
-            toast.success('Database backup downloaded successfully');
-        } catch (error) {
-            toast.error('Failed to download database backup');
-            console.error(error);
-        } finally {
-            setIsBackingUp(false);
-        }
-    };
+
 
     const stats = [
         { label: 'Total RMAs', value: totalRmas, icon: ChartBarIcon, color: 'bg-blue-500', textColor: 'text-blue-600', bgLight: 'bg-blue-50' },
@@ -57,8 +45,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNewRma }) => {
     const quickActions = [
         { label: 'New RMA', onClick: onNewRma, color: 'bg-primary-600 hover:bg-primary-700', icon: '📝', show: true },
         { label: 'View All RMAs', onClick: onNavigateToRmas, color: 'bg-slate-600 hover:bg-slate-700', icon: '📋', show: true },
-        { label: 'Manage Customers', onClick: onNavigateToCustomers, color: 'bg-indigo-600 hover:bg-indigo-700', icon: '👥', show: true },
-        { label: isBackingUp ? 'Exporting...' : 'Backup Database', onClick: handleBackup, color: 'bg-red-600 hover:bg-red-700', icon: '💾', show: user?.role === 'SUPERADMIN' || user?.role === 'ADMIN' },
+        { label: 'Manage Customers', onClick: onNavigateToCustomers, color: 'bg-indigo-600 hover:bg-indigo-700', icon: '👥', show: true }
     ];
 
     return (

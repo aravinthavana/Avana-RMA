@@ -70,6 +70,57 @@ export class BackupService {
                 reject(new Error(`Failed to start pg_dump process: ${err.message}`));
             });
         });
+    /**
+     * Restores a PostgreSQL database from a given SQL dump file using psql.
+     * WARNING: This is a destructive operation that completely overwrites existing data!
+     */
+    async restoreDatabaseBackup(filePath: string): Promise<void> {
+        const databaseUrl = process.env.DATABASE_URL;
+
+        if (!databaseUrl) {
+            throw new Error('DATABASE_URL environment variable is missing.');
+        }
+
+        if (!fs.existsSync(filePath)) {
+            throw new Error(`Backup file not found at path: ${filePath}`);
+        }
+
+        return new Promise((resolve, reject) => {
+            // SECURITY: Use spawn() to prevent shell injection.
+            // psql -d <url> -f <file>
+            const psql = spawn('psql', [
+                databaseUrl,
+                '-f', filePath,
+                // --quiet to suppress massive output during restore
+                '--quiet'
+            ], { stdio: ['ignore', 'ignore', 'pipe'], shell: false });
+
+            let stderrOutput = '';
+            psql.stderr.on('data', (data) => {
+                stderrOutput += data.toString();
+            });
+
+            psql.on('close', (code) => {
+                // If it fails with code != 0, we still reject, though psql may exit 0 even if some statements fail
+                // if ON_ERROR_STOP is not set. For a basic pg_dump restore, this is usually acceptable.
+                if (code !== 0) {
+                    reject(new Error(`psql restore process exited with code ${code}: ${stderrOutput}`));
+                    return;
+                }
+                
+                // If there are significant FATAL errors in stderr, we could optionally throw
+                if (stderrOutput.includes('FATAL:')) {
+                    reject(new Error(`Restore encountered fatal errors: ${stderrOutput}`));
+                    return;
+                }
+
+                resolve();
+            });
+
+            psql.on('error', (err) => {
+                reject(new Error(`Failed to start psql process: ${err.message}`));
+            });
+        });
     }
 }
 
