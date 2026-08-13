@@ -110,8 +110,7 @@ const TestReportModal: React.FC<Props> = ({
                     if (templateSteps.length > 0) {
                         setSteps(templateSteps.map((s: any) => ({
                             stepNo: s.stepNo,
-                            name: s.name,
-                            question: s.question || '',
+                            name: s.question ? `${s.name}\n${s.question}` : s.name,
                             criterion: s.criterion || 'Yes/No',
                             unit: '',
                             result: '',
@@ -169,7 +168,7 @@ const TestReportModal: React.FC<Props> = ({
     };
 
     // --- Step handlers ---
-    const addStep = () => setSteps(prev => [...prev, { stepNo: prev.length + 1, name: '', question: '', criterion: 'Yes/No', unit: '', result: '', isOk: true }]);
+    const addStep = () => setSteps(prev => [...prev, { stepNo: prev.length + 1, name: '', criterion: '', unit: '', result: '', isOk: true }]);
     const removeStep = (idx: number) => {
         setSteps(prev => prev.filter((_, i) => i !== idx).map((s, i) => ({ ...s, stepNo: i + 1 })));
     };
@@ -341,9 +340,8 @@ const TestReportModal: React.FC<Props> = ({
                                     <thead className="bg-slate-50 border-b border-slate-200">
                                         <tr>
                                             <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-10">Sl. No.</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-48">Test Step</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Question</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-32">Criterion</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Test Step</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Criterion</th>
                                             <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-24">Unit</th>
                                             <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-32">Result</th>
                                             <th className="px-3 py-3 text-center text-xs font-semibold text-slate-500 uppercase w-16">OK?</th>
