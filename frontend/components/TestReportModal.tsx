@@ -328,7 +328,7 @@ const TestReportModal: React.FC<Props> = ({
                                                         <td className="px-3 py-2 text-slate-500 text-center font-mono text-xs font-bold align-middle" rowSpan={2}>{step.stepNo}.</td>
                                                         <td colSpan={5} className="px-3 pt-2 pb-1 text-xs font-bold text-slate-700">
                                                             <input
-                                                                className="w-full bg-transparent outline-none font-bold"
+                                                                className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-primary-400 focus:ring-1 focus:ring-primary-400 rounded px-2 py-1 outline-none transition-colors font-bold text-slate-800"
                                                                 value={title}
                                                                 onChange={e => updateStep(idx, 'name', `${e.target.value}\n${question}`)}
                                                                 placeholder="Test Name"
@@ -347,7 +347,7 @@ const TestReportModal: React.FC<Props> = ({
                                                     <tr className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                                                         <td className="px-3 py-1 pb-2">
                                                             <input
-                                                                className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none text-sm text-slate-600"
+                                                                className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-primary-400 focus:ring-1 focus:ring-primary-400 rounded px-2 py-1 outline-none transition-colors text-sm text-slate-600"
                                                                 value={question}
                                                                 onChange={e => updateStep(idx, 'name', `${title}\n${e.target.value}`)}
                                                                 placeholder="Question / Detail"
@@ -355,7 +355,7 @@ const TestReportModal: React.FC<Props> = ({
                                                         </td>
                                                         <td className="px-3 py-1 pb-2 align-top">
                                                             <input
-                                                                className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none"
+                                                                className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-primary-400 focus:ring-1 focus:ring-primary-400 rounded px-2 py-1 outline-none transition-colors"
                                                                 value={step.criterion}
                                                                 onChange={e => updateStep(idx, 'criterion', e.target.value)}
                                                                 placeholder="Yes/No"
@@ -363,7 +363,7 @@ const TestReportModal: React.FC<Props> = ({
                                                         </td>
                                                         <td className="px-3 py-1 pb-2 align-top">
                                                             <input
-                                                                className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none"
+                                                                className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-primary-400 focus:ring-1 focus:ring-primary-400 rounded px-2 py-1 outline-none transition-colors"
                                                                 value={step.unit}
                                                                 onChange={e => updateStep(idx, 'unit', e.target.value)}
                                                                 placeholder="Unit"
@@ -371,7 +371,7 @@ const TestReportModal: React.FC<Props> = ({
                                                         </td>
                                                         <td className="px-3 py-1 pb-2 align-top">
                                                             <input
-                                                                className="w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-primary-400 rounded px-1 py-0.5 outline-none"
+                                                                className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-primary-400 focus:ring-1 focus:ring-primary-400 rounded px-2 py-1 outline-none transition-colors"
                                                                 value={step.result}
                                                                 onChange={e => updateStep(idx, 'result', e.target.value)}
                                                                 placeholder="Result"

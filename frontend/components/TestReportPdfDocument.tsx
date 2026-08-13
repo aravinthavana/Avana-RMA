@@ -243,7 +243,7 @@ const formatDate = (dateStr: string) => {
 };
 
 // Column widths for test steps table
-const stepColWidths = ['5%', '46%', '10%', '12%', '16%', '11%'];
+const stepColWidths = ['5%', '41%', '15%', '12%', '16%', '11%'];
 
 const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rmaId }) => {
     const equipment = (report.equipmentUsed || []) as TestEquipment[];
@@ -367,7 +367,7 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                 </View>
 
                 {/* ---- OVERALL ASSESSMENT ---- */}
-                <View style={styles.assessmentBox}>
+                <View style={styles.assessmentBox} wrap={false}>
                     <View style={styles.assessmentHeader}>
                         <Text style={styles.assessmentHeaderText}>Overall Assessment</Text>
                     </View>
