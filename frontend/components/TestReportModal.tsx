@@ -294,7 +294,7 @@ const TestReportModal: React.FC<Props> = ({
                                     <input className={`${inputClass} bg-slate-100 cursor-not-allowed`} readOnly value={form.deviceType} title="Fetched automatically from RMA device" />
                                 </div>
                                 <div>
-                                    <label className={labelClass}>Mains Connection *</label>
+                                    <label className={labelClass}>Mains Connection</label>
                                     <input className={inputClass} value={form.mainsConnection} onChange={e => setForm({ ...form, mainsConnection: e.target.value })} placeholder="e.g. 220V / 50Hz (Optional)" />
                                 </div>
                                 <div>

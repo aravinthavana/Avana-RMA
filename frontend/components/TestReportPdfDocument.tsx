@@ -282,7 +282,7 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                     </View>
                     <View style={{ padding: '4 7' }}>
                          <Text style={styles.infoLabel}>Mains Connection:</Text>
-                         <Text style={styles.infoValue}>{report.mainsConnection}</Text>
+                         <Text style={styles.infoValue}>{report.mainsConnection || 'N/A'}</Text>
                     </View>
                 </View>
 
