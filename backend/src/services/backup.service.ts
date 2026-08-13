@@ -3,6 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
+import os from 'os';
+
 export class BackupService {
     /**
      * Generates a PostgreSQL database dump using pg_dump.
@@ -18,7 +20,7 @@ export class BackupService {
 
         // Create a secure temporary file path
         const fileName = `backup-${new Date().toISOString().replace(/[:.]/g, '-')}-${uuidv4().substring(0, 8)}.sql`;
-        const tempDir = path.join(process.cwd(), 'temp-backups');
+        const tempDir = path.join(os.tmpdir(), 'avana-backups');
 
         // Ensure temp directory exists
         if (!fs.existsSync(tempDir)) {
