@@ -9,6 +9,13 @@ const PlusIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+
+const PencilIcon = ({ className }: { className?: string }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+    </svg>
+);
+
 const TrashIcon = ({ className }: { className?: string }) => (
     <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
@@ -34,6 +41,8 @@ export default function TemplateManagement() {
     const [newArticle, setNewArticle] = useState({ articleNo: '', name: '' });
     const [newEquipment, setNewEquipment] = useState({ equipmentId: '', name: '' });
     const [newStep, setNewStep] = useState({ name: '', criterion: '' });
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editData, setEditData] = useState<any>({});
 
     useEffect(() => {
         if (!isAdmin) return;
@@ -77,6 +86,36 @@ export default function TemplateManagement() {
     };
 
     // Handlers
+
+    const handleEditStart = (item: any) => {
+        setEditingId(item.id);
+        setEditData({ ...item });
+    };
+
+    const handleEditSave = async (type: 'article' | 'equipment' | 'step') => {
+        try {
+            setIsLoading(true);
+            if (type === 'article') {
+                await apiClient.put(`/api/articles/${editingId}`, editData);
+                toast.success('Updated Article');
+                fetchArticles();
+            } else if (type === 'equipment') {
+                await apiClient.put(`/api/templates/equipment/${editingId}`, editData);
+                toast.success('Updated Equipment');
+                fetchEquipment();
+            } else if (type === 'step') {
+                await apiClient.put(`/api/templates/test-steps/${editingId}`, editData);
+                toast.success('Updated Step');
+                fetchSteps(selectedArticleNo);
+            }
+            setEditingId(null);
+        } catch (err) {
+            toast.error('Failed to update');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleAddArticle = async () => {
         if (!newArticle.articleNo) return toast.error('Article No is required');
         try {
@@ -215,10 +254,24 @@ export default function TemplateManagement() {
                         <tbody className="bg-white divide-y divide-slate-200">
                             {articles.map(a => (
                                 <tr key={a.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{a.articleNo}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{a.name}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
+                                        {editingId === a.id ? <input className="rounded-md border-slate-300 w-full" value={editData.articleNo} onChange={e => setEditData({...editData, articleNo: e.target.value})} /> : a.articleNo}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                        {editingId === a.id ? <input className="rounded-md border-slate-300 w-full" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} /> : a.name}
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button onClick={() => handleDeleteArticle(a.id)} className="text-red-600 hover:text-red-900"><TrashIcon className="w-5 h-5"/></button>
+                                        {editingId === a.id ? (
+                                            <div className="flex gap-2 justify-end">
+                                                <button onClick={() => handleEditSave('article')} className="text-green-600 hover:text-green-900 text-xs">Save</button>
+                                                <button onClick={() => setEditingId(null)} className="text-slate-500 hover:text-slate-700 text-xs">Cancel</button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex gap-2 justify-end">
+                                                <button onClick={() => handleEditStart(a)} className="text-slate-400 hover:text-primary-600"><PencilIcon className="w-5 h-5"/></button>
+                                                <button onClick={() => handleDeleteArticle(a.id)} className="text-red-600 hover:text-red-900"><TrashIcon className="w-5 h-5"/></button>
+                                            </div>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
@@ -235,7 +288,7 @@ export default function TemplateManagement() {
                         <label className="text-sm font-medium text-slate-700">Select Article:</label>
                         <select className="rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" value={selectedArticleNo} onChange={e => setSelectedArticleNo(e.target.value)}>
                             <option value="">-- Select --</option>
-                            {articles.map(a => <option key={a.id} value={a.articleNo}>{a.articleNo} - {a.name}</option>)}
+                            {articles.map(a => <option key={a.id} value={a.articleNo}>{a.articleNo} - {a.name} ({a.stepCount || 0} steps)</option>)}
                         </select>
                     </div>
 
@@ -266,11 +319,27 @@ export default function TemplateManagement() {
                                 <tbody className="bg-white divide-y divide-slate-200">
                                     {steps.map(s => (
                                         <tr key={s.id}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{s.stepNo}</td>
-                                            <td className="px-6 py-4 text-sm text-slate-900 whitespace-pre-line">{s.name}</td>
-                                            <td className="px-6 py-4 text-sm text-slate-500">{s.criterion}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
+                                                {editingId === s.id ? <input type="number" className="rounded-md border-slate-300 w-16" value={editData.stepNo} onChange={e => setEditData({...editData, stepNo: parseInt(e.target.value) || 1})} /> : s.stepNo}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-slate-900 whitespace-pre-line">
+                                                {editingId === s.id ? <input className="rounded-md border-slate-300 w-full" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} /> : s.name}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-slate-500">
+                                                {editingId === s.id ? <input className="rounded-md border-slate-300 w-full" value={editData.criterion} onChange={e => setEditData({...editData, criterion: e.target.value})} /> : s.criterion}
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <button onClick={() => handleDeleteStep(s.id)} className="text-red-600 hover:text-red-900"><TrashIcon className="w-5 h-5"/></button>
+                                                {editingId === s.id ? (
+                                                    <div className="flex gap-2 justify-end">
+                                                        <button onClick={() => handleEditSave('step')} className="text-green-600 hover:text-green-900 text-xs">Save</button>
+                                                        <button onClick={() => setEditingId(null)} className="text-slate-500 hover:text-slate-700 text-xs">Cancel</button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex gap-2 justify-end">
+                                                        <button onClick={() => handleEditStart(s)} className="text-slate-400 hover:text-primary-600"><PencilIcon className="w-5 h-5"/></button>
+                                                        <button onClick={() => handleDeleteStep(s.id)} className="text-red-600 hover:text-red-900"><TrashIcon className="w-5 h-5"/></button>
+                                                    </div>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
@@ -301,10 +370,24 @@ export default function TemplateManagement() {
                         <tbody className="bg-white divide-y divide-slate-200">
                             {equipment.map(e => (
                                 <tr key={e.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{e.equipmentId}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{e.name}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
+                                        {editingId === e.id ? <input className="rounded-md border-slate-300 w-full" value={editData.equipmentId} onChange={evt => setEditData({...editData, equipmentId: evt.target.value})} /> : e.equipmentId}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                        {editingId === e.id ? <input className="rounded-md border-slate-300 w-full" value={editData.name} onChange={evt => setEditData({...editData, name: evt.target.value})} /> : e.name}
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button onClick={() => handleDeleteEquipment(e.id)} className="text-red-600 hover:text-red-900"><TrashIcon className="w-5 h-5"/></button>
+                                        {editingId === e.id ? (
+                                            <div className="flex gap-2 justify-end">
+                                                <button onClick={() => handleEditSave('equipment')} className="text-green-600 hover:text-green-900 text-xs">Save</button>
+                                                <button onClick={() => setEditingId(null)} className="text-slate-500 hover:text-slate-700 text-xs">Cancel</button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex gap-2 justify-end">
+                                                <button onClick={() => handleEditStart(e)} className="text-slate-400 hover:text-primary-600"><PencilIcon className="w-5 h-5"/></button>
+                                                <button onClick={() => handleDeleteEquipment(e.id)} className="text-red-600 hover:text-red-900"><TrashIcon className="w-5 h-5"/></button>
+                                            </div>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

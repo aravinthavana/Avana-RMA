@@ -8,7 +8,15 @@ export const articleController = {
       const articles = await prisma.article.findMany({
         orderBy: { articleNo: 'asc' },
       });
-      res.json({ success: true, data: articles });
+      const stepCounts = await prisma.testStepTemplate.groupBy({
+        by: ['articleNo'],
+        _count: { articleNo: true }
+      });
+      const data = articles.map(a => {
+        const count = stepCounts.find(c => c.articleNo === a.articleNo)?._count.articleNo || 0;
+        return { ...a, stepCount: count };
+      });
+      res.json({ success: true, data });
     } catch (error) {
       console.error('Error fetching articles:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch articles' });
