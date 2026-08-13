@@ -63,10 +63,10 @@ app.use((req, res, next) => {
 });
 
 // Rate limiting configuration
-// General API rate limit: 100 requests per 15 minutes
+// General API rate limit: 5000 requests per 15 minutes
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    max: 5000, // Limit each IP to 5000 requests per windowMs
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
@@ -75,7 +75,7 @@ const apiLimiter = rateLimit({
 // Stricter rate limit for mutating operations (POST, PUT, DELETE)
 const strictLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 50, // Limit each IP to 50 requests per windowMs
+    max: 500, // Limit each IP to 500 requests per windowMs
     message: 'Too many write operations from this IP, please try again later.',
 });
 
