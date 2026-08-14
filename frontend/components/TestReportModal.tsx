@@ -204,6 +204,13 @@ const TestReportModal: React.FC<Props> = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!user?.signatureUrl) {
+            if (!window.confirm('You do not have a digital signature uploaded in your profile. This report will be generated without an E-Sign. Do you want to proceed? (You can upload a signature in your Profile)')) {
+                return;
+            }
+        }
+
         setIsLoading(true);
         try {
             const payload: CreateTestReportData = {
