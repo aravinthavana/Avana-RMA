@@ -121,6 +121,21 @@ const TestReportModal: React.FC<Props> = ({
 
     useEffect(() => {
         if (!existingReport && initialDeviceType) {
+            const draft = localStorage.getItem(`draft-report-${serviceCycleId}`);
+            if (draft) {
+                try {
+                    const parsed = JSON.parse(draft);
+                    if (window.confirm('A saved draft was found for this report. Do you want to load it?')) {
+                        setForm(parsed.form);
+                        setEquipment(parsed.equipment);
+                        setSteps(parsed.steps);
+                        return; // Skip fetching defaults
+                    }
+                } catch(e) {
+                    console.error('Failed to parse draft', e);
+                }
+            }
+
             // Attempt to fetch article name to combine with articleNo
             apiClient.get('/api/articles')
                 .then(res => {
@@ -152,7 +167,7 @@ const TestReportModal: React.FC<Props> = ({
                     setSteps(defaultSteps);
                 });
         }
-    }, [initialDeviceType, existingReport]);
+    }, [initialDeviceType, existingReport, serviceCycleId]);
 
     useEffect(() => {
         if (existingReport) {
@@ -202,16 +217,28 @@ const TestReportModal: React.FC<Props> = ({
         setSteps(prev => prev.map((s, i) => i === idx ? { ...s, [field]: value } : s));
     };
 
+    const handleSaveDraft = () => {
+        const payload = { form, equipment, steps };
+        localStorage.setItem(`draft-report-${serviceCycleId}`, JSON.stringify(payload));
+        toast.success('Draft saved! You can safely close and update your profile.');
+        onClose();
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!user?.signatureUrl) {
-            if (!window.confirm('You do not have a digital signature uploaded in your profile. This report will be generated without an E-Sign. Do you want to proceed? (You can upload a signature in your Profile)')) {
+            if (!window.confirm('You do not have a digital signature uploaded in your profile. This report will be generated without an E-Sign. Do you want to proceed? (You can click "Save Draft", upload your signature in your Profile, and come back)')) {
                 return;
             }
         }
 
         setIsLoading(true);
+        if (user?.signatureUrl) {
+            toast('Digitally Signing...', { icon: '✍️', duration: 1000 });
+            await new Promise(r => setTimeout(r, 1000));
+        }
+        
         try {
             const payload: CreateTestReportData = {
                 ...form,
@@ -232,6 +259,7 @@ const TestReportModal: React.FC<Props> = ({
                 report = (res as any).data;
                 toast.success('Test report created!');
             }
+            localStorage.removeItem(`draft-report-${serviceCycleId}`);
             onSaved(report);
             onClose();
         } catch (err: any) {
@@ -503,16 +531,35 @@ const TestReportModal: React.FC<Props> = ({
                             <button
                                 type="button"
                                 onClick={onClose}
+                                disabled={isLoading}
                                 className="px-5 py-2.5 rounded-lg text-sm font-medium text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors"
                             >
                                 Cancel
                             </button>
+                            {!existingReport && (
+                                <button
+                                    type="button"
+                                    onClick={handleSaveDraft}
+                                    disabled={isLoading}
+                                    className="px-5 py-2.5 rounded-lg text-sm font-medium text-blue-600 border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-colors"
+                                >
+                                    Save Draft
+                                </button>
+                            )}
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm"
+                                className="px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm min-w-[140px] flex justify-center items-center"
                             >
-                                {isLoading ? 'Saving...' : existingReport ? 'Update Report' : 'Create Report'}
+                                {isLoading ? (
+                                    <span className="flex items-center gap-2">
+                                        <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        Saving...
+                                    </span>
+                                ) : existingReport ? 'Update Report' : 'Sign & Submit'}
                             </button>
                         </div>
                     </form>
