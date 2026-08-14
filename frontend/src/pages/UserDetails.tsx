@@ -19,7 +19,8 @@ export default function UserDetails() {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        role: ''
+        role: '',
+        isAdmin: false
     });
 
     // Reset password state
@@ -40,7 +41,8 @@ export default function UserDetails() {
             setFormData({
                 name: data.name,
                 email: data.email,
-                role: data.role
+                role: data.role,
+                isAdmin: data.isAdmin
             });
         } catch (error) {
             console.error('Failed to fetch user', error);
@@ -332,11 +334,23 @@ export default function UserDetails() {
                                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                     className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
                                 >
-                                    <option value="ADMIN">Admin</option>
                                     <option value="MANAGER">Manager</option>
                                     <option value="COORDINATOR">Coordinator</option>
                                     <option value="SERVICE_ENGINEER">Service Engineer</option>
                                 </select>
+                            </div>
+
+                            <div className="flex items-center pt-2">
+                                <input
+                                    type="checkbox"
+                                    id="isAdmin"
+                                    className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                    checked={formData.isAdmin}
+                                    onChange={e => setFormData({ ...formData, isAdmin: e.target.checked })}
+                                />
+                                <label htmlFor="isAdmin" className="ml-2 block text-sm font-medium text-slate-700">
+                                    Has Admin Privileges
+                                </label>
                             </div>
 
                             <div className="pt-4 flex justify-end">

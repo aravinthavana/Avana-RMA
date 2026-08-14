@@ -119,7 +119,6 @@ const UserManagement: React.FC = () => {
                     className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
                 >
                     <option value="">All Roles</option>
-                    <option value="ADMIN">Admin</option>
                     <option value="MANAGER">Manager</option>
                     <option value="COORDINATOR">Coordinator</option>
                     <option value="SERVICE_ENGINEER">Service Engineer</option>

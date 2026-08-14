@@ -132,7 +132,7 @@ export class UserController {
             }
 
             // Prevent deleting last admin
-            if (userToDelete.role === 'ADMIN') {
+            if (userToDelete.isAdmin || userToDelete.role === 'ADMIN') {
                 const adminCount = await this.userService.getAdminCount();
                 if (adminCount <= 1) {
                     return res.status(403).json({
