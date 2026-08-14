@@ -52,10 +52,18 @@ class ApiClient {
             ...options,
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json',
                 ...options.headers,
             },
         };
+
+        // Let the browser set the Content-Type automatically for FormData (multipart/form-data with boundaries)
+        const isFormData = options.body instanceof FormData;
+        if (!isFormData) {
+            const hasContentType = Object.keys(config.headers as object).some(k => k.toLowerCase() === 'content-type');
+            if (!hasContentType) {
+                (config.headers as Record<string, string>)['Content-Type'] = 'application/json';
+            }
+        }
 
         // Attach token — check sessionStorage first (session-only login), then localStorage (remember me)
         const token = sessionStorage.getItem('token') || localStorage.getItem('token');
