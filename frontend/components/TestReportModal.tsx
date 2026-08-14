@@ -510,7 +510,6 @@ const TestReportModal: React.FC<Props> = ({
                                     <select className={inputClass} required value={form.overallResult} onChange={e => setForm({ ...form, overallResult: e.target.value })}>
                                         <option value="Passed">✓ Passed</option>
                                         <option value="Failed">✗ Failed</option>
-                                        <option value="Conditional Pass">⚠ Conditional Pass</option>
                                     </select>
                                 </div>
                                 <div>

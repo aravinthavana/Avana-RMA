@@ -389,12 +389,9 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                             <View style={styles.assessmentResultContainer}>
                                 <Text style={{ fontSize: 9, color: '#6b7280', marginBottom: 4, fontFamily: 'Helvetica-Bold', textTransform: 'uppercase' }}>Overall Test Result</Text>
                                 <Text style={
-                                    report.overallResult === 'Passed' ? styles.assessmentResultPass :
-                                        report.overallResult === 'Failed' ? styles.assessmentResultFail :
-                                            styles.assessmentResultConditional
+                                    report.overallResult === 'Passed' ? styles.assessmentResultPass : styles.assessmentResultFail
                                 }>
-                                    {report.overallResult === 'Passed' ? '✓ PASSED' :
-                                        report.overallResult === 'Failed' ? '✗ FAILED' : '⚠ CONDITIONAL'}
+                                    {report.overallResult === 'Passed' ? '✓ PASSED' : '✗ FAILED'}
                                 </Text>
                             </View>
                         </View>
@@ -405,22 +402,22 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                         <View style={{ flexDirection: 'row', backgroundColor: '#f9fafb' }}>
                             {/* Tester Name */}
                             <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#e5e7eb', padding: '8 10', alignItems: 'center', justifyContent: 'center' }}>
-                                <Text style={[styles.infoValue, { marginBottom: 4, textAlign: 'center' }]}>{report.testerName}</Text>
-                                <Text style={[styles.infoLabel, { textAlign: 'center', marginBottom: 0 }]}>Tester Name</Text>
+                                <Text style={[styles.infoValue, { marginBottom: 4, textAlign: 'center', fontSize: 11 }]}>{report.testerName}</Text>
+                                <Text style={[styles.infoLabel, { textAlign: 'center', marginBottom: 0, fontSize: 8 }]}>Tester Name</Text>
                             </View>
                             {/* Signature */}
                             <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#e5e7eb', padding: '8 10', alignItems: 'center', justifyContent: 'center' }}>
                                 {signatureUrl ? (
-                                    <Image src={`${API_BASE_URL}${signatureUrl}`} style={{ height: 35, objectFit: 'contain', marginBottom: 4 }} />
+                                    <Image src={`${API_BASE_URL}${signatureUrl}`} style={{ height: 40, objectFit: 'contain', marginBottom: 4 }} />
                                 ) : (
-                                    <View style={{ height: 35, marginBottom: 4 }} />
+                                    <View style={{ height: 40, marginBottom: 4 }} />
                                 )}
-                                <Text style={[styles.infoLabel, { textAlign: 'center', marginBottom: 0 }]}>Signature</Text>
+                                <Text style={[styles.infoLabel, { textAlign: 'center', marginBottom: 0, fontSize: 8 }]}>Signature</Text>
                             </View>
                             {/* Date */}
                             <View style={{ flex: 1, padding: '8 10', alignItems: 'center', justifyContent: 'center' }}>
-                                <Text style={[styles.infoValue, { marginBottom: 4, textAlign: 'center' }]}>{formatDate(report.testDate)}</Text>
-                                <Text style={[styles.infoLabel, { textAlign: 'center', marginBottom: 0 }]}>Date</Text>
+                                <Text style={[styles.infoValue, { marginBottom: 4, textAlign: 'center', fontSize: 11 }]}>{formatDate(report.testDate)}</Text>
+                                <Text style={[styles.infoLabel, { textAlign: 'center', marginBottom: 0, fontSize: 8 }]}>Date</Text>
                             </View>
                         </View>
                     </View>
