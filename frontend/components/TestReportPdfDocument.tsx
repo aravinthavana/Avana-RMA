@@ -402,28 +402,25 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
 
                     {/* Signatures */}
                     <View style={{ marginTop: 12, borderWidth: 1.5, borderColor: '#d48a07', borderRadius: 4, overflow: 'hidden' }}>
-                        <View style={{ backgroundColor: '#d48a07', padding: '4 8' }}>
-                            <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', textTransform: 'uppercase', color: '#ffffff' }}>Signatures</Text>
-                        </View>
                         <View style={{ flexDirection: 'row', backgroundColor: '#f9fafb' }}>
                             {/* Tester Name */}
-                            <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#e5e7eb', padding: '8 10' }}>
-                                <Text style={styles.infoLabel}>Tester Name</Text>
-                                <Text style={[styles.infoValue, { marginTop: 4 }]}>{report.testerName}</Text>
+                            <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#e5e7eb', padding: '8 10', alignItems: 'center', justifyContent: 'center' }}>
+                                <Text style={[styles.infoValue, { marginBottom: 4, textAlign: 'center' }]}>{report.testerName}</Text>
+                                <Text style={[styles.infoLabel, { textAlign: 'center', marginBottom: 0 }]}>Tester Name</Text>
                             </View>
                             {/* Signature */}
                             <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#e5e7eb', padding: '8 10', alignItems: 'center', justifyContent: 'center' }}>
-                                <Text style={[styles.infoLabel, { alignSelf: 'flex-start', width: '100%' }]}>Signature (E-Sign)</Text>
                                 {signatureUrl ? (
-                                    <Image src={`${API_BASE_URL}${signatureUrl}`} style={{ height: 35, objectFit: 'contain', marginTop: 4 }} />
+                                    <Image src={`${API_BASE_URL}${signatureUrl}`} style={{ height: 35, objectFit: 'contain', marginBottom: 4 }} />
                                 ) : (
-                                    <View style={{ height: 35, marginTop: 4 }} />
+                                    <View style={{ height: 35, marginBottom: 4 }} />
                                 )}
+                                <Text style={[styles.infoLabel, { textAlign: 'center', marginBottom: 0 }]}>Signature</Text>
                             </View>
                             {/* Date */}
-                            <View style={{ flex: 1, padding: '8 10' }}>
-                                <Text style={styles.infoLabel}>Date Signed</Text>
-                                <Text style={[styles.infoValue, { marginTop: 4 }]}>{formatDate(report.testDate)}</Text>
+                            <View style={{ flex: 1, padding: '8 10', alignItems: 'center', justifyContent: 'center' }}>
+                                <Text style={[styles.infoValue, { marginBottom: 4, textAlign: 'center' }]}>{formatDate(report.testDate)}</Text>
+                                <Text style={[styles.infoLabel, { textAlign: 'center', marginBottom: 0 }]}>Date</Text>
                             </View>
                         </View>
                     </View>
