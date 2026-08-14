@@ -115,13 +115,15 @@ model TestReport {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
+  id               String   @id @default(uuid())
+  email            String   @unique
   password         String   // Hashed
   name             String
   role             String   @default("MANAGER") // "MANAGER", "COORDINATOR", "SERVICE_ENGINEER"
   isAdmin          Boolean  @default(false)
   isActive         Boolean  @default(true)
+  isDeleted        Boolean  @default(false)
+  lastLoginAt      DateTime?
   resetToken       String?
   resetTokenExpiry DateTime?
   signatureUrl     String?  // Optional path to the user's uploaded signature image

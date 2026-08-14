@@ -28,7 +28,7 @@ export class AuthService {
     async login(email: string, password: string): Promise<{ token: string; user: Omit<User, 'password'> }> {
         // Find user by email
         const user = await this.authRepo.findByEmail(email);
-        if (!user) {
+        if (!user || user.isDeleted) {
             throw new Error('Invalid email or password');
         }
 
@@ -43,6 +43,11 @@ export class AuthService {
 
         // Remove password from response
         const { password: _, ...userWithoutPassword } = user;
+
+        // Update last login timestamp in background
+        this.authRepo.update(user.id, { lastLoginAt: new Date() }).catch(err => {
+            console.error('Failed to update lastLoginAt', err);
+        });
 
         return {
             token,
@@ -85,7 +90,7 @@ export class AuthService {
      */
     async forgotPassword(email: string): Promise<void> {
         const user = await this.authRepo.findByEmail(email);
-        if (!user) {
+        if (!user || user.isDeleted) {
             // For security: Don't reveal if user exists or not
             // Silently fail but don't throw error
             return;

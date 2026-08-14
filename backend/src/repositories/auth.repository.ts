@@ -7,8 +7,8 @@ export class AuthRepository {
      * Find user by email
      */
     async findByEmail(email: string): Promise<User | null> {
-        return await prisma.user.findUnique({
-            where: { email },
+        return await prisma.user.findFirst({
+            where: { email, isDeleted: false },
         });
     }
 
@@ -16,8 +16,8 @@ export class AuthRepository {
      * Find user by ID
      */
     async findById(id: string): Promise<User | null> {
-        return await prisma.user.findUnique({
-            where: { id },
+        return await prisma.user.findFirst({
+            where: { id, isDeleted: false },
         });
     }
 

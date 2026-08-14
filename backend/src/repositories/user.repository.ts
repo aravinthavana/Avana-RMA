@@ -4,18 +4,20 @@ import prisma from '../lib/prisma';
 
 export class UserRepository {
     async findAll(): Promise<User[]> {
-        return await prisma.user.findMany();
+        return await prisma.user.findMany({
+            where: { isDeleted: false }
+        });
     }
 
     async findById(id: string): Promise<User | null> {
-        return await prisma.user.findUnique({
-            where: { id }
+        return await prisma.user.findFirst({
+            where: { id, isDeleted: false }
         });
     }
 
     async findByEmail(email: string): Promise<User | null> {
-        return await prisma.user.findUnique({
-            where: { email }
+        return await prisma.user.findFirst({
+            where: { email, isDeleted: false }
         });
     }
 
@@ -33,8 +35,9 @@ export class UserRepository {
     }
 
     async delete(id: string): Promise<User> {
-        return await prisma.user.delete({
-            where: { id }
+        return await prisma.user.update({
+            where: { id },
+            data: { isDeleted: true, isActive: false }
         });
     }
 }

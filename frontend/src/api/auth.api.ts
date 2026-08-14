@@ -7,6 +7,7 @@ export interface User {
     role: string;
     isAdmin?: boolean;
     isActive: boolean;
+    lastLoginAt?: string;
     signatureUrl?: string;
 }
 
