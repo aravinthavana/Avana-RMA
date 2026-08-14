@@ -58,4 +58,11 @@ export const authApi = {
             },
         });
     },
+
+    /**
+     * Remove signature
+     */
+    removeSignature: async (): Promise<ApiResponse<void>> => {
+        return apiClient.delete<void>('/api/auth/profile/signature');
+    },
 };

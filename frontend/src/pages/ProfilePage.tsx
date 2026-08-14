@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { User, Lock, Mail, Shield, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { authApi } from '../api/auth.api';
+import { API_BASE_URL } from '../../config';
 
 const ProfilePage: React.FC = () => {
     const { user } = useAuth();
@@ -99,7 +100,7 @@ const ProfilePage: React.FC = () => {
                         {user?.signatureUrl ? (
                             <div className="bg-white p-4 rounded border border-slate-200">
                                 <img 
-                                    src={`http://localhost:3001${user.signatureUrl}`} 
+                                    src={`${API_BASE_URL}${user.signatureUrl}`} 
                                     alt="My Signature" 
                                     className="max-h-20 object-contain mx-auto mix-blend-multiply" 
                                     onError={(e) => {
@@ -113,7 +114,7 @@ const ProfilePage: React.FC = () => {
                         )}
                         <div>
                             <label className="flex items-center justify-center w-full px-4 py-2 bg-white border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors">
-                                {uploadingSignature ? 'Uploading...' : 'Upload PNG Signature'}
+                                {uploadingSignature ? 'Uploading...' : (user?.signatureUrl ? 'Update PNG Signature' : 'Upload PNG Signature')}
                                 <input 
                                     type="file" 
                                     accept="image/*" 
@@ -123,6 +124,22 @@ const ProfilePage: React.FC = () => {
                                 />
                             </label>
                             <p className="text-xs text-slate-500 mt-2 text-center">Used in Test Reports as your E-Sign.</p>
+                            {user?.signatureUrl && (
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            await authApi.removeSignature();
+                                            toast.success('Signature removed successfully');
+                                            setTimeout(() => window.location.reload(), 1000);
+                                        } catch (e) {
+                                            toast.error('Failed to remove signature');
+                                        }
+                                    }}
+                                    className="mt-3 flex items-center justify-center w-full px-4 py-2 bg-red-50 border border-red-200 rounded-lg shadow-sm text-sm font-medium text-red-600 hover:bg-red-100 cursor-pointer transition-colors"
+                                >
+                                    Remove Signature
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

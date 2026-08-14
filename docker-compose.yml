@@ -54,3 +54,5 @@ volumes:
 networks:
   avana-net:
     driver: bridge
+
+  uploads:

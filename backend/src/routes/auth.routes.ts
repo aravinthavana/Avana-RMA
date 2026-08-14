@@ -62,5 +62,6 @@ router.post('/reset-password', authController.resetPassword);
 // Protected routes
 router.get('/me', authMiddleware, authController.me);
 router.post('/profile/signature', authMiddleware, uploadSignature.single('signature'), authController.uploadSignature);
+router.delete('/profile/signature', authMiddleware, authController.removeSignature);
 
 export default router;

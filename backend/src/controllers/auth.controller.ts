@@ -163,6 +163,26 @@ export class AuthController {
             next(error);
         }
     };
+
+    removeSignature = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const decodedUser = (req as any).user;
+            if (!decodedUser || !decodedUser.id) {
+                res.status(401).json({ error: 'Not authenticated' });
+                return;
+            }
+
+            // Update user in DB
+            await userService.updateUser(decodedUser.id, { signatureUrl: null });
+
+            res.json({
+                success: true,
+                message: 'Signature removed successfully'
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
 }
 
 export default new AuthController();

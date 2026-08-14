@@ -1,6 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { TestReport, TestEquipment, TestStep } from '../src/api/test-reports.api';
+import { API_BASE_URL } from '../config';
 
 // --- Styles ---
 const styles = StyleSheet.create({
@@ -407,7 +408,7 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                         </View>
                         <View style={[styles.signatureBlock, { alignItems: 'center', borderTopWidth: 0, paddingTop: 0, marginTop: -30 }]}>
                             {signatureUrl ? (
-                                <Image src={`http://localhost:3001${signatureUrl}`} style={styles.signatureImage} />
+                                <Image src={`${API_BASE_URL}${signatureUrl}`} style={styles.signatureImage} />
                             ) : (
                                 <View style={{ height: 40, marginBottom: 4 }} />
                             )}
