@@ -13,6 +13,8 @@ const UserManagement: React.FC = () => {
     const navigate = useNavigate();
     const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [roleFilter, setRoleFilter] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [editUserId, setEditUserId] = useState<string | null>(null);
@@ -145,6 +147,13 @@ const UserManagement: React.FC = () => {
         }
     };
 
+    const filteredUsers = users.filter(user => {
+        const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                              user.email.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesRole = roleFilter ? user.role === roleFilter : true;
+        return matchesSearch && matchesRole;
+    });
+
     return (
         <div className="p-8">
             <div className="flex justify-between items-center mb-8">
@@ -161,6 +170,27 @@ const UserManagement: React.FC = () => {
                 </button>
             </div>
 
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <input
+                    type="text"
+                    placeholder="Search by name or email..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+                <select
+                    value={roleFilter}
+                    onChange={(e) => setRoleFilter(e.target.value)}
+                    className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                >
+                    <option value="">All Roles</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="MANAGER">Manager</option>
+                    <option value="COORDINATOR">Coordinator</option>
+                    <option value="SERVICE_ENGINEER">Service Engineer</option>
+                </select>
+            </div>
+
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-slate-50 border-b border-slate-200">
@@ -169,12 +199,13 @@ const UserManagement: React.FC = () => {
                             <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</th>
                             <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Role</th>
                             <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Signature</th>
                             <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Last Login</th>
                             <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {users.map((user) => (
+                        {filteredUsers.map((user) => (
                             <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
                                 <td className="px-6 py-4">
                                     <div className="font-medium text-slate-900">{user.name}</div>
@@ -195,6 +226,12 @@ const UserManagement: React.FC = () => {
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                         }`}>
                                         {user.isActive ? 'Active' : 'Inactive'}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.signatureUrl ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
+                                        }`}>
+                                        {user.signatureUrl ? 'Configured' : 'Missing'}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-sm text-slate-500">
@@ -235,9 +272,9 @@ const UserManagement: React.FC = () => {
                                 </td>
                             </tr>
                         ))}
-                        {users.length === 0 && !isLoading && (
+                        {filteredUsers.length === 0 && !isLoading && (
                             <tr>
-                                <td colSpan={6} className="px-6 py-8 text-center text-slate-500">No users found.</td>
+                                <td colSpan={7} className="px-6 py-8 text-center text-slate-500">No users found.</td>
                             </tr>
                         )}
                     </tbody>
