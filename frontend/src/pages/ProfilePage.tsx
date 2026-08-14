@@ -73,8 +73,12 @@ const ProfilePage: React.FC = () => {
                 {/* User Info Card */}
                 <div className="md:col-span-1 space-y-6">
                     <div className="glass p-6 rounded-xl border border-white/20 shadow-sm text-center">
-                        <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary-100 to-indigo-100 rounded-full flex items-center justify-center text-3xl font-bold text-primary-700 border-4 border-white shadow-lg mb-4">
-                            {user?.name?.charAt(0) || 'U'}
+                        <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary-100 to-indigo-100 rounded-full flex items-center justify-center text-3xl font-bold text-primary-700 border-4 border-white shadow-lg mb-4 overflow-hidden">
+                            {user?.profilePictureUrl ? (
+                                <img src={`${API_BASE_URL}${user.profilePictureUrl}`} alt={user.name} className="w-full h-full object-cover" />
+                            ) : (
+                                user?.name?.charAt(0) || 'U'
+                            )}
                         </div>
                         <h2 className="text-xl font-bold text-slate-800">{user?.name}</h2>
                         <span className="inline-block mt-2 px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-medium border border-primary-100">
