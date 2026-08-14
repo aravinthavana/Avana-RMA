@@ -94,54 +94,74 @@ const ProfilePage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Signature Preview */}
-                    <div className="glass p-6 rounded-xl border border-white/20 shadow-sm space-y-4">
-                        <h3 className="font-semibold text-slate-700 border-b border-slate-100 pb-2">Digital Signature</h3>
-                        {user?.signatureUrl ? (
-                            <div className="bg-white p-4 rounded border border-slate-200">
-                                <img 
-                                    src={`${API_BASE_URL}${user.signatureUrl}`} 
-                                    alt="My Signature" 
-                                    className="max-h-20 object-contain mx-auto mix-blend-multiply" 
-                                    onError={(e) => {
-                                        // Fallback if image fails to load
-                                        (e.target as HTMLImageElement).style.display = 'none';
-                                    }}
-                                />
-                            </div>
-                        ) : (
-                            <p className="text-sm text-slate-500 italic text-center py-4">No signature uploaded yet.</p>
-                        )}
-                        <div>
-                            <label className="flex items-center justify-center w-full px-4 py-2 bg-white border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors">
-                                {uploadingSignature ? 'Uploading...' : (user?.signatureUrl ? 'Update PNG Signature' : 'Upload PNG Signature')}
-                                <input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    className="hidden" 
-                                    onChange={handleSignatureUpload}
-                                    disabled={uploadingSignature}
-                                />
-                            </label>
-                            <p className="text-xs text-slate-500 mt-2 text-center">Used in Test Reports as your E-Sign.</p>
-                            {user?.signatureUrl && (
-                                <button
-                                    onClick={async () => {
-                                        try {
-                                            await authApi.removeSignature();
-                                            toast.success('Signature removed successfully');
-                                            setTimeout(() => window.location.reload(), 1000);
-                                        } catch (e) {
-                                            toast.error('Failed to remove signature');
-                                        }
-                                    }}
-                                    className="mt-3 flex items-center justify-center w-full px-4 py-2 bg-red-50 border border-red-200 rounded-lg shadow-sm text-sm font-medium text-red-600 hover:bg-red-100 cursor-pointer transition-colors"
-                                >
-                                    Remove Signature
-                                </button>
+                        {/* Signature Preview */}
+                        <div className="glass p-6 rounded-xl border border-white/20 shadow-sm space-y-4">
+                            <h3 className="font-semibold text-slate-700 border-b border-slate-100 pb-2">Digital Signature</h3>
+                            {user?.signatureUrl ? (
+                                <div className="bg-white p-4 rounded border border-slate-200">
+                                    <img 
+                                        src={`${API_BASE_URL}${user.signatureUrl}`} 
+                                        alt="My Signature" 
+                                        className="max-h-20 object-contain mx-auto mix-blend-multiply" 
+                                        onError={(e) => {
+                                            // Fallback if image fails to load
+                                            (e.target as HTMLImageElement).style.display = 'none';
+                                        }}
+                                    />
+                                </div>
+                            ) : (
+                                <p className="text-sm text-slate-500 italic text-center py-4">No signature uploaded yet.</p>
                             )}
+                            <div>
+                                <label className="flex items-center justify-center w-full px-4 py-2 bg-white border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors">
+                                    {uploadingSignature ? 'Uploading...' : (user?.signatureUrl ? 'Update Signature' : 'Upload Signature')}
+                                    <input 
+                                        type="file" 
+                                        accept="image/png, image/jpeg, image/jpg" 
+                                        className="hidden" 
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                if (file.size > 2 * 1024 * 1024) {
+                                                    toast.error("Signature image must be less than 2MB.");
+                                                    e.target.value = '';
+                                                    return;
+                                                }
+                                                if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+                                                    toast.error("Signature must be a PNG or JPG image.");
+                                                    e.target.value = '';
+                                                    return;
+                                                }
+                                                handleSignatureUpload(e);
+                                            }
+                                        }}
+                                        disabled={uploadingSignature}
+                                    />
+                                </label>
+                                <p className="text-xs text-slate-500 mt-2 text-center">
+                                    Used in Test Reports as your E-Sign.<br />
+                                    <span className="text-slate-400">Max size: 2MB. Formats: PNG, JPG.<br />Recommended: 300x100px PNG.</span>
+                                </p>
+                                {user?.signatureUrl && (
+                                    <button
+                                        onClick={async () => {
+                                            if (window.confirm('Are you sure you want to remove your digital signature?')) {
+                                                try {
+                                                    await authApi.removeSignature();
+                                                    toast.success('Signature removed successfully');
+                                                    setTimeout(() => window.location.reload(), 1000);
+                                                } catch (e) {
+                                                    toast.error('Failed to remove signature');
+                                                }
+                                            }
+                                        }}
+                                        className="mt-3 flex items-center justify-center w-full px-4 py-2 bg-red-50 border border-red-200 rounded-lg shadow-sm text-sm font-medium text-red-600 hover:bg-red-100 cursor-pointer transition-colors"
+                                    >
+                                        Remove Signature
+                                    </button>
+                                )}
+                            </div>
                         </div>
-                    </div>
                 </div>
 
                 {/* Settings / Actions */}

@@ -338,9 +338,9 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                 <View style={styles.sectionHeader}><Text>Test Results</Text></View>
                 <View style={{ borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 3 }}>
                     <View style={styles.tableHeader} fixed>
-                        <Text style={[styles.tableHeaderCell, { width: stepColWidths[0] }]}>Sl. No.</Text>
+                        <Text style={[styles.tableHeaderCell, { width: stepColWidths[0], textAlign: 'center' }]}>Sl. No.</Text>
                         <Text style={[styles.tableHeaderCell, { width: stepColWidths[1] }]}>Test Step</Text>
-                        <Text style={[styles.tableHeaderCell, { width: stepColWidths[2] }]}>Criterion</Text>
+                        <Text style={[styles.tableHeaderCell, { width: stepColWidths[2], textAlign: 'center' }]}>Criterion</Text>
                         <Text style={[styles.tableHeaderCell, { width: stepColWidths[3], textAlign: 'center' }]}>Pass/Fail</Text>
                     </View>
                     {steps.map((step, idx) => {
@@ -359,7 +359,7 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                                 <View style={{ flexDirection: 'row', minHeight: 14, alignItems: 'flex-start', paddingBottom: 2 }}>
                                     <View style={{ width: stepColWidths[0] }} /> {/* spacer */}
                                     <Text style={[styles.tableCell, { width: stepColWidths[1], paddingTop: 0 }]}>{question}</Text>
-                                    <Text style={[styles.tableCell, { width: stepColWidths[2], paddingTop: 0 }]}>{step.criterion}</Text>
+                                    <Text style={[styles.tableCell, styles.tableCellCenter, { width: stepColWidths[2], paddingTop: 0 }]}>{step.criterion}</Text>
                                     <Text style={[
                                         styles.tableCell,
                                         styles.tableCellCenter,
@@ -401,24 +401,30 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                     </View>
 
                     {/* Signatures */}
-                    <View style={styles.signatureRow}>
-                        <View style={styles.signatureBlock}>
-                            <Text style={styles.signatureLabel}>Tester Name</Text>
-                            <Text style={styles.signatureName}>{report.testerName}</Text>
+                    <View style={{ marginTop: 12, borderWidth: 1.5, borderColor: '#d48a07', borderRadius: 4, overflow: 'hidden' }}>
+                        <View style={{ backgroundColor: '#d48a07', padding: '4 8' }}>
+                            <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', textTransform: 'uppercase', color: '#ffffff' }}>Signatures</Text>
                         </View>
-                        <View style={[styles.signatureBlock, { alignItems: 'center', borderTopWidth: 0, paddingTop: 0, marginTop: -30 }]}>
-                            {signatureUrl ? (
-                                <Image src={`${API_BASE_URL}${signatureUrl}`} style={styles.signatureImage} />
-                            ) : (
-                                <View style={{ height: 40, marginBottom: 4 }} />
-                            )}
-                            <View style={{ borderTopWidth: 1, borderColor: '#6b7280', width: '100%', alignItems: 'center', paddingTop: 6 }}>
-                                <Text style={styles.signatureLabel}>Signature (E-Sign)</Text>
+                        <View style={{ flexDirection: 'row', backgroundColor: '#f9fafb' }}>
+                            {/* Tester Name */}
+                            <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#e5e7eb', padding: '8 10' }}>
+                                <Text style={styles.infoLabel}>Tester Name</Text>
+                                <Text style={[styles.infoValue, { marginTop: 4 }]}>{report.testerName}</Text>
                             </View>
-                        </View>
-                        <View style={styles.signatureBlock}>
-                            <Text style={styles.signatureLabel}>Date Signed</Text>
-                            <Text style={styles.signatureName}>{formatDate(report.testDate)}</Text>
+                            {/* Signature */}
+                            <View style={{ flex: 1, borderRightWidth: 1, borderColor: '#e5e7eb', padding: '8 10', alignItems: 'center', justifyContent: 'center' }}>
+                                <Text style={[styles.infoLabel, { alignSelf: 'flex-start', width: '100%' }]}>Signature (E-Sign)</Text>
+                                {signatureUrl ? (
+                                    <Image src={`${API_BASE_URL}${signatureUrl}`} style={{ height: 35, objectFit: 'contain', marginTop: 4 }} />
+                                ) : (
+                                    <View style={{ height: 35, marginTop: 4 }} />
+                                )}
+                            </View>
+                            {/* Date */}
+                            <View style={{ flex: 1, padding: '8 10' }}>
+                                <Text style={styles.infoLabel}>Date Signed</Text>
+                                <Text style={[styles.infoValue, { marginTop: 4 }]}>{formatDate(report.testDate)}</Text>
+                            </View>
                         </View>
                     </View>
                 </View>

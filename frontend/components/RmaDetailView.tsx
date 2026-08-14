@@ -280,16 +280,39 @@ const RmaDetailView: React.FC = () => {
                       {(cycle as any).id && (
                         <>
                           <span className="text-slate-300">|</span>
-                          <button
-                            onClick={() => setTestReportModalCycle(cycle)}
-                            className={`text-sm font-medium px-3 py-1 rounded-md border transition-colors ${
-                              testReports[(cycle as any).id]
-                                ? 'border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100'
-                                : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-100'
-                            }`}
-                          >
-                            {testReports[(cycle as any).id] ? '📋 View / Edit Test Report' : '+ Create Test Report'}
-                          </button>
+                          {!testReports[(cycle as any).id] && localStorage.getItem(`draft-report-${(cycle as any).id}`) ? (
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setTestReportModalCycle(cycle)}
+                                    className="text-sm font-medium px-3 py-1 rounded-md border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors"
+                                >
+                                    📝 Open Draft
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (window.confirm('Are you sure you want to clear this draft?')) {
+                                            localStorage.removeItem(`draft-report-${(cycle as any).id}`);
+                                            // Force re-render to update the button
+                                            setTestReports(prev => ({ ...prev }));
+                                        }
+                                    }}
+                                    className="text-sm font-medium px-3 py-1 rounded-md border border-red-200 text-red-700 bg-red-50 hover:bg-red-100 transition-colors"
+                                >
+                                    🗑️ Clear Draft
+                                </button>
+                            </div>
+                          ) : (
+                              <button
+                                onClick={() => setTestReportModalCycle(cycle)}
+                                className={`text-sm font-medium px-3 py-1 rounded-md border transition-colors ${
+                                  testReports[(cycle as any).id]
+                                    ? 'border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100'
+                                    : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-100'
+                                }`}
+                              >
+                                {testReports[(cycle as any).id] ? '📋 View / Edit Test Report' : '+ Create Test Report'}
+                              </button>
+                          )}
                           {testReports[(cycle as any).id] && (
                             <>
                               <button
