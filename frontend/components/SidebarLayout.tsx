@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../src/context/AuthContext';
 import { WrenchScrewdriverIcon, BuildingOffice2Icon, XMarkIcon, ChevronRightIcon, HomeIcon } from './icons';
 import { NotificationBell } from './NotificationBell';
+import { API_BASE_URL } from '../config';
 
 interface SidebarLayoutProps {
     children: React.ReactNode;
@@ -200,8 +201,12 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeVi
                     </button>
                     <div className="flex-1 text-sm font-semibold leading-6 text-slate-900 font-display">Avana Service Portal</div>
                     {user?.role === 'ADMIN' && <NotificationBell />}
-                    <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
-                        {user?.name?.charAt(0) || 'U'}
+                    <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 overflow-hidden">
+                        {user?.profilePictureUrl ? (
+                            <img src={`${API_BASE_URL}${user.profilePictureUrl}`} alt={user.name} className="w-full h-full object-cover" />
+                        ) : (
+                            user?.name?.charAt(0) || 'U'
+                        )}
                     </div>
                 </div>
 
@@ -217,8 +222,12 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeVi
                             onClick={() => onNavigate('profile')}
                         >
                             <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">{user?.name}</span>
-                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary-100 to-indigo-100 flex items-center justify-center text-xs font-bold text-primary-700 border border-primary-200 group-hover:border-primary-300 transition-colors">
-                                {user?.name?.charAt(0) || 'U'}
+                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary-100 to-indigo-100 flex items-center justify-center text-xs font-bold text-primary-700 border border-primary-200 group-hover:border-primary-300 transition-colors overflow-hidden">
+                                {user?.profilePictureUrl ? (
+                                    <img src={`${API_BASE_URL}${user.profilePictureUrl}`} alt={user.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    user?.name?.charAt(0) || 'U'
+                                )}
                             </div>
                         </div>
 

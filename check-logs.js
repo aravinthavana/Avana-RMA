@@ -4,7 +4,7 @@ const fs = require('fs');
 const conn = new Client();
 
 conn.on('ready', () => {
-    conn.exec('docker logs --tail=50 avana-frontend', (err, stream) => {
+    conn.exec('docker logs --tail=50 avana-backend', (err, stream) => {
         if (err) throw err;
         stream.on('close', (code, signal) => {
             conn.end();

@@ -7,6 +7,7 @@ import { User } from '../api/auth.api';
 
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../../config';
 
 const UserManagement: React.FC = () => {
     const { user } = useAuth();
@@ -140,8 +141,19 @@ const UserManagement: React.FC = () => {
                         {filteredUsers.map((user) => (
                             <tr key={user.id} onClick={() => navigate(`/users/${user.id}`)} className="hover:bg-slate-50/50 transition-colors cursor-pointer">
                                 <td className="px-6 py-4">
-                                    <div className="font-medium text-slate-900">{user.name}</div>
-                                    <div className="text-sm text-slate-500">{user.email}</div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 overflow-hidden flex-shrink-0">
+                                            {user.profilePictureUrl ? (
+                                                <img src={`${API_BASE_URL}${user.profilePictureUrl}`} alt={user.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                user.name.charAt(0).toUpperCase()
+                                            )}
+                                        </div>
+                                        <div>
+                                            <div className="font-medium text-slate-900">{user.name}</div>
+                                            <div className="text-sm text-slate-500">{user.email}</div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4">
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
