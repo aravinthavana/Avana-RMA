@@ -134,6 +134,35 @@ export class AuthController {
             next(error);
         }
     };
+
+    uploadSignature = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const decodedUser = (req as any).user;
+            if (!decodedUser || !decodedUser.id) {
+                res.status(401).json({ error: 'Not authenticated' });
+                return;
+            }
+
+            if (!req.file) {
+                res.status(400).json({ error: 'No image file provided' });
+                return;
+            }
+
+            // Construct the public URL for the signature
+            const signatureUrl = `/uploads/signatures/${req.file.filename}`;
+
+            // Update user in DB
+            await userService.updateUser(decodedUser.id, { signatureUrl });
+
+            res.json({
+                success: true,
+                message: 'Signature uploaded successfully',
+                data: { signatureUrl }
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
 }
 
 export default new AuthController();

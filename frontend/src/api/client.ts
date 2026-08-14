@@ -123,10 +123,20 @@ class ApiClient {
     /**
      * POST request
      */
-    async post<T>(endpoint: string, body?: any): Promise<ApiResponse<T>> {
+    async post<T>(endpoint: string, body?: any, options?: RequestInit): Promise<ApiResponse<T>> {
+        const isFormData = body instanceof FormData;
+        
+        // Remove Content-Type header if sending FormData so browser sets correct boundary
+        const headers = options?.headers ? { ...options.headers } : undefined;
+        if (isFormData && headers) {
+            delete (headers as any)['Content-Type'];
+        }
+        
         return this.request<T>(endpoint, {
+            ...options,
             method: 'POST',
-            body: body ? JSON.stringify(body) : undefined,
+            headers,
+            body: isFormData ? body : (body ? JSON.stringify(body) : undefined),
         });
     }
 

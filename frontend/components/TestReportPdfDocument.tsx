@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         borderBottom: '2.5px solid #b27f0d',
         paddingBottom: 10,
         marginBottom: 14,
@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
         textTransform: 'uppercase',
         letterSpacing: 0.5,
+        textAlign: 'center',
     },
     // --- Info grid ---
     infoGrid: {
@@ -161,9 +162,21 @@ const styles = StyleSheet.create({
         letterSpacing: 0.5,
     },
     assessmentBody: {
-        padding: 10,
         flexDirection: 'row',
-        gap: 20,
+        backgroundColor: '#f9fafb',
+    },
+    assessmentRemarksContainer: {
+        flex: 1,
+        padding: 10,
+        borderRightWidth: 1,
+        borderColor: '#e5e7eb',
+    },
+    assessmentResultContainer: {
+        width: 150,
+        padding: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#ffffff',
     },
     assessmentResultPass: {
         fontSize: 18,
@@ -210,6 +223,11 @@ const styles = StyleSheet.create({
         fontFamily: 'Helvetica-Bold',
         marginTop: 3,
     },
+    signatureImage: {
+        height: 40,
+        objectFit: 'contain',
+        marginBottom: 4,
+    },
     // --- Footer ---
     footer: {
         position: 'absolute',
@@ -232,6 +250,7 @@ interface Props {
     report: TestReport;
     deviceSerialNumber: string;
     rmaId: string;
+    signatureUrl?: string;
 }
 
 const formatDate = (dateStr: string) => {
@@ -243,9 +262,9 @@ const formatDate = (dateStr: string) => {
 };
 
 // Column widths for test steps table
-const stepColWidths = ['5%', '48%', '12%', '10%', '15%', '10%'];
+const stepColWidths = ['10%', '60%', '15%', '15%'];
 
-const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rmaId }) => {
+const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rmaId, signatureUrl }) => {
     const equipment = (report.equipmentUsed || []) as TestEquipment[];
     const steps = (report.testSteps || []) as TestStep[];
 
@@ -270,7 +289,7 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                 {/* ---- DEVICE DATA ---- */}
                 <View style={[styles.infoGrid, { marginBottom: 6, flexDirection: 'column' }]}>
                     <View style={[styles.sectionHeader, { marginTop: 0, marginBottom: 0, padding: '4 8' }]}><Text>Device Data</Text></View>
-                    <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: '#d1d5db' }}>
+                    <View style={{ flexDirection: 'row' }}>
                          <View style={{ width: '50%', padding: '4 7', borderRightWidth: 1, borderColor: '#d1d5db' }}>
                               <Text style={styles.infoLabel}>Device Type/Name</Text>
                               <Text style={styles.infoValue}>{report.deviceType}</Text>
@@ -279,10 +298,6 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                               <Text style={styles.infoLabel}>Serial No:</Text>
                               <Text style={styles.infoValue}>{deviceSerialNumber}</Text>
                          </View>
-                    </View>
-                    <View style={{ padding: '4 7' }}>
-                         <Text style={styles.infoLabel}>Mains Connection:</Text>
-                         <Text style={styles.infoValue}>{report.mainsConnection || 'N/A'}</Text>
                     </View>
                 </View>
 
@@ -325,9 +340,7 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                         <Text style={[styles.tableHeaderCell, { width: stepColWidths[0] }]}>Sl. No.</Text>
                         <Text style={[styles.tableHeaderCell, { width: stepColWidths[1] }]}>Test Step</Text>
                         <Text style={[styles.tableHeaderCell, { width: stepColWidths[2] }]}>Criterion</Text>
-                        <Text style={[styles.tableHeaderCell, { width: stepColWidths[3] }]}>Unit</Text>
-                        <Text style={[styles.tableHeaderCell, { width: stepColWidths[4] }]}>Result</Text>
-                        <Text style={[styles.tableHeaderCell, { width: stepColWidths[5], textAlign: 'center' }]}>Pass/Fail</Text>
+                        <Text style={[styles.tableHeaderCell, { width: stepColWidths[3], textAlign: 'center' }]}>Pass/Fail</Text>
                     </View>
                     {steps.map((step, idx) => {
                         const parts = step.name.split('\n');
@@ -346,12 +359,10 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                                     <View style={{ width: stepColWidths[0] }} /> {/* spacer */}
                                     <Text style={[styles.tableCell, { width: stepColWidths[1], paddingTop: 0 }]}>{question}</Text>
                                     <Text style={[styles.tableCell, { width: stepColWidths[2], paddingTop: 0 }]}>{step.criterion}</Text>
-                                    <Text style={[styles.tableCell, { width: stepColWidths[3], paddingTop: 0 }]}>{step.unit}</Text>
-                                    <Text style={[styles.tableCell, { width: stepColWidths[4], paddingTop: 0 }]}>{step.result}</Text>
                                     <Text style={[
                                         styles.tableCell,
                                         styles.tableCellCenter,
-                                        { width: stepColWidths[5], paddingTop: 0 },
+                                        { width: stepColWidths[3], paddingTop: 0 },
                                         step.isOk ? styles.okPass : styles.okFail
                                     ]}>
                                         {step.isOk ? '✓ PASS' : '✗ FAIL'}
@@ -370,7 +381,12 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                             <Text style={styles.assessmentHeaderText}>Overall Assessment</Text>
                         </View>
                         <View style={styles.assessmentBody}>
-                            <View style={{ alignItems: 'center' }}>
+                            <View style={styles.assessmentRemarksContainer}>
+                                <Text style={styles.infoLabel}>Remarks:</Text>
+                                <Text style={styles.assessmentRemarks}>{report.overallAssessment || 'No remarks.'}</Text>
+                            </View>
+                            <View style={styles.assessmentResultContainer}>
+                                <Text style={{ fontSize: 9, color: '#6b7280', marginBottom: 4, fontFamily: 'Helvetica-Bold', textTransform: 'uppercase' }}>Overall Test Result</Text>
                                 <Text style={
                                     report.overallResult === 'Passed' ? styles.assessmentResultPass :
                                         report.overallResult === 'Failed' ? styles.assessmentResultFail :
@@ -379,22 +395,29 @@ const TestReportPdfDocument: React.FC<Props> = ({ report, deviceSerialNumber, rm
                                     {report.overallResult === 'Passed' ? '✓ PASSED' :
                                         report.overallResult === 'Failed' ? '✗ FAILED' : '⚠ CONDITIONAL'}
                                 </Text>
-                                <Text style={{ fontSize: 7, color: '#6b7280', marginTop: 2 }}>Overall Result</Text>
                             </View>
-                            {report.overallAssessment ? (
-                                <View style={{ flex: 1 }}>
-                                    <Text style={styles.infoLabel}>Remarks:</Text>
-                                    <Text style={styles.assessmentRemarks}>{report.overallAssessment}</Text>
-                                </View>
-                            ) : null}
                         </View>
                     </View>
 
                     {/* Signatures */}
                     <View style={styles.signatureRow}>
                         <View style={styles.signatureBlock}>
-                            <Text style={styles.signatureLabel}>Tested By</Text>
+                            <Text style={styles.signatureLabel}>Tester Name</Text>
                             <Text style={styles.signatureName}>{report.testerName}</Text>
+                        </View>
+                        <View style={[styles.signatureBlock, { alignItems: 'center', borderTopWidth: 0, paddingTop: 0, marginTop: -30 }]}>
+                            {signatureUrl ? (
+                                <Image src={`http://localhost:3001${signatureUrl}`} style={styles.signatureImage} />
+                            ) : (
+                                <View style={{ height: 40, marginBottom: 4 }} />
+                            )}
+                            <View style={{ borderTopWidth: 1, borderColor: '#6b7280', width: '100%', alignItems: 'center', paddingTop: 6 }}>
+                                <Text style={styles.signatureLabel}>Signature (E-Sign)</Text>
+                            </View>
+                        </View>
+                        <View style={styles.signatureBlock}>
+                            <Text style={styles.signatureLabel}>Date Signed</Text>
+                            <Text style={styles.signatureName}>{formatDate(report.testDate)}</Text>
                         </View>
                     </View>
                 </View>

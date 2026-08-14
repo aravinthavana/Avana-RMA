@@ -12,6 +12,7 @@ const ProfilePage: React.FC = () => {
         newPassword: '',
         confirmPassword: ''
     });
+    const [uploadingSignature, setUploadingSignature] = useState(false);
 
     const handleChangePassword = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,6 +29,36 @@ const ProfilePage: React.FC = () => {
         } catch (error) {
             toast.error('Failed to update password');
             console.error(error);
+        }
+    };
+
+    const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please upload an image file');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('File size must be less than 5MB');
+            return;
+        }
+
+        try {
+            setUploadingSignature(true);
+            const response = await authApi.uploadSignature(file);
+            toast.success('Signature uploaded successfully');
+            // Update local user context if possible, or trigger a refresh
+            // For now, we rely on the backend to serve the image correctly when fetched next time
+            // We can optionally refresh the page to reload the user context
+            setTimeout(() => window.location.reload(), 1000);
+        } catch (error) {
+            toast.error('Failed to upload signature');
+            console.error(error);
+        } finally {
+            setUploadingSignature(false);
         }
     };
 
@@ -59,6 +90,39 @@ const ProfilePage: React.FC = () => {
                         <div className="flex items-center gap-3 text-slate-600">
                             <Shield size={18} className="text-slate-400" />
                             <span className="text-sm cursor-help" title="User ID">ID: {user?.id?.slice(0, 8)}...</span>
+                        </div>
+                    </div>
+
+                    {/* Signature Preview */}
+                    <div className="glass p-6 rounded-xl border border-white/20 shadow-sm space-y-4">
+                        <h3 className="font-semibold text-slate-700 border-b border-slate-100 pb-2">Digital Signature</h3>
+                        {user?.signatureUrl ? (
+                            <div className="bg-white p-4 rounded border border-slate-200">
+                                <img 
+                                    src={`http://localhost:3001${user.signatureUrl}`} 
+                                    alt="My Signature" 
+                                    className="max-h-20 object-contain mx-auto mix-blend-multiply" 
+                                    onError={(e) => {
+                                        // Fallback if image fails to load
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                    }}
+                                />
+                            </div>
+                        ) : (
+                            <p className="text-sm text-slate-500 italic text-center py-4">No signature uploaded yet.</p>
+                        )}
+                        <div>
+                            <label className="flex items-center justify-center w-full px-4 py-2 bg-white border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors">
+                                {uploadingSignature ? 'Uploading...' : 'Upload PNG Signature'}
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    className="hidden" 
+                                    onChange={handleSignatureUpload}
+                                    disabled={uploadingSignature}
+                                />
+                            </label>
+                            <p className="text-xs text-slate-500 mt-2 text-center">Used in Test Reports as your E-Sign.</p>
                         </div>
                     </div>
                 </div>

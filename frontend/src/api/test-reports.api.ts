@@ -9,8 +9,6 @@ export interface TestStep {
     stepNo: number;
     name: string;
     criterion: string;
-    unit: string;
-    result: string;
     isOk: boolean;
 }
 
@@ -19,7 +17,6 @@ export interface TestReport {
     serviceCycleId: number;
     testDate: string;
     deviceType: string;
-    mainsConnection: string;
     manufacturer: string;
     performedBy: string;
     testerName: string;

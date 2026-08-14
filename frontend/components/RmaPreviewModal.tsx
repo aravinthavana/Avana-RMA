@@ -5,6 +5,7 @@ import { TestReport } from '../src/api/test-reports.api';
 import { XMarkIcon, DownloadIcon, EyeIcon } from './icons';
 import { ReturnAuthorizationDocument, ServiceReportDocument } from './RmaPdfDocument';
 import TestReportPdfDocument from './TestReportPdfDocument';
+import { useAuth } from '../src/context/AuthContext';
 
 interface RmaPreviewModalProps {
     rma: Rma | null | undefined;
@@ -75,6 +76,7 @@ export const RmaPreviewModal: React.FC<RmaPreviewModalProps> = ({ rma, testRepor
     const [view, setView] = useState<'main' | 'select_report' | 'service_report' | 'test_report'>(initialView || 'main');
     const [selectedServiceReport, setSelectedServiceReport] = useState<{ device: Device, cycle: ServiceCycle } | null>(null);
     const [selectedTestReport, setSelectedTestReport] = useState<{ device: Device, cycle: ServiceCycle, report: TestReport } | null>(initialSelectedTestReport || null);
+    const { user } = useAuth();
 
     if (!rma) return null;
 
@@ -83,7 +85,7 @@ export const RmaPreviewModal: React.FC<RmaPreviewModalProps> = ({ rma, testRepor
             return <ServiceReportDocument rma={rma} device={selectedServiceReport.device} cycle={selectedServiceReport.cycle} />;
         }
         if (view === 'test_report' && selectedTestReport) {
-            return <TestReportPdfDocument report={selectedTestReport.report} deviceSerialNumber={selectedTestReport.device.serialNumber} rmaId={rma.id} />;
+            return <TestReportPdfDocument report={selectedTestReport.report} deviceSerialNumber={selectedTestReport.device.serialNumber} rmaId={rma.id} signatureUrl={user?.signatureUrl} />;
         }
         return <ReturnAuthorizationDocument rma={rma} />;
     };

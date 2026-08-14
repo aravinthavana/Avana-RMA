@@ -89,6 +89,15 @@ import routes from './routes';
 // Mount new routes
 app.use('/api', routes);
 
+// Serve uploads folder for signatures and attachments
+import path from 'path';
+import fs from 'fs';
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
+
 // Health check endpoint (used by Docker/Portainer to verify the service is alive)
 app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });

@@ -97,7 +97,6 @@ model TestReport {
   serviceCycleId    Int           @unique
   testDate          DateTime      @default(now())
   deviceType        String
-  mainsConnection   String
   manufacturer      String
   performedBy       String
   testerName        String
@@ -125,6 +124,7 @@ model User {
   isActive         Boolean  @default(true)
   resetToken       String?
   resetTokenExpiry DateTime?
+  signatureUrl     String?  // Optional path to the user's uploaded signature image
   updatedAt        DateTime @updatedAt
   auditLogs        AuditLog[]
 

@@ -61,7 +61,7 @@ export default function TemplateManagement() {
     const fetchArticles = async () => {
         try {
             const res = await apiClient.get('/api/articles');
-            setArticles(res.data || []);
+            setArticles((res as any).data || []);
         } catch (error) {
             toast.error('Failed to fetch articles');
         }
@@ -70,7 +70,7 @@ export default function TemplateManagement() {
     const fetchEquipment = async () => {
         try {
             const res = await apiClient.get('/api/templates/equipment');
-            setEquipment(res.data || []);
+            setEquipment((res as any).data || []);
         } catch (error) {
             toast.error('Failed to fetch equipment');
         }
@@ -79,7 +79,7 @@ export default function TemplateManagement() {
     const fetchSteps = async (articleNo: string) => {
         try {
             const res = await apiClient.get(`/api/templates/test-steps/${articleNo}`);
-            setSteps(res.data || []);
+            setSteps((res as any).data || []);
         } catch (error) {
             toast.error('Failed to fetch test steps');
         }
@@ -176,7 +176,7 @@ export default function TemplateManagement() {
             const stepNo = steps.length + 1;
             await apiClient.post('/api/templates/test-steps', { ...newStep, stepNo, articleNo: selectedArticleNo });
             toast.success('Added Step');
-            setNewStep({ name: '', criterion: '' });
+            setNewStep({ name: '', question: '' });
             fetchSteps(selectedArticleNo);
         } catch (err) {
             toast.error('Failed to add step');
@@ -301,7 +301,7 @@ export default function TemplateManagement() {
                                 </div>
                                 <div className="flex-[3] min-w-[300px]">
                                     <label className="block text-xs font-medium text-slate-700 mb-1">Question / Criterion</label>
-                                    <input type="text" className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" value={newStep.criterion} onChange={e => setNewStep({...newStep, criterion: e.target.value})} placeholder="e.g. No physical damage" />
+                                    <input type="text" className="w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" value={newStep.question} onChange={e => setNewStep({...newStep, question: e.target.value})} placeholder="e.g. No physical damage" />
                                 </div>
                                 <div className="w-auto pb-0.5">
                                     <button onClick={handleAddStep} disabled={isLoading} className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 whitespace-nowrap">Add Step</button>

@@ -22,6 +22,6 @@ interface GetAuditLogsParams {
 
 export const auditApi = {
     getAll: async (params: GetAuditLogsParams = {}): Promise<GetAuditLogsResponse> => {
-        return apiClient.get('/api/audit', params);
+        return apiClient.get('/api/audit', params) as Promise<GetAuditLogsResponse>;
     }
 };

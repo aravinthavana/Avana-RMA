@@ -33,8 +33,8 @@ export const MOCK_RMAS: Rma[] = [
     customer: MOCK_CUSTOMERS[0],
     devices: [
       {
-        model: 'VitalSign Monitor 5000',
-        partNumber: 'PN-VSM5K',
+        articleNumber: 'VitalSign Monitor 5000',
+        
         serialNumber: 'VSM5K-A9876',
         quantity: 1,
       },
@@ -43,6 +43,7 @@ export const MOCK_RMAS: Rma[] = [
     lastUpdateDate: '2024-07-18T14:00:00Z',
     dateOfIncident: '2024-07-14T00:00:00Z',
     dateOfReport: '2024-07-15T00:00:00Z',
+isInjuryRelated: false,
     attachment: 'proof_1.jpg',
     serviceCycles: [
       {
@@ -65,8 +66,8 @@ export const MOCK_RMAS: Rma[] = [
     customer: MOCK_CUSTOMERS[1],
     devices: [
       {
-        model: 'Infusion Pump Pro',
-        partNumber: 'PN-IPP-PRO',
+        articleNumber: 'Infusion Pump Pro',
+        
         serialNumber: 'IPP-B1234',
         quantity: 1,
       },
@@ -75,10 +76,11 @@ export const MOCK_RMAS: Rma[] = [
     lastUpdateDate: '2024-07-20T11:25:00Z',
     dateOfIncident: '2024-07-09T00:00:00Z',
     dateOfReport: '2024-07-10T00:00:00Z',
+isInjuryRelated: false,
     serviceCycles: [
       {
         deviceSerialNumber: 'IPP-B1234',
-        status: RmaStatus.SHIPPED,
+        status: RmaStatus.CLOSED,
         creationDate: '2024-07-10T09:00:00Z',
         statusDate: '2024-07-20T11:25:00Z',
         issueDescription: 'The pump is not delivering the correct dosage. Alarm sounds frequently.',
@@ -87,8 +89,8 @@ export const MOCK_RMAS: Rma[] = [
           { status: RmaStatus.PENDING, date: '2024-07-10T09:00:00Z', notes: 'RMA created and device registered.' },
           { status: RmaStatus.RECEIVED, date: '2024-07-11T10:00:00Z', notes: 'Pump received.' },
           { status: RmaStatus.IN_REPAIR, date: '2024-07-12T14:30:00Z', notes: 'Replaced the peristaltic motor assembly and recalibrated the flow sensor.' },
-          { status: RmaStatus.REPAIRED, date: '2024-07-19T16:00:00Z', notes: 'Device passed all post-service diagnostics.' },
-          { status: RmaStatus.SHIPPED, date: '2024-07-20T11:25:00Z', notes: 'Shipped via FedEx, tracking #1234567890.' },
+          { status: RmaStatus.CLOSED, date: '2024-07-19T16:00:00Z', notes: 'Device passed all post-service diagnostics.' },
+          { status: RmaStatus.CLOSED, date: '2024-07-20T11:25:00Z', notes: 'Shipped via FedEx, tracking #1234567890.' },
         ]
       },
     ],
@@ -98,14 +100,14 @@ export const MOCK_RMAS: Rma[] = [
     customer: MOCK_CUSTOMERS[0],
     devices: [
       {
-        model: 'Portable Defibrillator X',
-        partNumber: 'PN-PDX-X',
+        articleNumber: 'Portable Defibrillator X',
+        
         serialNumber: 'PDX-C5432',
         quantity: 1,
       },
       {
-        model: 'ECG Monitor 12-Lead',
-        partNumber: 'PN-ECG12',
+        articleNumber: 'ECG Monitor 12-Lead',
+        
         serialNumber: 'ECG12-D9876',
         quantity: 1,
       },
@@ -114,6 +116,7 @@ export const MOCK_RMAS: Rma[] = [
     lastUpdateDate: '2024-07-22T09:15:00Z',
     dateOfIncident: '2024-06-19T00:00:00Z',
     dateOfReport: '2024-06-20T00:00:00Z',
+isInjuryRelated: false,
     attachment: 'proof_2.pdf',
     serviceCycles: [
       {
@@ -126,7 +129,7 @@ export const MOCK_RMAS: Rma[] = [
         history: [
           { status: RmaStatus.PENDING, date: '2024-06-20T16:00:00Z', notes: 'RMA created and device registered.' },
           { status: RmaStatus.IN_REPAIR, date: '2024-06-22T13:20:15Z', notes: 'Replaced the internal battery and main circuit board.' },
-          { status: RmaStatus.REPAIRED, date: '2024-07-04T15:00:00Z', notes: 'Tested and verified functionality.' },
+          { status: RmaStatus.CLOSED, date: '2024-07-04T15:00:00Z', notes: 'Tested and verified functionality.' },
           { status: RmaStatus.CLOSED, date: '2024-07-05T17:00:00Z', notes: 'Case closed.' },
         ]
       },
@@ -160,92 +163,92 @@ export const MOCK_RMAS: Rma[] = [
     customer: MOCK_CUSTOMERS[2],
     devices: [
       {
-        model: 'Anesthesia Machine 9001',
-        partNumber: 'PN-AM9K1',
+        articleNumber: 'Anesthesia Machine 9001',
+        
         serialNumber: 'AM9K1-X001',
         quantity: 1,
       },
       {
-        model: 'Surgical Light Pro',
-        partNumber: 'PN-SLPRO',
+        articleNumber: 'Surgical Light Pro',
+        
         serialNumber: 'SLP-Y002',
         quantity: 2,
       },
       {
-        model: 'Patient Warmer Plus',
-        partNumber: 'PN-PWP',
+        articleNumber: 'Patient Warmer Plus',
+        
         serialNumber: 'PWP-Z003',
         quantity: 1,
       },
       {
-        model: 'Electrosurgical Unit 300',
-        partNumber: 'PN-ESU300',
+        articleNumber: 'Electrosurgical Unit 300',
+        
         serialNumber: 'ESU3-A004',
         quantity: 1,
       },
       {
-        model: 'Medical Gas Blender',
-        partNumber: 'PN-MGB',
+        articleNumber: 'Medical Gas Blender',
+        
         serialNumber: 'MGB-B005',
         quantity: 1,
       },
       {
-        model: 'Ultrasound System Z',
-        partNumber: 'PN-USZ',
+        articleNumber: 'Ultrasound System Z',
+        
         serialNumber: 'USZ-C006',
         quantity: 1,
       },
       {
-        model: 'Defibrillator Pad',
-        partNumber: 'PN-DPAD',
+        articleNumber: 'Defibrillator Pad',
+        
         serialNumber: 'DPAD-L007',
         quantity: 10,
       },
       {
-        model: 'Hospital Bed XYZ',
-        partNumber: 'PN-HBXYZ',
+        articleNumber: 'Hospital Bed XYZ',
+        
         serialNumber: 'HBXYZ-008',
         quantity: 1,
       },
       {
-        model: 'IV Stand',
-        partNumber: 'PN-IVS',
+        articleNumber: 'IV Stand',
+        
         serialNumber: 'IVS-009',
         quantity: 5,
       },
       {
-        model: 'Wheelchair',
-        partNumber: 'PN-WC',
+        articleNumber: 'Wheelchair',
+        
         serialNumber: 'WC-010',
         quantity: 3,
       },
       {
-        model: 'Stretcher',
-        partNumber: 'PN-STR',
+        articleNumber: 'Stretcher',
+        
         serialNumber: 'STR-011',
         quantity: 2,
       },
       {
-        model: 'Medical Refrigerator',
-        partNumber: 'PN-MR',
+        articleNumber: 'Medical Refrigerator',
+        
         serialNumber: 'MR-012',
         quantity: 1,
       },
       {
-        model: 'Autoclave',
-        partNumber: 'PN-AC',
+        articleNumber: 'Autoclave',
+        
         serialNumber: 'AC-013',
         quantity: 1,
       },
       {
-        model: 'Centrifuge',
-        partNumber: 'PN-CFG',
+        articleNumber: 'Centrifuge',
+        
         serialNumber: 'CFG-014',
         quantity: 1,
       },
       {
-        model: 'Microscope',
-        partNumber: 'PN-MS',
+        articleNumber: 'Microscope',
+        
         serialNumber: 'MS-015',
         quantity: 1,
       },
@@ -254,6 +257,7 @@ export const MOCK_RMAS: Rma[] = [
     lastUpdateDate: '2024-05-25T10:00:00Z',
     dateOfIncident: '2024-05-14T00:00:00Z',
     dateOfReport: '2024-05-15T00:00:00Z',
+isInjuryRelated: false,
     attachment: 'multi_device_proof.docx',
     serviceCycles: [
       {
@@ -265,7 +269,7 @@ export const MOCK_RMAS: Rma[] = [
         accessoriesIncluded: 'Vaporizer unit only',
         history: [
           { status: RmaStatus.PENDING, date: '2024-05-15T11:00:00Z', notes: 'RMA created and device registered.' },
-          { status: RmaStatus.REPAIRED, date: '2024-05-24T16:00:00Z', notes: 'Replaced seals and recalibrated vaporizer.' },
+          { status: RmaStatus.CLOSED, date: '2024-05-24T16:00:00Z', notes: 'Replaced seals and recalibrated vaporizer.' },
           { status: RmaStatus.CLOSED, date: '2024-05-25T10:00:00Z', notes: 'Final test passed. Case closed.' },
         ]
       },

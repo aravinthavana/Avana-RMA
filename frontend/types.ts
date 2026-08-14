@@ -30,6 +30,7 @@ export interface Device {
 }
 
 export interface ServiceCycle {
+  id?: number;
   deviceSerialNumber: string; // Link cycle to a specific device in the RMA
   status: RmaStatus;
   statusDate: string; // This is the last update date for this cycle

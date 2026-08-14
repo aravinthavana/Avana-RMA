@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
-import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { testReportsApi, TestReport, TestEquipment, TestStep, CreateTestReportData } from '../src/api/test-reports.api';
 import { apiClient } from '../src/api/client';
@@ -44,10 +43,10 @@ const inputClass = 'w-full rounded-lg border border-slate-200 bg-white px-3 py-2
 const labelClass = 'block text-xs font-semibold text-slate-600 mb-1 uppercase tracking-wide';
 
 const defaultSteps: TestStep[] = [
-    { stepNo: 1, name: 'Visual Inspection', criterion: 'No physical damage', unit: '-', result: '', isOk: true },
-    { stepNo: 2, name: 'Power On Test', criterion: 'Device powers on normally', unit: '-', result: '', isOk: true },
-    { stepNo: 3, name: 'Functional Test', criterion: 'All functions operate correctly', unit: '-', result: '', isOk: true },
-    { stepNo: 4, name: 'Alarm Test', criterion: 'All alarms trigger correctly', unit: '-', result: '', isOk: true },
+    { stepNo: 1, name: 'Visual Inspection', criterion: 'No physical damage', isOk: true },
+    { stepNo: 2, name: 'Power On Test', criterion: 'Device powers on normally', isOk: true },
+    { stepNo: 3, name: 'Functional Test', criterion: 'All functions operate correctly', isOk: true },
+    { stepNo: 4, name: 'Alarm Test', criterion: 'All alarms trigger correctly', isOk: true },
 ];
 
 // Note: Default templates will now be fetched from API instead of hardcoded
@@ -70,7 +69,6 @@ const TestReportModal: React.FC<Props> = ({
     const [form, setForm] = useState({
         testDate: new Date().toISOString().split('T')[0],
         deviceType: initialDeviceType || '',
-        mainsConnection: '',
         manufacturer: 'Avana Technology Services Pvt. Ltd',
         performedBy: 'Avana Technology Services Pvt. Ltd',
         testerName: user?.name || '',
@@ -137,14 +135,12 @@ const TestReportModal: React.FC<Props> = ({
             // Fetch test step templates
             apiClient.get(`/api/templates/test-steps/${initialDeviceType}`)
                 .then(res => {
-                    const templateSteps = res.data || [];
+                    const templateSteps: any[] = (res.data as any) || [];
                     if (templateSteps.length > 0) {
                         setSteps(templateSteps.map((s: any) => ({
                             stepNo: s.stepNo,
                             name: s.question ? `${s.name}\n${s.question}` : s.name,
                             criterion: s.criterion && s.criterion !== 'Yes/No' ? s.criterion : '',
-                            unit: '',
-                            result: '',
                             isOk: true
                         })));
                     } else {
@@ -163,7 +159,6 @@ const TestReportModal: React.FC<Props> = ({
             setForm({
                 testDate: new Date(existingReport.testDate).toISOString().split('T')[0],
                 deviceType: existingReport.deviceType,
-                mainsConnection: existingReport.mainsConnection,
                 manufacturer: existingReport.manufacturer,
                 performedBy: existingReport.performedBy,
                 testerName: existingReport.testerName,
@@ -199,7 +194,7 @@ const TestReportModal: React.FC<Props> = ({
     };
 
     // --- Step handlers ---
-    const addStep = () => setSteps(prev => [...prev, { stepNo: prev.length + 1, name: '', criterion: '', unit: '', result: '', isOk: true }]);
+    const addStep = () => setSteps(prev => [...prev, { stepNo: prev.length + 1, name: '', criterion: '', isOk: true }]);
     const removeStep = (idx: number) => {
         setSteps(prev => prev.filter((_, i) => i !== idx).map((s, i) => ({ ...s, stepNo: i + 1 })));
     };
@@ -288,10 +283,6 @@ const TestReportModal: React.FC<Props> = ({
                                 <div>
                                     <label className={labelClass}>Device Type / Name</label>
                                     <input className={`${inputClass} bg-slate-100 cursor-not-allowed`} readOnly value={form.deviceType} title="Fetched automatically from RMA device" />
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Mains Connection</label>
-                                    <input className={inputClass} value={form.mainsConnection} onChange={e => setForm({ ...form, mainsConnection: e.target.value })} placeholder="e.g. 220V / 50Hz (Optional)" />
                                 </div>
                                 <div>
                                     <label className={labelClass}>Performed By *</label>
@@ -392,8 +383,6 @@ const TestReportModal: React.FC<Props> = ({
                                             <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-10">Sl. No.</th>
                                             <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Test Step</th>
                                             <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Criterion</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-24">Unit</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-32">Result</th>
                                             <th className="px-3 py-3 text-center text-xs font-semibold text-slate-500 uppercase w-16">OK?</th>
                                             <th className="px-3 py-3 w-10"></th>
                                         </tr>
@@ -407,7 +396,7 @@ const TestReportModal: React.FC<Props> = ({
                                                 <React.Fragment key={idx}>
                                                     <tr className="bg-slate-50 border-t border-slate-200">
                                                         <td className="px-3 py-2 text-slate-500 text-center font-mono text-xs font-bold align-middle" rowSpan={2}>{step.stepNo}.</td>
-                                                        <td colSpan={5} className="px-3 pt-2 pb-1 text-xs font-bold text-slate-700">
+                                                        <td colSpan={3} className="px-3 pt-2 pb-1 text-xs font-bold text-slate-700">
                                                             <input
                                                                 className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-primary-400 focus:ring-1 focus:ring-primary-400 rounded px-2 py-1 outline-none transition-colors font-bold text-slate-800"
                                                                 value={title}
@@ -440,22 +429,6 @@ const TestReportModal: React.FC<Props> = ({
                                                                 value={step.criterion}
                                                                 onChange={e => updateStep(idx, 'criterion', e.target.value)}
                                                                 placeholder="Yes/No"
-                                                            />
-                                                        </td>
-                                                        <td className="px-3 py-1 pb-2 align-top">
-                                                            <input
-                                                                className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-primary-400 focus:ring-1 focus:ring-primary-400 rounded px-2 py-1 outline-none transition-colors"
-                                                                value={step.unit}
-                                                                onChange={e => updateStep(idx, 'unit', e.target.value)}
-                                                                placeholder="Unit"
-                                                            />
-                                                        </td>
-                                                        <td className="px-3 py-1 pb-2 align-top">
-                                                            <input
-                                                                className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-primary-400 focus:ring-1 focus:ring-primary-400 rounded px-2 py-1 outline-none transition-colors"
-                                                                value={step.result}
-                                                                onChange={e => updateStep(idx, 'result', e.target.value)}
-                                                                placeholder="Result"
                                                             />
                                                         </td>
                                                         <td className="px-3 py-1 pb-2 text-center align-top">

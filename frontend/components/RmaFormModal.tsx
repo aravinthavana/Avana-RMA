@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
-import { useState, useEffect, useRef } from 'react';
 import { Rma, Customer, Device, ServiceCycle, RmaStatus } from '../types';
 import { XMarkIcon, PlusIcon } from './icons';
 import { API_BASE_URL } from '../config';

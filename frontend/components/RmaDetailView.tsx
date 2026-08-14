@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { RmaStatus, ServiceCycle, StatusHistoryEvent } from '../types';
+import { RmaStatus, ServiceCycle, StatusHistoryEvent, Device } from '../types';
 import StatusUpdateModal from './StatusUpdateModal';
 import { RmaPreviewModal } from './RmaPreviewModal';
 import NewCycleModal from './NewCycleModal';
@@ -12,6 +12,7 @@ import { useRmaContext } from '../src/context/RmaContext';
 import { motion } from 'framer-motion';
 import { getStatusBadgeColor } from './RmaList';
 import { testReportsApi, TestReport } from '../src/api/test-reports.api';
+import { useAuth } from '../src/context/AuthContext';
 
 /**
  * A detailed status badge component that shows the current status and the date of the last update.
@@ -104,6 +105,7 @@ const RmaDetailView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { rmas, updateStatus, updateRma } = useRmaContext();
+  const { user } = useAuth();
 
   const rma = rmas.find(r => r.id === id);
 
@@ -305,6 +307,7 @@ const RmaDetailView: React.FC = () => {
                                     report={testReports[(cycle as any).id]!}
                                     deviceSerialNumber={cycle.deviceSerialNumber}
                                     rmaId={rma.id}
+                                    signatureUrl={user?.signatureUrl}
                                   />
                                 }
                                 fileName={`TestReport-${rma.id}-${cycle.deviceSerialNumber}.pdf`}

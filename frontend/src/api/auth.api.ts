@@ -7,6 +7,7 @@ export interface User {
     role: string;
     isAdmin?: boolean;
     isActive: boolean;
+    signatureUrl?: string;
 }
 
 export interface AuthResponse {
@@ -43,5 +44,18 @@ export const authApi = {
      */
     forgotPassword: async (email: string): Promise<ApiResponse<void>> => {
         return apiClient.post<void>('/api/auth/forgot-password', { email });
+    },
+    
+    /**
+     * Upload signature
+     */
+    uploadSignature: async (file: File): Promise<ApiResponse<{ signatureUrl: string }>> => {
+        const formData = new FormData();
+        formData.append('signature', file);
+        return apiClient.post<{ signatureUrl: string }>('/api/auth/profile/signature', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     },
 };
