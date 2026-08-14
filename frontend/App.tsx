@@ -16,6 +16,7 @@ import { Breadcrumbs, BreadcrumbItem } from './components/Breadcrumbs';
 import Dashboard from './components/Dashboard';
 import MainDashboard from './components/MainDashboard';
 import UserManagement from './src/pages/UserManagement';
+import UserDetails from './src/pages/UserDetails';
 import AuditLogsPage from './src/pages/AuditLogsPage';
 import ForgotPassword from './src/pages/ForgotPassword';
 import ResetPassword from './src/pages/ResetPassword';
@@ -245,6 +246,9 @@ const AppContent: FC = () => {
                 } />
                 <Route path="/users" element={
                   <UserManagement />
+                } />
+                <Route path="/users/:id" element={
+                  <UserDetails />
                 } />
                 <Route path="/system-logs" element={
                   <AuditLogsPage />

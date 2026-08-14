@@ -16,8 +16,6 @@ const UserManagement: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [roleFilter, setRoleFilter] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isEditMode, setIsEditMode] = useState(false);
-    const [editUserId, setEditUserId] = useState<string | null>(null);
 
     useEffect(() => {
         if (user && !(user.isAdmin || user.role === 'ADMIN')) {
@@ -50,10 +48,7 @@ const UserManagement: React.FC = () => {
         isActive: true
     });
 
-    // Reset password state
-    const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const [newPassword, setNewPassword] = useState('');
+
 
     const fetchUsers = async () => {
         try {
@@ -70,81 +65,20 @@ const UserManagement: React.FC = () => {
     const handleCreateUser = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            if (isEditMode && editUserId) {
-                // Update existing user
-                const { password, ...updateData } = formData;
-                await apiClient.put(`/api/users/${editUserId}`, updateData);
-                toast.success('User updated successfully');
-            } else {
-                // Create new user
-                await apiClient.post('/api/users', formData);
-                toast.success('User created successfully');
-            }
+            await apiClient.post('/api/users', formData);
+            toast.success('User created successfully');
             setIsModalOpen(false);
             fetchUsers(); // Refresh list
             setFormData({ name: '', email: '', password: '', role: 'SERVICE_ENGINEER', isAdmin: false, isActive: true });
         } catch (error) {
             console.error('Save user error:', error);
-            toast.error(`Failed to ${isEditMode ? 'update' : 'create'} user`);
+            toast.error('Failed to create user');
         }
-    };
-
-    const openEditModal = (user: User) => {
-        setFormData({
-            name: user.name,
-            email: user.email,
-            password: '', // Leave blank, password change handled elsewhere
-            role: user.role,
-            isAdmin: user.isAdmin,
-            isActive: user.isActive
-        });
-        setEditUserId(user.id);
-        setIsEditMode(true);
-        setIsModalOpen(true);
     };
 
     const openCreateModal = () => {
         setFormData({ name: '', email: '', password: '', role: 'SERVICE_ENGINEER', isAdmin: false, isActive: true });
-        setEditUserId(null);
-        setIsEditMode(false);
         setIsModalOpen(true);
-    };
-
-    const toggleUserStatus = async (user: User) => {
-        try {
-            await apiClient.patch(`/api/users/${user.id}/status`, { isActive: !user.isActive });
-            toast.success(`User ${user.isActive ? 'deactivated' : 'activated'}`);
-            fetchUsers();
-        } catch (error) {
-            toast.error('Failed to update status');
-        }
-    };
-
-    const deleteUser = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this user?')) return;
-        try {
-            await apiClient.delete(`/api/users/${id}`);
-            toast.success('User deleted');
-            fetchUsers();
-        } catch (error) {
-            toast.error('Failed to delete user');
-        }
-    };
-
-    const handleResetPassword = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!selectedUser || !newPassword) return;
-        try {
-            await apiClient.patch(`/api/users/${selectedUser.id}/reset-password`, { newPassword });
-            toast.success('Password reset successfully');
-            setIsResetPasswordModalOpen(false);
-            setSelectedUser(null);
-            setNewPassword('');
-        } catch (error: any) {
-            // Show the server's specific validation error (e.g. 'Password must contain uppercase...')
-            const msg = error?.response?.error || error?.message || 'Failed to reset password';
-            toast.error(msg);
-        }
     };
 
     const filteredUsers = users.filter(user => {
@@ -200,12 +134,11 @@ const UserManagement: React.FC = () => {
                             <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
                             <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Signature</th>
                             <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Last Login</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {filteredUsers.map((user) => (
-                            <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
+                            <tr key={user.id} onClick={() => navigate(`/users/${user.id}`)} className="hover:bg-slate-50/50 transition-colors cursor-pointer">
                                 <td className="px-6 py-4">
                                     <div className="font-medium text-slate-900">{user.name}</div>
                                     <div className="text-sm text-slate-500">{user.email}</div>
@@ -236,44 +169,11 @@ const UserManagement: React.FC = () => {
                                 <td className="px-6 py-4 text-sm text-slate-500">
                                     {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'Never'}
                                 </td>
-                                <td className="px-6 py-4 text-right space-x-2 flex justify-end">
-                                    <button
-                                        onClick={() => toggleUserStatus(user)}
-                                        title={user.isActive ? "Deactivate" : "Activate"}
-                                        className={`p-1 rounded hover:bg-slate-100 ${user.isActive ? 'text-amber-600' : 'text-green-600'}`}
-                                    >
-                                        {user.isActive ? <Ban className="w-5 h-5" /> : <CheckCircle className="w-5 h-5" />}
-                                    </button>
-                                    <button
-                                        onClick={() => openEditModal(user)}
-                                        title="Edit User"
-                                        className="p-1 rounded hover:bg-slate-100 text-blue-600"
-                                    >
-                                        <Pencil className="w-5 h-5" />
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setSelectedUser(user);
-                                            setIsResetPasswordModalOpen(true);
-                                        }}
-                                        title="Reset Password"
-                                        className="p-1 rounded hover:bg-slate-100 text-indigo-600"
-                                    >
-                                        <KeyRound className="w-5 h-5" />
-                                    </button>
-                                    <button
-                                        onClick={() => deleteUser(user.id)}
-                                        title="Delete"
-                                        className="p-1 rounded hover:bg-slate-100 text-red-600"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
-                                </td>
                             </tr>
                         ))}
                         {filteredUsers.length === 0 && !isLoading && (
                             <tr>
-                                <td colSpan={6} className="px-6 py-8 text-center text-slate-500">No users found.</td>
+                                <td colSpan={5} className="px-6 py-8 text-center text-slate-500">No users found.</td>
                             </tr>
                         )}
                     </tbody>
@@ -361,7 +261,7 @@ const UserManagement: React.FC = () => {
                                     type="submit"
                                     className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium"
                                 >
-                                    {isEditMode ? 'Save Changes' : 'Create User'}
+                                    Create User
                                 </button>
                             </div>
                         </form>
@@ -369,58 +269,6 @@ const UserManagement: React.FC = () => {
                 </div>
             )}
 
-            {/* Reset Password Modal */}
-            {isResetPasswordModalOpen && selectedUser && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
-                    >
-                        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                            <h3 className="text-lg font-bold text-slate-900">Reset Password for {selectedUser.name}</h3>
-                            <button onClick={() => {
-                                setIsResetPasswordModalOpen(false);
-                                setSelectedUser(null);
-                                setNewPassword('');
-                            }} className="text-slate-400 hover:text-slate-600">✕</button>
-                        </div>
-                        <form onSubmit={handleResetPassword} className="p-6 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">New Password</label>
-                                <input
-                                    type="password"
-                                    required
-                                    minLength={8}
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-                                    value={newPassword}
-                                    onChange={e => setNewPassword(e.target.value)}
-                                    placeholder="Min 8 chars, uppercase, lowercase & number"
-                                />
-                            </div>
-                            <div className="pt-4 flex justify-end gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsResetPasswordModalOpen(false);
-                                        setSelectedUser(null);
-                                        setNewPassword('');
-                                    }}
-                                    className="px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-                                >
-                                    Reset Password
-                                </button>
-                            </div>
-                        </form>
-                    </motion.div>
-                </div>
-            )}
         </div>
     );
 };

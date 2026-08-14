@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import userService from '../services/user.service';
+import fs from 'fs';
+import path from 'path';
 
 export class UserController {
     private userService = userService;
@@ -164,6 +166,68 @@ export class UserController {
             )) {
                 return res.status(400).json({ success: false, error: error.message });
             }
+            next(error);
+        }
+    };
+
+    uploadProfilePicture = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ success: false, error: 'No profile picture provided' });
+            }
+
+            const user = await this.userService.getUserById(req.params.id);
+            if (!user) {
+                // Cleanup uploaded file since user doesn't exist
+                fs.unlinkSync(req.file.path);
+                return res.status(404).json({ success: false, error: 'User not found' });
+            }
+
+            // If user already had a profile picture, delete the old one
+            if (user.profilePictureUrl) {
+                const oldPath = path.join(process.cwd(), user.profilePictureUrl);
+                if (fs.existsSync(oldPath)) {
+                    fs.unlinkSync(oldPath);
+                }
+            }
+
+            const relativePath = `/uploads/profiles/${req.file.filename}`;
+            const updatedUser = await this.userService.updateUser(user.id, { profilePictureUrl: relativePath });
+            const { password, ...userWithoutPassword } = updatedUser;
+
+            res.json({ 
+                success: true, 
+                data: userWithoutPassword,
+                message: 'Profile picture uploaded successfully' 
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    removeProfilePicture = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const user = await this.userService.getUserById(req.params.id);
+            if (!user) {
+                return res.status(404).json({ success: false, error: 'User not found' });
+            }
+
+            if (user.profilePictureUrl) {
+                const oldPath = path.join(process.cwd(), user.profilePictureUrl);
+                if (fs.existsSync(oldPath)) {
+                    fs.unlinkSync(oldPath);
+                }
+                const updatedUser = await this.userService.updateUser(user.id, { profilePictureUrl: null });
+                const { password, ...userWithoutPassword } = updatedUser;
+                return res.json({ 
+                    success: true, 
+                    data: userWithoutPassword,
+                    message: 'Profile picture removed successfully' 
+                });
+            }
+
+            res.json({ success: true, message: 'No profile picture to remove' });
+        } catch (error) {
             next(error);
         }
     };

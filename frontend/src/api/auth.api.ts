@@ -9,6 +9,7 @@ export interface User {
     isActive: boolean;
     lastLoginAt?: string;
     signatureUrl?: string;
+    profilePictureUrl?: string;
 }
 
 export interface AuthResponse {
