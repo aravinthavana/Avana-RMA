@@ -12,11 +12,14 @@ export class BackupService {
      * Returns the absolute path to the generated .sql file.
      */
     async createDatabaseBackup(): Promise<string> {
-        const databaseUrl = process.env.DATABASE_URL;
+        let databaseUrl = process.env.DATABASE_URL;
 
         if (!databaseUrl) {
             throw new Error('DATABASE_URL environment variable is missing.');
         }
+
+        // pg_dump doesn't accept the ?schema=public query parameter that Prisma requires
+        databaseUrl = databaseUrl.split('?')[0];
 
         // Create a secure temporary file path
         const fileName = `backup-${new Date().toISOString().replace(/[:.]/g, '-')}-${uuidv4().substring(0, 8)}.sql`;
@@ -79,11 +82,14 @@ export class BackupService {
      * WARNING: This is a destructive operation that completely overwrites existing data!
      */
     async restoreDatabaseBackup(filePath: string): Promise<void> {
-        const databaseUrl = process.env.DATABASE_URL;
+        let databaseUrl = process.env.DATABASE_URL;
 
         if (!databaseUrl) {
             throw new Error('DATABASE_URL environment variable is missing.');
         }
+
+        // psql doesn't accept the ?schema=public query parameter that Prisma requires
+        databaseUrl = databaseUrl.split('?')[0];
 
         if (!fs.existsSync(filePath)) {
             throw new Error(`Backup file not found at path: ${filePath}`);
