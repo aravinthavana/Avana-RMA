@@ -15,6 +15,7 @@ export interface AddHistoryEventData {
     status: string;
     date?: Date;              // A-2: DateTime — DB defaults to now()
     notes?: string;
+    attachmentUrl?: string;
 }
 
 export class ServiceCycleRepository {
@@ -86,6 +87,7 @@ export class ServiceCycleRepository {
                 status: data.status,
                 date: data.date ?? new Date(),
                 notes: data.notes,
+                attachmentUrl: data.attachmentUrl,
             },
         });
     }

@@ -375,7 +375,14 @@ export const ServiceReportDocument = ({ rma, device, cycle }: {
             <View key={idx} style={[styles.tableRow, idx % 2 === 1 ? styles.tableRowEven : {}]} wrap={false}>
               <Text style={[styles.tableCell, { width: '20%' }]}>{formatDate(entry.date)}</Text>
               <Text style={[styles.tableCell, { width: '25%' }]}>{entry.status}</Text>
-              <Text style={[styles.tableCell, { width: '55%' }]}>{entry.notes || '-'}</Text>
+              <View style={[styles.tableCell, { width: '55%', flexDirection: 'column' }]}>
+                <Text>{entry.notes || '-'}</Text>
+                {entry.attachmentUrl && (
+                  <Text style={{ fontSize: 7, color: '#3b82f6', marginTop: 2 }}>
+                    [Attachment Included: {entry.attachmentUrl.split('/').pop()}]
+                  </Text>
+                )}
+              </View>
             </View>
           ))
         ) : (

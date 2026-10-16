@@ -212,7 +212,8 @@ export class RmaService {
         rmaId: string,
         deviceSerialNumber: string,
         newStatus: string,
-        notes?: string
+        notes?: string,
+        attachmentUrl?: string
     ) {
         // Get the RMA
         const rma = await this.rmaRepo.findById(rmaId);
@@ -232,7 +233,8 @@ export class RmaService {
         // Update the service cycle status
         const updatedCycle = await this.updateServiceCycleStatus(serviceCycle.id, {
             status: newStatus,
-            notes
+            notes,
+            attachmentUrl
         });
 
         // Update RMA last update date (A-2: Date object, not ISO string)
@@ -249,7 +251,7 @@ export class RmaService {
      */
     async updateServiceCycleStatus(
         cycleId: number,
-        statusUpdate: UpdateServiceCycleStatusDto
+        statusUpdate: UpdateServiceCycleStatusDto & { attachmentUrl?: string }
     ) {
         // Validate service cycle exists
         const cycle = await this.serviceCycleRepo.findById(cycleId);
@@ -271,14 +273,18 @@ export class RmaService {
             status: statusUpdate.status,
             date: now,
             notes: statusUpdate.notes,
+            attachmentUrl: statusUpdate.attachmentUrl,
         };
 
-        await this.serviceCycleRepo.addHistoryEvent(cycleId, historyData);
+        const newHistoryEvent = await this.serviceCycleRepo.addHistoryEvent(cycleId, historyData);
 
         // Update RMA's lastUpdateDate (A-2: Date object)
         await this.rmaRepo.update(cycle.rmaId, { lastUpdateDate: now });
 
-        return updatedCycle;
+        return {
+            ...updatedCycle,
+            history: [...updatedCycle.history, newHistoryEvent]
+        };
     }
 
     /**

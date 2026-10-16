@@ -85,6 +85,7 @@ model ServiceHistory {
   status          String
   date            DateTime      @default(now())   // A-2: was String
   notes           String?
+  attachmentUrl   String?
   
   serviceCycle    ServiceCycle  @relation(fields: [serviceCycleId], references: [id], onDelete: Cascade)
   

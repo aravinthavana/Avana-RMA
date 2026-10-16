@@ -5,13 +5,14 @@ import { XMarkIcon } from './icons';
 interface StatusUpdateModalProps {
   currentStatus: RmaStatus;
   onClose: () => void;
-  onSave: (newStatus: string, notes: string) => void;
+  onSave: (newStatus: string, notes: string, attachment?: File) => void;
 }
 
 interface FormData {
   newStatus: RmaStatus;
   customStatus: string;
   notes: string;
+  attachment?: File;
 }
 
 interface Errors {
@@ -30,6 +31,7 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({ currentStatus, on
 
   const isNotesRequired = formData.newStatus === RmaStatus.CLOSED;
   const isCustomStatus = formData.newStatus === RmaStatus.CUSTOM;
+  const showAttachment = [RmaStatus.RECEIVED, RmaStatus.CLOSED, RmaStatus.CUSTOM].includes(formData.newStatus as any);
 
   useEffect(() => {
     firstInputRef.current?.focus();
@@ -47,10 +49,17 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({ currentStatus, on
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLTextAreaElement | HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
-    if (errors[id as keyof Errors]) {
-      setErrors(prev => ({ ...prev, [id]: undefined }));
+    const { id, value, type } = e.target;
+    
+    if (type === 'file') {
+      const fileInput = e.target as HTMLInputElement;
+      const file = fileInput.files?.[0];
+      setFormData(prev => ({ ...prev, attachment: file }));
+    } else {
+      setFormData(prev => ({ ...prev, [id]: value }));
+      if (errors[id as keyof Errors]) {
+        setErrors(prev => ({ ...prev, [id]: undefined }));
+      }
     }
   };
 
@@ -63,7 +72,7 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({ currentStatus, on
     }
     // If Custom, pass the custom text. Otherwise pass the enum value string.
     const statusToSave = isCustomStatus ? formData.customStatus.trim() : formData.newStatus;
-    onSave(statusToSave, formData.notes);
+    onSave(statusToSave, formData.notes, formData.attachment);
   };
 
   // Exclude CUSTOM from dropdown since we handle it specially below
@@ -139,6 +148,21 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({ currentStatus, on
             </div>
             {errors.notes && <p id="notes-error" className={errorTextStyles} role="alert">{errors.notes}</p>}
           </div>
+
+          {showAttachment && (
+            <div>
+              <label htmlFor="attachment" className={labelStyles}>Proof Attachment (Optional)</label>
+              <p className="text-xs text-slate-500 mb-2">Attach an image or document as proof of condition.</p>
+              <input
+                type="file"
+                id="attachment"
+                accept="image/*,application/pdf"
+                onChange={handleChange}
+                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+              />
+            </div>
+          )}
+
           <div className="flex justify-end gap-4 pt-4 border-t border-slate-200">
             <button type="button" onClick={onClose} className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50">Cancel</button>
             <button type="submit" className="rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:opacity-50 disabled:cursor-not-allowed">

@@ -19,6 +19,7 @@ export interface StatusUpdateData {
     deviceSerialNumber: string;
     newStatus: RmaStatus;
     notes: string;
+    attachment?: File;
 }
 
 export const rmasApi = {
@@ -71,8 +72,20 @@ export const rmasApi = {
     updateStatus: async (
         rmaId: string,
         statusData: StatusUpdateData
-    ): Promise<ApiResponse<{ lastUpdateDate: string }>> => {
-        return apiClient.patch<{ lastUpdateDate: string }>(
+    ): Promise<ApiResponse<{ cycle: any; lastUpdateDate: string }>> => {
+        if (statusData.attachment) {
+            const formData = new FormData();
+            formData.append('deviceSerialNumber', statusData.deviceSerialNumber);
+            formData.append('newStatus', statusData.newStatus);
+            formData.append('notes', statusData.notes);
+            formData.append('attachment', statusData.attachment);
+            return apiClient.patch<{ cycle: any; lastUpdateDate: string }>(
+                `/api/rmas/${rmaId}/status`,
+                formData
+            );
+        }
+
+        return apiClient.patch<{ cycle: any; lastUpdateDate: string }>(
             `/api/rmas/${rmaId}/status`,
             statusData
         );

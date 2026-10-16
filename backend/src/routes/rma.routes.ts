@@ -1,4 +1,7 @@
 import { Router } from 'express';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 import rmaController from '../controllers/rma.controller';
 import { createRmaSchema, updateRmaSchema, statusUpdateSchema } from '../validation';
 import authMiddleware from '../middleware/auth.middleware';
@@ -6,6 +9,25 @@ import { auditMiddleware } from '../middleware/audit.middleware';
 import { AuditAction, AuditEntity } from '../services/audit.service';
 
 const router = Router();
+
+// Configure Multer for attachments
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = path.join(process.cwd(), 'uploads', 'attachments');
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+const uploadAttachment = multer({ 
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
 
 // Protect all routes
 router.use(authMiddleware);
@@ -117,7 +139,7 @@ router.delete('/:id', auditMiddleware(AuditAction.DELETE, AuditEntity.RMA), (req
  * @access  Public
  * @body    { deviceSerialNumber, newStatus, notes? }
  */
-router.patch('/:id/status', validateStatusUpdate, auditMiddleware(AuditAction.UPDATE, AuditEntity.RMA), (req, res, next) => rmaController.updateStatus(req, res, next));
+router.patch('/:id/status', uploadAttachment.single('attachment'), validateStatusUpdate, auditMiddleware(AuditAction.UPDATE, AuditEntity.RMA), (req, res, next) => rmaController.updateStatus(req, res, next));
 
 /**
  * @route   POST /api/rmas/:id/cycles
@@ -134,6 +156,6 @@ router.post('/:id/cycles', auditMiddleware(AuditAction.UPDATE, AuditEntity.RMA),
  * @access  Public
  * @body    { status, notes? }
  */
-router.put('/cycles/:cycleId/status', validateStatusUpdate, auditMiddleware(AuditAction.UPDATE, AuditEntity.RMA), (req, res, next) => rmaController.updateCycleStatus(req, res, next));
+router.put('/cycles/:cycleId/status', uploadAttachment.single('attachment'), validateStatusUpdate, auditMiddleware(AuditAction.UPDATE, AuditEntity.RMA), (req, res, next) => rmaController.updateCycleStatus(req, res, next));
 
 export default router;

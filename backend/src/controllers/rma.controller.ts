@@ -194,12 +194,18 @@ export class RmaController {
         try {
             const { id } = req.params;
             const { deviceSerialNumber, newStatus, notes } = req.body;
+            let attachmentUrl = undefined;
+
+            if (req.file) {
+                attachmentUrl = `/uploads/attachments/${req.file.filename}`;
+            }
 
             const updatedRma = await this.rmaService.updateServiceCycleStatusBySerialNumber(
                 id,
                 deviceSerialNumber,
                 newStatus,
-                notes
+                notes,
+                attachmentUrl
             );
 
             if (!updatedRma) {
@@ -208,7 +214,10 @@ export class RmaController {
 
             res.json({
                 success: true,
-                data: updatedRma,
+                data: {
+                    cycle: updatedRma,
+                    lastUpdateDate: new Date().toISOString()
+                },
             });
         } catch (error) {
             next(error);
@@ -243,7 +252,16 @@ export class RmaController {
             if (isNaN(cycleId)) {
                 return res.status(400).json({ success: false, error: 'Invalid cycle ID — must be a number' });
             }
-            const cycle = await this.rmaService.updateServiceCycleStatus(cycleId, req.body);
+            
+            let attachmentUrl = undefined;
+            if (req.file) {
+                attachmentUrl = `/uploads/attachments/${req.file.filename}`;
+            }
+
+            const cycle = await this.rmaService.updateServiceCycleStatus(cycleId, {
+                ...req.body,
+                attachmentUrl
+            });
 
             res.json({
                 success: true,

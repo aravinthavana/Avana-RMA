@@ -12,6 +12,7 @@ export interface StatusHistoryEvent {
   status: RmaStatus;
   date: string;
   notes: string;
+  attachmentUrl?: string;
 }
 
 export interface Customer {

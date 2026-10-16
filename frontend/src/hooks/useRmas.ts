@@ -137,16 +137,18 @@ export const useRmas = (initialPage: number = 1, initialLimit: number = 50) => {
         rmaId: string,
         deviceSerialNumber: string,
         newStatus: RmaStatus,
-        notes: string
+        notes: string,
+        attachment?: File
     ): Promise<boolean> => {
         try {
             const response = await rmasApi.updateStatus(rmaId, {
                 deviceSerialNumber,
                 newStatus,
-                notes
+                notes,
+                attachment
             });
 
-            const { lastUpdateDate } = response.data;
+            const { cycle: updatedCycle, lastUpdateDate } = response.data;
 
             // Update local state
             setRmas(prevRmas => prevRmas.map(rma => {
@@ -156,9 +158,6 @@ export const useRmas = (initialPage: number = 1, initialLimit: number = 50) => {
 
                 updatedRma.serviceCycles = rma.serviceCycles.map(cycle => {
                     if (cycle.deviceSerialNumber !== deviceSerialNumber) return cycle;
-
-                    const updatedCycle = { ...cycle, status: newStatus, statusDate: new Date().toISOString() };
-                    updatedCycle.history = [...cycle.history, { status: newStatus, date: new Date().toISOString(), notes }];
                     return updatedCycle;
                 });
 
