@@ -9,6 +9,7 @@ import adminRoutes from './admin.routes';
 import testReportRoutes from './test-report.routes';
 import articleRoutes from './article.routes';
 import templateRoutes from './template.routes';
+import deviationRoutes from './deviation.routes';
 
 const router = Router();
 
@@ -23,6 +24,7 @@ router.use('/admin', adminRoutes);
 router.use('/test-reports', testReportRoutes);
 router.use('/articles', articleRoutes);
 router.use('/templates', templateRoutes);
+router.use('/deviations', deviationRoutes);
 
 // Health check endpoint
 router.get('/health', (req, res) => {

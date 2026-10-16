@@ -72,3 +72,47 @@ export interface AuditLog {
   ipAddress?: string;
   createdAt: string;
 }
+
+export type ProtocolPortionType = 'IQ' | 'OQ' | 'PQ' | 'OTHER';
+
+export type DeviationStatusType = 'DRAFT' | 'UNDER_INVESTIGATION' | 'PENDING_APPROVAL' | 'APPROVED' | 'CLOSED';
+
+export interface ValidationDeviation {
+  id: string;
+  deviationNumber: string;
+  documentNumber: string;
+  version: string;
+  effectiveDate: string;
+  protocolPortion: ProtocolPortionType;
+  protocolPortionCustom?: string;
+  testSection: string;
+  description: string;
+  observedByName: string;
+  observedBySignature?: string;
+  dateObserved: string;
+  investigationImpact?: string;
+  correctiveAction?: string;
+  attachments?: string[];
+  isResolved: boolean;
+  status: DeviationStatusType;
+  completedByName?: string;
+  completedBySignature?: string;
+  completedDate?: string;
+  validationApproverName?: string;
+  validationApproverSignature?: string;
+  validationApprovalDate?: string;
+  smeApproverName?: string;
+  smeApproverSignature?: string;
+  smeApprovalDate?: string;
+  approverName?: string;
+  approverSignature?: string;
+  approvalDate?: string;
+  createdAt: string;
+  updatedAt: string;
+  createdById?: string;
+  createdBy?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}

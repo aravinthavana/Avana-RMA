@@ -23,6 +23,7 @@ import ResetPassword from './src/pages/ResetPassword';
 import ProfilePage from './src/pages/ProfilePage';
 import TemplateManagement from './src/pages/TemplateManagement';
 import DatabaseManagerPage from './src/pages/DatabaseManagerPage';
+import DeviationListView from './components/DeviationListView';
 
 // Context Providers
 import { CustomerProvider, useCustomerContext } from './src/context/CustomerContext';
@@ -150,6 +151,7 @@ const AppContent: FC = () => {
     if (view === 'logs') navigate('/system-logs');
     if (view === 'profile') navigate('/profile');
     if (view === 'templates') navigate('/templates');
+    if (view === 'deviations') navigate('/deviations');
   }
 
   const getBreadcrumbs = (): BreadcrumbItem[] => {
@@ -183,6 +185,12 @@ const AppContent: FC = () => {
       } else if (custId) {
         items.push({ label: 'Details', active: true });
       }
+    } else if (path.startsWith('/deviations')) {
+      items.push({ label: 'Validation Deviations', onClick: () => navigate('/deviations'), active: path === '/deviations' });
+      const devId = path.split('/')[2];
+      if (devId) {
+        items.push({ label: `${devId}`, active: true });
+      }
     }
     return items;
   }
@@ -196,6 +204,7 @@ const AppContent: FC = () => {
     if (location.pathname.includes('profile')) return 'profile';
     if (location.pathname.includes('templates')) return 'templates' as any;
     if (location.pathname.includes('database')) return 'database' as any;
+    if (location.pathname.includes('deviations')) return 'deviations' as any;
     return 'dashboard';
   };
 
@@ -261,6 +270,9 @@ const AppContent: FC = () => {
                 } />
                 <Route path="/templates" element={
                   <TemplateManagement />
+                } />
+                <Route path="/deviations" element={
+                  <DeviationListView />
                 } />
               </Routes>
 

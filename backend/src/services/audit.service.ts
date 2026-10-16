@@ -16,6 +16,7 @@ export enum AuditEntity {
     USER = 'USER',
     CUSTOMER = 'CUSTOMER',
     RMA = 'RMA',
+    DEVIATION = 'DEVIATION',
     SYSTEM = 'SYSTEM'
 }
 

@@ -131,6 +131,7 @@ model User {
   profilePictureUrl String? // Optional path to the user's uploaded profile picture
   updatedAt        DateTime @updatedAt
   auditLogs        AuditLog[]
+  deviations       ValidationDeviation[]
 
   @@map("users")
 }
@@ -192,4 +193,52 @@ model TestEquipmentTemplate {
   createdAt   DateTime @default(now())
 
   @@map("test_equipment_templates")
+}
+
+model ValidationDeviation {
+  id                    String    @id @default(uuid())
+  deviationNumber       String    @unique
+  documentNumber        String    @default("FORM-SH001")
+  version               String    @default("1.0")
+  effectiveDate         String    @default("10-Oct-2022")
+  protocolPortion       String    @default("IQ")
+  protocolPortionCustom String?
+  testSection           String
+  
+  description           String    @db.Text
+  observedByName        String
+  observedBySignature   String?
+  dateObserved          DateTime
+  
+  investigationImpact   String?   @db.Text
+  correctiveAction      String?   @db.Text
+  attachments           String[]  @default([])
+  
+  isResolved            Boolean   @default(false)
+  status                String    @default("DRAFT")
+  
+  completedByName       String?
+  completedBySignature  String?
+  completedDate         DateTime?
+  
+  validationApproverName      String?
+  validationApproverSignature String?
+  validationApprovalDate      DateTime?
+  
+  smeApproverName             String?
+  smeApproverSignature        String?
+  smeApprovalDate             DateTime?
+  
+  approverName                String?
+  approverSignature           String?
+  approvalDate                DateTime?
+  
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  createdById           String?
+  createdBy             User?     @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([deviationNumber])
+  @@index([status])
+  @@map("validation_deviations")
 }

@@ -7,8 +7,8 @@ import { API_BASE_URL } from '../config';
 
 interface SidebarLayoutProps {
     children: React.ReactNode;
-    activeView: 'dashboard' | 'rma' | 'customer' | 'users' | 'logs' | 'profile' | 'templates' | 'database';
-    onNavigate: (view: 'rma' | 'customer' | 'users' | 'dashboard' | 'logs' | 'profile' | 'templates' | 'database') => void;
+    activeView: 'dashboard' | 'rma' | 'customer' | 'users' | 'logs' | 'profile' | 'templates' | 'database' | 'deviations';
+    onNavigate: (view: 'rma' | 'customer' | 'users' | 'dashboard' | 'logs' | 'profile' | 'templates' | 'database' | 'deviations') => void;
     onGoHome?: () => void;
 }
 
@@ -27,6 +27,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children, activeVi
         { id: 'home' as const, label: 'Dashboard', icon: HomeIcon, callback: onGoHome },
         { id: 'rma' as const, label: 'RMAs', icon: WrenchScrewdriverIcon, callback: () => onNavigate('rma') },
         { id: 'customer' as const, label: 'Customers', icon: BuildingOffice2Icon, callback: () => onNavigate('customer') },
+        { id: 'deviations' as const, label: 'Validation Deviations', icon: WrenchScrewdriverIcon, callback: () => onNavigate('deviations') },
         ...(user?.isAdmin || user?.role === 'ADMIN' ? [
             { id: 'templates' as const, label: 'Master Data', icon: WrenchScrewdriverIcon, callback: () => onNavigate('templates' as any) },
             { id: 'users' as const, label: 'Users', icon: BuildingOffice2Icon, callback: () => onNavigate('users') },
