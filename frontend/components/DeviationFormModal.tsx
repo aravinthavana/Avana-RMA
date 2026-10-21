@@ -427,10 +427,6 @@ export const DeviationFormModal: React.FC<DeviationFormModalProps> = ({
                 completedBySignature: completedBySignature || undefined,
                 completedDate: completedDate || undefined,
 
-                validationApproverName: validationApproverName.trim() || undefined,
-                validationApproverSignature: validationApproverSignature || undefined,
-                validationApprovalDate: validationApprovalDate || undefined,
-
                 smeApproverName: smeApproverName.trim() || undefined,
                 smeApproverSignature: smeApproverSignature || undefined,
                 smeApprovalDate: smeApprovalDate || undefined,
@@ -725,12 +721,11 @@ export const DeviationFormModal: React.FC<DeviationFormModalProps> = ({
                                     </div>
                                 </div>
 
-                                {/* 4 Signature Blocks */}
+                                {/* 3 Signature Blocks */}
                                 <div className="space-y-3 pt-2">
                                     {renderSignatureSection('1. Completed By (Print/Sign)', 'COMPLETED', completedByName, setCompletedByName, completedBySignature, setCompletedBySignature, completedDate, setCompletedDate, false)}
-                                    {renderSignatureSection('2. Validation or Designee Approval (Print, Sign)', 'VALIDATION', validationApproverName, setValidationApproverName, validationApproverSignature, setValidationApproverSignature, validationApprovalDate, setValidationApprovalDate, false)}
-                                    {renderSignatureSection('3. Process Owner or SME Approval (Print, Sign)', 'SME', smeApproverName, setSmeApproverName, smeApproverSignature, setSmeApproverSignature, smeApprovalDate, setSmeApprovalDate, false)}
-                                    {renderSignatureSection('4. Approval (Print/Sign)', 'APPROVAL', approverName, setApproverName, approverSignature, setApproverSignature, approvalDate, setApprovalDate, false)}
+                                    {renderSignatureSection('2. Process Owner or SME Approval (Print, Sign)', 'SME', smeApproverName, setSmeApproverName, smeApproverSignature, setSmeApproverSignature, smeApprovalDate, setSmeApprovalDate, false)}
+                                    {renderSignatureSection('3. Approval (Print/Sign)', 'APPROVAL', approverName, setApproverName, approverSignature, setApproverSignature, approvalDate, setApprovalDate, false)}
                                 </div>
                             </div>
                         </div>

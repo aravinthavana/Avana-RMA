@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
     },
     tableRow: {
         flexDirection: 'row',
+        minHeight: 22,
     },
     tableHeaderCell: {
         fontFamily: 'Helvetica-Bold',
@@ -63,9 +64,10 @@ const styles = StyleSheet.create({
         borderBottom: '1px solid #000000',
     },
     tableCell: {
-        padding: '4 6',
+        padding: '3 6',
         fontSize: 8.5,
         borderRight: '1px solid #000000',
+        justifyContent: 'center',
     },
     lastCell: {
         borderRight: 'none',
@@ -87,8 +89,8 @@ const styles = StyleSheet.create({
         marginTop: 1,
     },
     contentArea: {
-        padding: '6 8',
-        minHeight: 55,
+        padding: '5 7',
+        minHeight: 52,
         fontSize: 8.5,
         lineHeight: 1.3,
     },
@@ -99,7 +101,7 @@ const styles = StyleSheet.create({
     },
     subRowColLeft: {
         width: '65%',
-        padding: '4 6',
+        padding: '3 6',
         borderRight: '1px solid #000000',
         flexDirection: 'row',
         alignItems: 'center',
@@ -107,14 +109,14 @@ const styles = StyleSheet.create({
     },
     subRowColRight: {
         width: '35%',
-        padding: '4 6',
+        padding: '3 6',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
     },
     sigImage: {
-        height: 24,
-        maxWidth: 120,
+        height: 22,
+        maxWidth: 110,
         objectFit: 'contain',
     },
     // Verification Section
@@ -122,30 +124,32 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '4 8',
+        padding: '3 6',
         borderBottom: '1px solid #000000',
         backgroundColor: '#fafafa',
     },
-    approvalRow: {
+    verifTableHeaderRow: {
+        flexDirection: 'row',
+        backgroundColor: '#f1f1f1',
+        borderBottom: '1px solid #000000',
+    },
+    verifHeaderCell: {
+        fontFamily: 'Helvetica-Bold',
+        fontSize: 7.5,
+        padding: '3 5',
+        borderRight: '1px solid #000000',
+    },
+    verifTableRow: {
         flexDirection: 'row',
         borderBottom: '1px solid #000000',
-        minHeight: 28,
+        minHeight: 26,
         alignItems: 'center',
     },
-    approvalColLeft: {
-        width: '70%',
-        padding: '3 6',
+    verifCell: {
+        padding: '3 5',
+        fontSize: 8,
         borderRight: '1px solid #000000',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    approvalColRight: {
-        width: '30%',
-        padding: '3 6',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
     },
     // Footer
     footer: {
@@ -219,12 +223,10 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                     </View>
                     <View style={styles.tableRow}>
                         <Text style={[styles.tableCell, { width: '28%', fontFamily: 'Helvetica-Bold' }]}>
-                            {isBlank ? 'DEV-________________' : (deviation?.deviationNumber || '')}
+                            {isBlank ? '' : (deviation?.deviationNumber || '')}
                         </Text>
                         <Text style={[styles.tableCell, { width: '32%' }]}>
-                            {isBlank ? (
-                                '[  ] IQ     [  ] PQ     [  ] Other'
-                            ) : (
+                            {isBlank ? '' : (
                                 deviation?.protocolPortion === 'OTHER' ? (deviation?.protocolPortionCustom || 'Other') : (deviation?.protocolPortion || '-')
                             )}
                         </Text>
@@ -242,14 +244,14 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                             [Describe in detail the deviation. Be specific, including references to the protocol section, the difference between expected and actual results, etc.]
                         </Text>
                     </View>
-                    <View style={[styles.contentArea, isBlank && { minHeight: 75 }]}>
+                    <View style={[styles.contentArea, isBlank && { minHeight: 70 }]}>
                         <Text>{isBlank ? '' : (deviation?.description || '-')}</Text>
                     </View>
                     <View style={styles.subRow}>
                         <View style={styles.subRowColLeft}>
                             <Text style={{ fontFamily: 'Helvetica-Bold' }}>Observed By (Print/Sign):</Text>
                             {isBlank ? (
-                                <Text style={{ color: '#555555' }}>Print: ___________________  Sign: ___________________</Text>
+                                <Text style={{ color: '#555555' }}>Print: ______________  Sign: ______________</Text>
                             ) : (
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                     <Text style={{ marginRight: 6 }}>{deviation?.observedByName || '-'}</Text>
@@ -274,7 +276,7 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                             [Give an explanation of how and why the deviation occurred and describe what impact, if any, the deviation has on the validity of the protocol. Reference additional evidence as needed]
                         </Text>
                     </View>
-                    <View style={[styles.contentArea, isBlank && { minHeight: 75 }]}>
+                    <View style={[styles.contentArea, isBlank && { minHeight: 70 }]}>
                         <Text>{isBlank ? '' : (deviation?.investigationImpact || '-')}</Text>
                     </View>
                 </View>
@@ -287,7 +289,7 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                             [ State all specific actions to address the deviation and its associated risks, e.g. Protocol document clarification, test re-execution, additional testing, etc. Include reference to any initiated NCR/Deviation/CAPA and whether an update to a risk management file is needed. If no further action is required, provide justification. Attach any supporting data as necessary]
                         </Text>
                     </View>
-                    <View style={[styles.contentArea, isBlank && { minHeight: 75 }]}>
+                    <View style={[styles.contentArea, isBlank && { minHeight: 70 }]}>
                         <Text>{isBlank ? '' : (deviation?.correctiveAction || '-')}</Text>
                     </View>
                 </View>
@@ -311,87 +313,95 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                         </View>
                     </View>
 
+                    {/* Verification Sign-off Table Header */}
+                    <View style={styles.verifTableHeaderRow}>
+                        <Text style={[styles.verifHeaderCell, { width: '32%' }]}>Approval Role</Text>
+                        <Text style={[styles.verifHeaderCell, { width: '28%' }]}>Print (Full Name)</Text>
+                        <Text style={[styles.verifHeaderCell, { width: '24%' }]}>Sign (Signature)</Text>
+                        <Text style={[styles.verifHeaderCell, { width: '16%' }, styles.lastCell]}>Date</Text>
+                    </View>
+
                     {/* 1. Completed By */}
-                    <View style={styles.approvalRow}>
-                        <View style={styles.approvalColLeft}>
-                            <Text style={{ fontFamily: 'Helvetica-Bold' }}>Completed By (Print/Sign):</Text>
+                    <View style={styles.verifTableRow}>
+                        <View style={[styles.verifCell, { width: '32%' }]}>
+                            <Text style={{ fontFamily: 'Helvetica-Bold' }}>Completed By</Text>
+                        </View>
+                        <View style={[styles.verifCell, { width: '28%' }]}>
                             {isBlank ? (
-                                <Text style={{ color: '#555555' }}>Print: ___________________  Sign: ___________________</Text>
+                                <Text style={{ color: '#555555' }}>Print: _________________</Text>
                             ) : (
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Text style={{ marginRight: 6 }}>{deviation?.completedByName || '-'}</Text>
-                                    {deviation?.completedBySignature && (
-                                        <Image src={deviation.completedBySignature} style={styles.sigImage} />
-                                    )}
-                                </View>
+                                <Text>{deviation?.completedByName || '-'}</Text>
                             )}
                         </View>
-                        <View style={styles.approvalColRight}>
-                            <Text style={{ fontFamily: 'Helvetica-Bold' }}>Date:</Text>
-                            <Text>{isBlank ? '____-____-________' : formatDate(deviation?.completedDate)}</Text>
+                        <View style={[styles.verifCell, { width: '24%' }]}>
+                            {isBlank ? (
+                                <Text style={{ color: '#555555' }}>Sign: ________________</Text>
+                            ) : (
+                                deviation?.completedBySignature ? (
+                                    <Image src={deviation.completedBySignature} style={styles.sigImage} />
+                                ) : (
+                                    <Text>-</Text>
+                                )
+                            )}
+                        </View>
+                        <View style={[styles.verifCell, { width: '16%' }, styles.lastCell]}>
+                            <Text>{isBlank ? '____-____-____' : formatDate(deviation?.completedDate)}</Text>
                         </View>
                     </View>
 
-                    {/* 2. Validation or Designee Approval */}
-                    <View style={styles.approvalRow}>
-                        <View style={styles.approvalColLeft}>
-                            <Text style={{ fontFamily: 'Helvetica-Bold' }}>Validation or Designee Approval (Print, Sign):</Text>
+                    {/* 2. Process Owner or SME Approval */}
+                    <View style={styles.verifTableRow}>
+                        <View style={[styles.verifCell, { width: '32%' }]}>
+                            <Text style={{ fontFamily: 'Helvetica-Bold' }}>Process Owner or SME Approval</Text>
+                        </View>
+                        <View style={[styles.verifCell, { width: '28%' }]}>
                             {isBlank ? (
-                                <Text style={{ color: '#555555' }}>Print: ___________________  Sign: ___________________</Text>
+                                <Text style={{ color: '#555555' }}>Print: _________________</Text>
                             ) : (
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Text style={{ marginRight: 6 }}>{deviation?.validationApproverName || '-'}</Text>
-                                    {deviation?.validationApproverSignature && (
-                                        <Image src={deviation.validationApproverSignature} style={styles.sigImage} />
-                                    )}
-                                </View>
+                                <Text>{deviation?.smeApproverName || '-'}</Text>
                             )}
                         </View>
-                        <View style={styles.approvalColRight}>
-                            <Text style={{ fontFamily: 'Helvetica-Bold' }}>Date:</Text>
-                            <Text>{isBlank ? '____-____-________' : formatDate(deviation?.validationApprovalDate)}</Text>
+                        <View style={[styles.verifCell, { width: '24%' }]}>
+                            {isBlank ? (
+                                <Text style={{ color: '#555555' }}>Sign: ________________</Text>
+                            ) : (
+                                deviation?.smeApproverSignature ? (
+                                    <Image src={deviation.smeApproverSignature} style={styles.sigImage} />
+                                ) : (
+                                    <Text>-</Text>
+                                )
+                            )}
+                        </View>
+                        <View style={[styles.verifCell, { width: '16%' }, styles.lastCell]}>
+                            <Text>{isBlank ? '____-____-____' : formatDate(deviation?.smeApprovalDate)}</Text>
                         </View>
                     </View>
 
-                    {/* 3. Process Owner or SME Approval */}
-                    <View style={styles.approvalRow}>
-                        <View style={styles.approvalColLeft}>
-                            <Text style={{ fontFamily: 'Helvetica-Bold' }}>Process Owner or SME Approval (Print, Sign):</Text>
+                    {/* 3. Approval */}
+                    <View style={[styles.verifTableRow, { borderBottom: 'none' }]}>
+                        <View style={[styles.verifCell, { width: '32%' }]}>
+                            <Text style={{ fontFamily: 'Helvetica-Bold' }}>Approval</Text>
+                        </View>
+                        <View style={[styles.verifCell, { width: '28%' }]}>
                             {isBlank ? (
-                                <Text style={{ color: '#555555' }}>Print: ___________________  Sign: ___________________</Text>
+                                <Text style={{ color: '#555555' }}>Print: _________________</Text>
                             ) : (
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Text style={{ marginRight: 6 }}>{deviation?.smeApproverName || '-'}</Text>
-                                    {deviation?.smeApproverSignature && (
-                                        <Image src={deviation.smeApproverSignature} style={styles.sigImage} />
-                                    )}
-                                </View>
+                                <Text>{deviation?.approverName || '-'}</Text>
                             )}
                         </View>
-                        <View style={styles.approvalColRight}>
-                            <Text style={{ fontFamily: 'Helvetica-Bold' }}>Date:</Text>
-                            <Text>{isBlank ? '____-____-________' : formatDate(deviation?.smeApprovalDate)}</Text>
-                        </View>
-                    </View>
-
-                    {/* 4. Approval (Print/Sign) - customized from Quality Approval */}
-                    <View style={[styles.approvalRow, { borderBottom: 'none' }]}>
-                        <View style={styles.approvalColLeft}>
-                            <Text style={{ fontFamily: 'Helvetica-Bold' }}>Approval (Print/Sign):</Text>
+                        <View style={[styles.verifCell, { width: '24%' }]}>
                             {isBlank ? (
-                                <Text style={{ color: '#555555' }}>Print: ___________________  Sign: ___________________</Text>
+                                <Text style={{ color: '#555555' }}>Sign: ________________</Text>
                             ) : (
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Text style={{ marginRight: 6 }}>{deviation?.approverName || '-'}</Text>
-                                    {deviation?.approverSignature && (
-                                        <Image src={deviation.approverSignature} style={styles.sigImage} />
-                                    )}
-                                </View>
+                                deviation?.approverSignature ? (
+                                    <Image src={deviation.approverSignature} style={styles.sigImage} />
+                                ) : (
+                                    <Text>-</Text>
+                                )
                             )}
                         </View>
-                        <View style={styles.approvalColRight}>
-                            <Text style={{ fontFamily: 'Helvetica-Bold' }}>Date:</Text>
-                            <Text>{isBlank ? '____-____-________' : formatDate(deviation?.approvalDate)}</Text>
+                        <View style={[styles.verifCell, { width: '16%' }, styles.lastCell]}>
+                            <Text>{isBlank ? '____-____-____' : formatDate(deviation?.approvalDate)}</Text>
                         </View>
                     </View>
                 </View>

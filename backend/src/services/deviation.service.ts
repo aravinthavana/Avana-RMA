@@ -85,9 +85,8 @@ export class DeviationService {
         const rolesToCheck = [
             { key: 'OBSERVER', label: 'Observed By', name: data.observedByName, signature: data.observedBySignature },
             { key: 'COMPLETED', label: 'Completed By', name: data.completedByName, signature: data.completedBySignature },
-            { key: 'VALIDATION', label: 'Validation Approver', name: data.validationApproverName, signature: data.validationApproverSignature },
             { key: 'SME', label: 'SME Approver', name: data.smeApproverName, signature: data.smeApproverSignature },
-            { key: 'APPROVAL', label: 'Final Approval', name: data.approverName, signature: data.approverSignature },
+            { key: 'APPROVAL', label: 'Approval', name: data.approverName, signature: data.approverSignature },
         ];
 
         try {
@@ -273,7 +272,7 @@ export class DeviationService {
         sheet.getRow(1).height = 36;
 
         // Subtitle Info
-        sheet.mergeCells('A2:L2');
+        sheet.mergeCells('A2:K2');
         const subCell = sheet.getCell('A2');
         subCell.value = `Document: FORM-SH001 | Version: 1.0 | Exported On: ${new Date().toLocaleDateString('en-GB')} | Total Records: ${deviations.length}`;
         subCell.font = { name: 'Arial', size: 9, italic: true, color: { argb: 'FF475569' } };
@@ -291,9 +290,8 @@ export class DeviationService {
             { header: 'Closed?', key: 'isResolved', width: 10 },
             { header: 'Description', key: 'description', width: 35 },
             { header: 'Completed By', key: 'completedBy', width: 18 },
-            { header: 'Validation Approval', key: 'validationApproval', width: 20 },
             { header: 'SME Approval', key: 'smeApproval', width: 18 },
-            { header: 'Final Approval', key: 'approval', width: 18 },
+            { header: 'Approval', key: 'approval', width: 18 },
         ];
 
         const headerRow = sheet.getRow(4);
@@ -332,7 +330,6 @@ export class DeviationService {
                 d.isResolved ? 'YES' : 'NO',
                 d.description,
                 d.completedByName ? `${d.completedByName} (${formatDate(d.completedDate)})` : '-',
-                d.validationApproverName ? `${d.validationApproverName} (${formatDate(d.validationApprovalDate)})` : '-',
                 d.smeApproverName ? `${d.smeApproverName} (${formatDate(d.smeApprovalDate)})` : '-',
                 d.approverName ? `${d.approverName} (${formatDate(d.approvalDate)})` : '-',
             ];
