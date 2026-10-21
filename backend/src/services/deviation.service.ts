@@ -251,7 +251,7 @@ export class DeviationService {
         }
 
         const workbook = new ExcelJS.Workbook();
-        workbook.creator = 'Avana Medical Devices';
+        workbook.creator = 'Avana Technology Services';
         workbook.created = new Date();
 
         const sheet = workbook.addWorksheet('Deviations', {
@@ -259,9 +259,9 @@ export class DeviationService {
         });
 
         // Title Row
-        sheet.mergeCells('A1:L1');
+        sheet.mergeCells('A1:K1');
         const titleCell = sheet.getCell('A1');
-        titleCell.value = 'Avana Medical Devices — Validation Deviation Register (FORM-SH001)';
+        titleCell.value = 'Avana Technology Services — Validation Deviation Register (FORM-SH001)';
         titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
         titleCell.fill = {
             type: 'pattern',

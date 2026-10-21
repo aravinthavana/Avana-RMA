@@ -410,7 +410,7 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                 <View style={styles.footer} fixed>
                     <Text style={styles.footerPageNumber} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
                     <Text style={styles.footerConfidential}>
-                        This document is confidential and proprietary, and it may not be reproduced, used, or disclosed to others without written consent of Avana Medical Devices Pvt. Ltd.
+                        This document is confidential and proprietary, and it may not be reproduced, used, or disclosed to others without written consent of Avana Technology Services Pvt. Ltd.
                     </Text>
                 </View>
             </Page>
