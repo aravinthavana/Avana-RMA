@@ -1,4 +1,4 @@
-import { ValidationDeviation } from '../../types';
+import { ValidationDeviation, SignerUser } from '../../types';
 
 const API_BASE = '/api/deviations';
 
@@ -64,6 +64,15 @@ export const deviationsApi = {
         if (!res.ok) throw new Error('Failed to get next number');
         const json = await res.json();
         return json.data.nextNumber;
+    },
+
+    async getSigners(): Promise<SignerUser[]> {
+        const res = await fetch(`${API_BASE}/signers`, {
+            headers: getAuthHeaders(),
+        });
+        if (!res.ok) throw new Error('Failed to fetch signers');
+        const json = await res.json();
+        return json.data;
     },
 
     async create(data: Partial<ValidationDeviation>): Promise<{ success: boolean; data: ValidationDeviation }> {

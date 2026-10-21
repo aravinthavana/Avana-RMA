@@ -1,5 +1,8 @@
 import ExcelJS from 'exceljs';
 import deviationRepository, { FindDeviationsQuery } from '../repositories/deviation.repository';
+import prisma from '../lib/prisma';
+import notificationService from './notification.service';
+import { auditService, AuditEntity } from './audit.service';
 
 export interface CreateDeviationDto {
     deviationNumber?: string;
@@ -62,7 +65,82 @@ export class DeviationService {
         return this.deviationRepo.getNextDeviationNumber();
     }
 
-    async createDeviation(data: CreateDeviationDto) {
+    async getSigners() {
+        return prisma.user.findMany({
+            where: { isActive: true, isDeleted: false },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                signatureUrl: true,
+            },
+            orderBy: { name: 'asc' },
+        });
+    }
+
+    private async notifyProxySigners(deviationId: string, deviationNumber: string, data: any, currentUser?: any) {
+        if (!currentUser) return;
+
+        const rolesToCheck = [
+            { key: 'OBSERVER', label: 'Observed By', name: data.observedByName, signature: data.observedBySignature },
+            { key: 'COMPLETED', label: 'Completed By', name: data.completedByName, signature: data.completedBySignature },
+            { key: 'VALIDATION', label: 'Validation Approver', name: data.validationApproverName, signature: data.validationApproverSignature },
+            { key: 'SME', label: 'SME Approver', name: data.smeApproverName, signature: data.smeApproverSignature },
+            { key: 'APPROVAL', label: 'Final Approval', name: data.approverName, signature: data.approverSignature },
+        ];
+
+        try {
+            const activeUsers = await prisma.user.findMany({
+                where: { isActive: true, isDeleted: false },
+                select: { id: true, name: true, email: true }
+            });
+
+            for (const item of rolesToCheck) {
+                if (!item.name || !item.signature) continue;
+
+                const targetUser = activeUsers.find(
+                    u => u.name?.trim().toLowerCase() === item.name.trim().toLowerCase()
+                );
+
+                if (targetUser && targetUser.id !== currentUser.id) {
+                    const message = `Your digital signature was applied to Validation Deviation ${deviationNumber} (${item.label}) by ${currentUser.name || currentUser.email}.`;
+
+                    await notificationService.createNotification(
+                        'DEVIATION_SIGNATURE',
+                        message,
+                        JSON.stringify({
+                            deviationId,
+                            deviationNumber,
+                            role: item.key,
+                            roleLabel: item.label,
+                            signedByUserId: currentUser.id,
+                            signedByUserName: currentUser.name || currentUser.email,
+                            signedForUserId: targetUser.id,
+                            signedForUserName: targetUser.name,
+                        })
+                    );
+
+                    await auditService.log({
+                        userId: currentUser.id,
+                        action: 'PROXY_SIGN',
+                        entity: AuditEntity.DEVIATION,
+                        entityId: deviationId,
+                        details: {
+                            signedForId: targetUser.id,
+                            signedForName: targetUser.name,
+                            role: item.key,
+                            deviationNumber
+                        }
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('Failed to notify proxy signers:', err);
+        }
+    }
+
+    async createDeviation(data: CreateDeviationDto, currentUser?: any) {
         const deviationNumber = data.deviationNumber && data.deviationNumber.trim() !== ''
             ? data.deviationNumber.trim()
             : await this.deviationRepo.getNextDeviationNumber();
@@ -73,7 +151,7 @@ export class DeviationService {
             throw new Error(`Deviation number '${deviationNumber}' already exists.`);
         }
 
-        return this.deviationRepo.create({
+        const created = await this.deviationRepo.create({
             deviationNumber,
             documentNumber: data.documentNumber || 'FORM-SH001',
             version: data.version || '1.0',
@@ -92,9 +170,13 @@ export class DeviationService {
             status: data.status || 'DRAFT',
             ...(data.createdById ? { createdBy: { connect: { id: data.createdById } } } : {}),
         });
+
+        await this.notifyProxySigners(created.id, created.deviationNumber, data, currentUser);
+
+        return created;
     }
 
-    async updateDeviation(id: string, data: UpdateDeviationDto) {
+    async updateDeviation(id: string, data: UpdateDeviationDto, currentUser?: any) {
         await this.getDeviationById(id);
 
         const updateData: any = { ...data };
@@ -107,7 +189,11 @@ export class DeviationService {
 
         delete updateData.createdById;
 
-        return this.deviationRepo.update(id, updateData);
+        const updated = await this.deviationRepo.update(id, updateData);
+
+        await this.notifyProxySigners(updated.id, updated.deviationNumber, data, currentUser);
+
+        return updated;
     }
 
     async deleteDeviation(id: string) {
@@ -115,7 +201,7 @@ export class DeviationService {
         return this.deviationRepo.delete(id);
     }
 
-    async signDeviation(id: string, signDto: SignDeviationDto) {
+    async signDeviation(id: string, signDto: SignDeviationDto, currentUser?: any) {
         const deviation = await this.getDeviationById(id);
         const signDate = signDto.date ? new Date(signDto.date) : new Date();
 
@@ -151,7 +237,9 @@ export class DeviationService {
                 throw new Error(`Invalid signing role: ${signDto.role}`);
         }
 
-        return this.deviationRepo.update(id, updatePayload);
+        const updated = await this.deviationRepo.update(id, updatePayload);
+        await this.notifyProxySigners(updated.id, updated.deviationNumber, updatePayload, currentUser);
+        return updated;
     }
 
     async exportToExcel(query: FindDeviationsQuery, selectedIds?: string[]): Promise<Buffer> {

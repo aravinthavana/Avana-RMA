@@ -41,6 +41,9 @@ router.get('/next-number', (req, res, next) => deviationController.getNextNumber
 // Upload supporting document/attachment
 router.post('/upload', uploadAttachment.single('file'), (req, res) => deviationController.uploadAttachment(req, res));
 
+// Active signers list for deviation signature selection
+router.get('/signers', (req, res, next) => deviationController.getSigners(req, res, next));
+
 // List and Create
 router.get('/', (req, res, next) => deviationController.getDeviations(req, res, next));
 router.post('/', auditMiddleware(AuditAction.CREATE, AuditEntity.DEVIATION), (req, res, next) => deviationController.createDeviation(req, res, next));

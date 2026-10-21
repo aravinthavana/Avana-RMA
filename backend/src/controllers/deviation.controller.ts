@@ -55,6 +55,18 @@ export class DeviationController {
         }
     }
 
+    async getSigners(req: Request, res: Response, next: NextFunction) {
+        try {
+            const signers = await deviationService.getSigners();
+            res.json({
+                success: true,
+                data: signers,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async createDeviation(req: Request, res: Response, next: NextFunction) {
         try {
             const user = (req as any).user;
@@ -62,7 +74,7 @@ export class DeviationController {
                 ...req.body,
                 createdById: user?.id,
             };
-            const created = await deviationService.createDeviation(payload);
+            const created = await deviationService.createDeviation(payload, user);
             res.status(201).json({
                 success: true,
                 data: created,
@@ -79,7 +91,8 @@ export class DeviationController {
     async updateDeviation(req: Request, res: Response, next: NextFunction) {
         try {
             const { id } = req.params;
-            const updated = await deviationService.updateDeviation(id, req.body);
+            const user = (req as any).user;
+            const updated = await deviationService.updateDeviation(id, req.body, user);
             res.json({
                 success: true,
                 data: updated,
@@ -109,6 +122,7 @@ export class DeviationController {
     async signDeviation(req: Request, res: Response, next: NextFunction) {
         try {
             const { id } = req.params;
+            const user = (req as any).user;
             const { role, signerName, signatureUrl, date } = req.body;
             if (!role || !signerName || !signatureUrl) {
                 return res.status(400).json({
@@ -121,7 +135,7 @@ export class DeviationController {
                 signerName,
                 signatureUrl,
                 date,
-            });
+            }, user);
             res.json({
                 success: true,
                 data: updated,

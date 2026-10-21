@@ -169,12 +169,13 @@ const styles = StyleSheet.create({
 });
 
 interface ValidationDeviationPdfDocumentProps {
-    deviation: ValidationDeviation;
+    deviation?: Partial<ValidationDeviation> | null;
+    isBlank?: boolean;
 }
 
-export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocumentProps> = ({ deviation }) => {
+export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocumentProps> = ({ deviation, isBlank = false }) => {
     const formatDate = (dateString?: string | null) => {
-        if (!dateString) return '-';
+        if (!dateString) return isBlank ? '____-____-________' : '-';
         const d = new Date(dateString);
         if (isNaN(d.getTime())) return '-';
         const day = d.getDate().toString().padStart(2, '0');
@@ -183,6 +184,10 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
         const year = d.getFullYear();
         return `${day}-${month}-${year}`;
     };
+
+    const docNumber = deviation?.documentNumber || 'FORM-SH001';
+    const docVersion = deviation?.version || '1.0';
+    const effectiveDate = deviation?.effectiveDate || '10-Oct-2022';
 
     return (
         <Document>
@@ -193,13 +198,13 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                         <View>
                             <Image src="/avana-logo.png" style={styles.logo} />
                             <Text style={styles.docMetaLeft}>Document Number</Text>
-                            <Text style={styles.docMetaBold}>{deviation.documentNumber || 'FORM-SH001'}</Text>
+                            <Text style={styles.docMetaBold}>{docNumber}</Text>
                         </View>
                         <View style={{ alignItems: 'flex-end' }}>
                             <Text style={styles.docMetaRight}>Version</Text>
-                            <Text style={[styles.docMetaBold, { textAlign: 'right' }]}>{deviation.version || '1.0'}</Text>
+                            <Text style={[styles.docMetaBold, { textAlign: 'right' }]}>{docVersion}</Text>
                             <Text style={[styles.docMetaRight, { marginTop: 2 }]}>Effective</Text>
-                            <Text style={[styles.docMetaBold, { textAlign: 'right' }]}>{deviation.effectiveDate || '10-Oct-2022'}</Text>
+                            <Text style={[styles.docMetaBold, { textAlign: 'right' }]}>{effectiveDate}</Text>
                         </View>
                     </View>
                     <Text style={styles.title}>Validation Deviation Form</Text>
@@ -209,15 +214,23 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                 <View style={styles.tableBox}>
                     <View style={styles.tableRow}>
                         <Text style={[styles.tableHeaderCell, { width: '28%' }]}>Deviation Number</Text>
-                        <Text style={[styles.tableHeaderCell, { width: '32%' }]}>Protocol Portion (IQ, OQ, PQ)</Text>
+                        <Text style={[styles.tableHeaderCell, { width: '32%' }]}>Protocol Portion (IQ, PQ)</Text>
                         <Text style={[styles.tableHeaderCell, { width: '40%' }, styles.lastCell]}>Test Section</Text>
                     </View>
                     <View style={styles.tableRow}>
-                        <Text style={[styles.tableCell, { width: '28%', fontFamily: 'Helvetica-Bold' }]}>{deviation.deviationNumber}</Text>
-                        <Text style={[styles.tableCell, { width: '32%' }]}>
-                            {deviation.protocolPortion === 'OTHER' ? (deviation.protocolPortionCustom || 'Other') : deviation.protocolPortion}
+                        <Text style={[styles.tableCell, { width: '28%', fontFamily: 'Helvetica-Bold' }]}>
+                            {isBlank ? 'DEV-________________' : (deviation?.deviationNumber || '')}
                         </Text>
-                        <Text style={[styles.tableCell, { width: '40%' }, styles.lastCell]}>{deviation.testSection}</Text>
+                        <Text style={[styles.tableCell, { width: '32%' }]}>
+                            {isBlank ? (
+                                '[  ] IQ     [  ] PQ     [  ] Other'
+                            ) : (
+                                deviation?.protocolPortion === 'OTHER' ? (deviation?.protocolPortionCustom || 'Other') : (deviation?.protocolPortion || '-')
+                            )}
+                        </Text>
+                        <Text style={[styles.tableCell, { width: '40%' }, styles.lastCell]}>
+                            {isBlank ? '' : (deviation?.testSection || '')}
+                        </Text>
                     </View>
                 </View>
 
@@ -229,22 +242,26 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                             [Describe in detail the deviation. Be specific, including references to the protocol section, the difference between expected and actual results, etc.]
                         </Text>
                     </View>
-                    <View style={styles.contentArea}>
-                        <Text>{deviation.description || '-'}</Text>
+                    <View style={[styles.contentArea, isBlank && { minHeight: 75 }]}>
+                        <Text>{isBlank ? '' : (deviation?.description || '-')}</Text>
                     </View>
                     <View style={styles.subRow}>
                         <View style={styles.subRowColLeft}>
                             <Text style={{ fontFamily: 'Helvetica-Bold' }}>Observed By (Print/Sign):</Text>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={{ marginRight: 6 }}>{deviation.observedByName}</Text>
-                                {deviation.observedBySignature && (
-                                    <Image src={deviation.observedBySignature} style={styles.sigImage} />
-                                )}
-                            </View>
+                            {isBlank ? (
+                                <Text style={{ color: '#555555' }}>Print: ___________________  Sign: ___________________</Text>
+                            ) : (
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text style={{ marginRight: 6 }}>{deviation?.observedByName || '-'}</Text>
+                                    {deviation?.observedBySignature && (
+                                        <Image src={deviation.observedBySignature} style={styles.sigImage} />
+                                    )}
+                                </View>
+                            )}
                         </View>
                         <View style={styles.subRowColRight}>
                             <Text style={{ fontFamily: 'Helvetica-Bold' }}>Date Observed:</Text>
-                            <Text>{formatDate(deviation.dateObserved)}</Text>
+                            <Text>{isBlank ? '____-____-________' : formatDate(deviation?.dateObserved)}</Text>
                         </View>
                     </View>
                 </View>
@@ -257,8 +274,8 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                             [Give an explanation of how and why the deviation occurred and describe what impact, if any, the deviation has on the validity of the protocol. Reference additional evidence as needed]
                         </Text>
                     </View>
-                    <View style={styles.contentArea}>
-                        <Text>{deviation.investigationImpact || '-'}</Text>
+                    <View style={[styles.contentArea, isBlank && { minHeight: 75 }]}>
+                        <Text>{isBlank ? '' : (deviation?.investigationImpact || '-')}</Text>
                     </View>
                 </View>
 
@@ -270,8 +287,8 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                             [ State all specific actions to address the deviation and its associated risks, e.g. Protocol document clarification, test re-execution, additional testing, etc. Include reference to any initiated NCR/Deviation/CAPA and whether an update to a risk management file is needed. If no further action is required, provide justification. Attach any supporting data as necessary]
                         </Text>
                     </View>
-                    <View style={styles.contentArea}>
-                        <Text>{deviation.correctiveAction || '-'}</Text>
+                    <View style={[styles.contentArea, isBlank && { minHeight: 75 }]}>
+                        <Text>{isBlank ? '' : (deviation?.correctiveAction || '-')}</Text>
                     </View>
                 </View>
 
@@ -286,10 +303,10 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                         <Text style={{ fontFamily: 'Helvetica-Bold' }}>All actions were satisfactorily resolved. Deviation Closed?</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Text style={{ fontFamily: 'Helvetica-Bold', marginRight: 15 }}>
-                                Yes {deviation.isResolved ? '[ X ]' : '[   ]'}
+                                Yes {isBlank ? '[   ]' : (deviation?.isResolved ? '[ X ]' : '[   ]')}
                             </Text>
                             <Text style={{ fontFamily: 'Helvetica-Bold' }}>
-                                No {!deviation.isResolved ? '[ X ]' : '[   ]'}
+                                No {isBlank ? '[   ]' : (!deviation?.isResolved ? '[ X ]' : '[   ]')}
                             </Text>
                         </View>
                     </View>
@@ -298,16 +315,20 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                     <View style={styles.approvalRow}>
                         <View style={styles.approvalColLeft}>
                             <Text style={{ fontFamily: 'Helvetica-Bold' }}>Completed By (Print/Sign):</Text>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={{ marginRight: 6 }}>{deviation.completedByName || '-'}</Text>
-                                {deviation.completedBySignature && (
-                                    <Image src={deviation.completedBySignature} style={styles.sigImage} />
-                                )}
-                            </View>
+                            {isBlank ? (
+                                <Text style={{ color: '#555555' }}>Print: ___________________  Sign: ___________________</Text>
+                            ) : (
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text style={{ marginRight: 6 }}>{deviation?.completedByName || '-'}</Text>
+                                    {deviation?.completedBySignature && (
+                                        <Image src={deviation.completedBySignature} style={styles.sigImage} />
+                                    )}
+                                </View>
+                            )}
                         </View>
                         <View style={styles.approvalColRight}>
                             <Text style={{ fontFamily: 'Helvetica-Bold' }}>Date:</Text>
-                            <Text>{formatDate(deviation.completedDate)}</Text>
+                            <Text>{isBlank ? '____-____-________' : formatDate(deviation?.completedDate)}</Text>
                         </View>
                     </View>
 
@@ -315,16 +336,20 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                     <View style={styles.approvalRow}>
                         <View style={styles.approvalColLeft}>
                             <Text style={{ fontFamily: 'Helvetica-Bold' }}>Validation or Designee Approval (Print, Sign):</Text>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={{ marginRight: 6 }}>{deviation.validationApproverName || '-'}</Text>
-                                {deviation.validationApproverSignature && (
-                                    <Image src={deviation.validationApproverSignature} style={styles.sigImage} />
-                                )}
-                            </View>
+                            {isBlank ? (
+                                <Text style={{ color: '#555555' }}>Print: ___________________  Sign: ___________________</Text>
+                            ) : (
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text style={{ marginRight: 6 }}>{deviation?.validationApproverName || '-'}</Text>
+                                    {deviation?.validationApproverSignature && (
+                                        <Image src={deviation.validationApproverSignature} style={styles.sigImage} />
+                                    )}
+                                </View>
+                            )}
                         </View>
                         <View style={styles.approvalColRight}>
                             <Text style={{ fontFamily: 'Helvetica-Bold' }}>Date:</Text>
-                            <Text>{formatDate(deviation.validationApprovalDate)}</Text>
+                            <Text>{isBlank ? '____-____-________' : formatDate(deviation?.validationApprovalDate)}</Text>
                         </View>
                     </View>
 
@@ -332,16 +357,20 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                     <View style={styles.approvalRow}>
                         <View style={styles.approvalColLeft}>
                             <Text style={{ fontFamily: 'Helvetica-Bold' }}>Process Owner or SME Approval (Print, Sign):</Text>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={{ marginRight: 6 }}>{deviation.smeApproverName || '-'}</Text>
-                                {deviation.smeApproverSignature && (
-                                    <Image src={deviation.smeApproverSignature} style={styles.sigImage} />
-                                )}
-                            </View>
+                            {isBlank ? (
+                                <Text style={{ color: '#555555' }}>Print: ___________________  Sign: ___________________</Text>
+                            ) : (
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text style={{ marginRight: 6 }}>{deviation?.smeApproverName || '-'}</Text>
+                                    {deviation?.smeApproverSignature && (
+                                        <Image src={deviation.smeApproverSignature} style={styles.sigImage} />
+                                    )}
+                                </View>
+                            )}
                         </View>
                         <View style={styles.approvalColRight}>
                             <Text style={{ fontFamily: 'Helvetica-Bold' }}>Date:</Text>
-                            <Text>{formatDate(deviation.smeApprovalDate)}</Text>
+                            <Text>{isBlank ? '____-____-________' : formatDate(deviation?.smeApprovalDate)}</Text>
                         </View>
                     </View>
 
@@ -349,16 +378,20 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
                     <View style={[styles.approvalRow, { borderBottom: 'none' }]}>
                         <View style={styles.approvalColLeft}>
                             <Text style={{ fontFamily: 'Helvetica-Bold' }}>Approval (Print/Sign):</Text>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={{ marginRight: 6 }}>{deviation.approverName || '-'}</Text>
-                                {deviation.approverSignature && (
-                                    <Image src={deviation.approverSignature} style={styles.sigImage} />
-                                )}
-                            </View>
+                            {isBlank ? (
+                                <Text style={{ color: '#555555' }}>Print: ___________________  Sign: ___________________</Text>
+                            ) : (
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text style={{ marginRight: 6 }}>{deviation?.approverName || '-'}</Text>
+                                    {deviation?.approverSignature && (
+                                        <Image src={deviation.approverSignature} style={styles.sigImage} />
+                                    )}
+                                </View>
+                            )}
                         </View>
                         <View style={styles.approvalColRight}>
                             <Text style={{ fontFamily: 'Helvetica-Bold' }}>Date:</Text>
-                            <Text>{formatDate(deviation.approvalDate)}</Text>
+                            <Text>{isBlank ? '____-____-________' : formatDate(deviation?.approvalDate)}</Text>
                         </View>
                     </View>
                 </View>

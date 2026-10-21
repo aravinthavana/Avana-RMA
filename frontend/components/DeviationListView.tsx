@@ -115,6 +115,40 @@ export const DeviationListView: React.FC = () => {
         }
     };
 
+    // Blank Form PDF Download & Print
+    const handleDownloadBlankPdf = async () => {
+        try {
+            toast.loading('Generating Blank FORM-SH001...', { id: 'blank-pdf' });
+            const blob = await pdf(<ValidationDeviationPdfDocument isBlank={true} />).toBlob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'FORM-SH001_Blank_Validation_Deviation_Form.pdf';
+            document.body.appendChild(a);
+            a.click();
+            URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            toast.success('Blank FORM-SH001 downloaded', { id: 'blank-pdf' });
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to generate blank PDF', { id: 'blank-pdf' });
+        }
+    };
+
+    const handlePrintBlankPdf = async () => {
+        try {
+            toast.loading('Preparing blank form for print...', { id: 'blank-print' });
+            const blob = await pdf(<ValidationDeviationPdfDocument isBlank={true} />).toBlob();
+            const url = URL.createObjectURL(blob);
+            const win = window.open(url, '_blank');
+            if (win) {
+                win.focus();
+            }
+            toast.success('Blank form opened in print view', { id: 'blank-print' });
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to open print preview', { id: 'blank-print' });
+        }
+    };
+
     // Bulk Excel Export
     const handleBulkExcelExport = async () => {
         setIsExportingExcel(true);
@@ -220,6 +254,30 @@ export const DeviationListView: React.FC = () => {
 
                 {/* Primary Action Buttons */}
                 <div className="flex items-center gap-2.5 flex-wrap">
+                    {/* Blank Form Print & Download Menu */}
+                    <div className="relative inline-flex items-center rounded-xl border border-slate-300 bg-white shadow-sm overflow-hidden divide-x divide-slate-200">
+                        <button
+                            onClick={handlePrintBlankPdf}
+                            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                            title="Open blank FORM-SH001 directly for printing"
+                        >
+                            <svg className="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                            Print Blank Form
+                        </button>
+                        <button
+                            onClick={handleDownloadBlankPdf}
+                            className="inline-flex items-center gap-1 px-2.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                            title="Download blank FORM-SH001 as PDF file"
+                        >
+                            <svg className="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            PDF
+                        </button>
+                    </div>
+
                     <button
                         onClick={handleBulkExcelExport}
                         disabled={isExportingExcel}
@@ -292,9 +350,8 @@ export const DeviationListView: React.FC = () => {
                         }}
                         className="text-xs px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-700 font-medium focus:ring-2 focus:ring-primary-500"
                     >
-                        <option value="ALL">All Portions (IQ/OQ/PQ)</option>
+                        <option value="ALL">All Portions (IQ/PQ)</option>
                         <option value="IQ">IQ (Installation)</option>
-                        <option value="OQ">OQ (Operational)</option>
                         <option value="PQ">PQ (Performance)</option>
                         <option value="OTHER">Other</option>
                     </select>

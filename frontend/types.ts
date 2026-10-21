@@ -73,7 +73,15 @@ export interface AuditLog {
   createdAt: string;
 }
 
-export type ProtocolPortionType = 'IQ' | 'OQ' | 'PQ' | 'OTHER';
+export type ProtocolPortionType = 'IQ' | 'PQ' | 'OTHER' | 'OQ';
+
+export interface SignerUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  signatureUrl: string | null;
+}
 
 export type DeviationStatusType = 'DRAFT' | 'UNDER_INVESTIGATION' | 'PENDING_APPROVAL' | 'APPROVED' | 'CLOSED';
 

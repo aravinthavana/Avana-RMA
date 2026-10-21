@@ -1,6 +1,5 @@
-import { PrismaClient, Prisma, ValidationDeviation } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { Prisma, ValidationDeviation } from '@prisma/client';
+import prisma from '../lib/prisma';
 
 export interface FindDeviationsQuery {
     page?: number;

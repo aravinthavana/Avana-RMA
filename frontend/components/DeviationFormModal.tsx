@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { pdf } from '@react-pdf/renderer';
 import { useAuth } from '../src/context/AuthContext';
 import { deviationsApi } from '../src/api/deviations.api';
-import { ValidationDeviation, ProtocolPortionType, DeviationStatusType } from '../types';
+import { ValidationDeviation, ProtocolPortionType, DeviationStatusType, SignerUser } from '../types';
+import { ValidationDeviationPdfDocument } from './ValidationDeviationPdfDocument';
+import { API_BASE_URL } from '../config';
 import { XMarkIcon } from './icons';
 import toast from 'react-hot-toast';
 
@@ -21,6 +24,9 @@ export const DeviationFormModal: React.FC<DeviationFormModalProps> = ({
 }) => {
     const { user } = useAuth();
     const isEdit = !!deviationToEdit;
+
+    // Available signers list
+    const [signers, setSigners] = useState<SignerUser[]>([]);
 
     // Form state
     const [deviationNumber, setDeviationNumber] = useState('');
@@ -61,6 +67,14 @@ export const DeviationFormModal: React.FC<DeviationFormModalProps> = ({
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+
+    // Fetch signers once modal opens
+    useEffect(() => {
+        if (!isOpen) return;
+        deviationsApi.getSigners()
+            .then(data => setSigners(data))
+            .catch(err => console.error('Failed to load signers', err));
+    }, [isOpen]);
 
     // Initialize or reset form
     useEffect(() => {
@@ -155,48 +169,217 @@ export const DeviationFormModal: React.FC<DeviationFormModalProps> = ({
         setAttachments(prev => prev.filter((_, idx) => idx !== index));
     };
 
-    // Quick Sign helper using current user signature
-    const handleQuickSign = (role: 'OBSERVER' | 'COMPLETED' | 'VALIDATION' | 'SME' | 'APPROVAL') => {
-        if (!user?.name) {
-            toast.error('User information not available');
-            return;
-        }
-        if (!user.signatureUrl) {
-            toast.error('No saved signature found on your user profile. Please upload one under Profile Settings.');
-            return;
+    // Helper to generate a standardized SVG digital certificate stamp if a user has no uploaded signature
+    const createDigitalStampSvg = (name: string, role?: string, date?: string) => {
+        const formattedDate = date || new Date().toISOString().slice(0, 10);
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="220" height="54" viewBox="0 0 220 54">
+            <rect x="2" y="2" width="216" height="50" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="4 2" />
+            <text x="10" y="16" font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="bold" fill="#0369a1" letter-spacing="0.5">DIGITALLY SIGNED &amp; VERIFIED</text>
+            <text x="10" y="32" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" fill="#0f172a">${name}</text>
+            <text x="10" y="45" font-family="Helvetica, Arial, sans-serif" font-size="8" fill="#475569">${role ? `${role} • ` : ''}${formattedDate}</text>
+        </svg>`;
+        return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+    };
+
+    // Apply signature from selected user or current user
+    const applySigner = (userId: string, role: 'OBSERVER' | 'COMPLETED' | 'VALIDATION' | 'SME' | 'APPROVAL') => {
+        let targetName = '';
+        let targetRole = '';
+        let targetSig: string | null = null;
+        let isSelf = false;
+
+        if (userId === '__SELF__') {
+            if (!user?.name) {
+                toast.error('User information not available');
+                return;
+            }
+            targetName = user.name;
+            targetRole = user.role || 'User';
+            targetSig = user.signatureUrl
+                ? (user.signatureUrl.startsWith('http') || user.signatureUrl.startsWith('data:') ? user.signatureUrl : `${API_BASE_URL}${user.signatureUrl}`)
+                : null;
+            isSelf = true;
+        } else {
+            const found = signers.find(s => s.id === userId);
+            if (!found) return;
+            targetName = found.name;
+            targetRole = found.role || 'Staff';
+            targetSig = found.signatureUrl
+                ? (found.signatureUrl.startsWith('http') || found.signatureUrl.startsWith('data:') ? found.signatureUrl : `${API_BASE_URL}${found.signatureUrl}`)
+                : null;
+            isSelf = found.id === user?.id;
         }
 
         const today = new Date().toISOString().slice(0, 10);
+        const resolvedSig = targetSig || createDigitalStampSvg(targetName, targetRole, today);
 
         switch (role) {
             case 'OBSERVER':
-                setObservedByName(user.name);
-                setObservedBySignature(user.signatureUrl);
+                setObservedByName(targetName);
+                setObservedBySignature(resolvedSig);
                 setDateObserved(today);
                 break;
             case 'COMPLETED':
-                setCompletedByName(user.name);
-                setCompletedBySignature(user.signatureUrl);
+                setCompletedByName(targetName);
+                setCompletedBySignature(resolvedSig);
                 setCompletedDate(today);
                 break;
             case 'VALIDATION':
-                setValidationApproverName(user.name);
-                setValidationApproverSignature(user.signatureUrl);
+                setValidationApproverName(targetName);
+                setValidationApproverSignature(resolvedSig);
                 setValidationApprovalDate(today);
                 break;
             case 'SME':
-                setSmeApproverName(user.name);
-                setSmeApproverSignature(user.signatureUrl);
+                setSmeApproverName(targetName);
+                setSmeApproverSignature(resolvedSig);
                 setSmeApprovalDate(today);
                 break;
             case 'APPROVAL':
-                setApproverName(user.name);
-                setApproverSignature(user.signatureUrl);
+                setApproverName(targetName);
+                setApproverSignature(resolvedSig);
                 setApprovalDate(today);
                 setStatus('APPROVED');
                 break;
         }
-        toast.success(`Signed as ${user.name}`);
+
+        if (isSelf) {
+            toast.success(`Signed as ${targetName}`);
+        } else {
+            toast.success(`Selected ${targetName}. Notice will be sent upon saving.`);
+        }
+    };
+
+    // Open blank form directly in print view
+    const handlePrintBlank = async () => {
+        try {
+            toast.loading('Preparing blank FORM-SH001 for print...', { id: 'blank-form-toast' });
+            const blob = await pdf(<ValidationDeviationPdfDocument isBlank={true} />).toBlob();
+            const url = URL.createObjectURL(blob);
+            const win = window.open(url, '_blank');
+            if (win) win.focus();
+            toast.success('Blank form opened in print view', { id: 'blank-form-toast' });
+        } catch (error: any) {
+            toast.error('Failed to open blank form', { id: 'blank-form-toast' });
+        }
+    };
+
+    // Reusable, interactive signature block with dropdown and notification notice
+    const renderSignatureSection = (
+        title: string,
+        role: 'OBSERVER' | 'COMPLETED' | 'VALIDATION' | 'SME' | 'APPROVAL',
+        nameValue: string,
+        setName: (name: string) => void,
+        sigValue: string | null,
+        setSig: (sig: string | null) => void,
+        dateValue: string,
+        setDate: (d: string) => void,
+        required: boolean = false
+    ) => {
+        const isSignedByOther = sigValue && nameValue && user?.name && nameValue.trim().toLowerCase() !== user.name.trim().toLowerCase();
+
+        return (
+            <div className="p-3.5 rounded-xl border border-slate-200 bg-white shadow-sm space-y-2.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-slate-800">
+                        {title} {required && <span className="text-red-500">*</span>}
+                    </span>
+
+                    {/* Team Member Selector Dropdown */}
+                    <div className="flex items-center gap-1.5">
+                        <label className="text-[11px] font-medium text-slate-500 whitespace-nowrap">Sign as:</label>
+                        <select
+                            onChange={(e) => {
+                                if (!e.target.value) return;
+                                applySigner(e.target.value, role);
+                                e.target.value = '';
+                            }}
+                            defaultValue=""
+                            className="text-xs py-1 px-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-primary-500 focus:bg-white"
+                        >
+                            <option value="" disabled>-- Select Team Member --</option>
+                            <option value="__SELF__">⭐ Me ({user?.name || 'Current User'})</option>
+                            <optgroup label="Registered Team Members">
+                                {signers.map(s => (
+                                    <option key={s.id} value={s.id}>
+                                        {s.name} ({s.role || 'Staff'}) {s.signatureUrl ? '✓ [Has Signature]' : '✦ [Digital Stamp]'}
+                                    </option>
+                                ))}
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                    {/* Name Input */}
+                    <div className="md:col-span-1">
+                        <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">Full Name</label>
+                        <input
+                            type="text"
+                            value={nameValue}
+                            onChange={e => setName(e.target.value)}
+                            placeholder="Signer Full Name"
+                            className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary-500 font-medium"
+                            required={required}
+                        />
+                    </div>
+
+                    {/* Signature Preview Box */}
+                    <div className="md:col-span-1">
+                        <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">Digital Signature</label>
+                        {sigValue ? (
+                            <div className="flex items-center gap-2">
+                                <div className="h-10 border border-slate-200 rounded-lg bg-slate-50/80 px-2 py-0.5 flex items-center justify-center">
+                                    <img src={sigValue} alt="Signature" className="h-full max-w-[120px] object-contain" />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setSig(null)}
+                                    className="p-1 text-slate-400 hover:text-red-500 rounded transition-colors text-xs font-semibold"
+                                    title="Clear signature"
+                                >
+                                    ✕ Clear
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-slate-400 italic">No signature</span>
+                                <button
+                                    type="button"
+                                    onClick={() => applySigner('__SELF__', role)}
+                                    className="px-2 py-1 text-[11px] font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-200 rounded-lg transition-colors"
+                                >
+                                    Sign as Me
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Date Input */}
+                    <div className="md:col-span-1">
+                        <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">Date</label>
+                        <input
+                            type="date"
+                            value={dateValue}
+                            onChange={e => setDate(e.target.value)}
+                            className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary-500"
+                            required={required}
+                        />
+                    </div>
+                </div>
+
+                {/* Proxy Notification Notice */}
+                {isSignedByOther && (
+                    <div className="flex items-center gap-1.5 text-[11px] text-blue-700 bg-blue-50/80 border border-blue-200 rounded-lg px-2.5 py-1">
+                        <svg className="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <span>
+                            Notice: <strong>{nameValue}</strong> will receive an alert that their digital signature was used on this form.
+                        </span>
+                    </div>
+                )}
+            </div>
+        );
     };
 
     // Save/Submit Form
@@ -302,12 +485,26 @@ export const DeviationFormModal: React.FC<DeviationFormModalProps> = ({
                                 </p>
                             </div>
                         </div>
-                        <button
-                            onClick={onClose}
-                            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
-                        >
-                            <XMarkIcon className="w-5 h-5" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={handlePrintBlank}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-200 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-colors"
+                                title="Print blank FORM-SH001"
+                            >
+                                <svg className="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                                Print Blank Form
+                            </button>
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+                            >
+                                <XMarkIcon className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Scrollable Form Body */}
@@ -330,7 +527,7 @@ export const DeviationFormModal: React.FC<DeviationFormModalProps> = ({
 
                             <div>
                                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                                    Protocol Portion (IQ, OQ, PQ) *
+                                    Protocol Portion (IQ, PQ) *
                                 </label>
                                 <select
                                     value={protocolPortion}
@@ -338,7 +535,6 @@ export const DeviationFormModal: React.FC<DeviationFormModalProps> = ({
                                     className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500 font-semibold"
                                 >
                                     <option value="IQ">IQ (Installation Qualification)</option>
-                                    <option value="OQ">OQ (Operational Qualification)</option>
                                     <option value="PQ">PQ (Performance Qualification)</option>
                                     <option value="OTHER">Other / Custom</option>
                                 </select>
@@ -389,56 +585,8 @@ export const DeviationFormModal: React.FC<DeviationFormModalProps> = ({
                                     required
                                 />
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
-                                    <div>
-                                        <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                            Observed By (Print/Sign) *
-                                        </label>
-                                        <div className="flex items-center gap-2">
-                                            <input
-                                                type="text"
-                                                value={observedByName}
-                                                onChange={e => setObservedByName(e.target.value)}
-                                                placeholder="Observer Full Name"
-                                                className="flex-1 px-3 py-1.5 text-sm border border-slate-300 rounded-lg"
-                                                required
-                                            />
-                                            {observedBySignature ? (
-                                                <div className="relative group">
-                                                    <img src={observedBySignature} alt="Sign" className="h-8 max-w-[90px] object-contain border border-slate-200 rounded bg-slate-50 px-1" />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setObservedBySignature(null)}
-                                                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 text-[10px]"
-                                                        title="Remove Signature"
-                                                    >
-                                                        ✕
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleQuickSign('OBSERVER')}
-                                                    className="px-2.5 py-1.5 text-xs font-medium text-primary-700 bg-primary-50 rounded-lg hover:bg-primary-100 border border-primary-200 whitespace-nowrap"
-                                                >
-                                                    Sign
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                            Date Observed *
-                                        </label>
-                                        <input
-                                            type="date"
-                                            value={dateObserved}
-                                            onChange={e => setDateObserved(e.target.value)}
-                                            className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-lg"
-                                            required
-                                        />
-                                    </div>
+                                <div className="pt-2 border-t border-slate-100">
+                                    {renderSignatureSection('Observed By (Print/Sign)', 'OBSERVER', observedByName, setObservedByName, observedBySignature, setObservedBySignature, dateObserved, setDateObserved, true)}
                                 </div>
                             </div>
                         </div>
@@ -579,149 +727,10 @@ export const DeviationFormModal: React.FC<DeviationFormModalProps> = ({
 
                                 {/* 4 Signature Blocks */}
                                 <div className="space-y-3 pt-2">
-                                    {/* 1. Completed By */}
-                                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                        <div className="flex-1">
-                                            <p className="text-xs font-bold text-slate-800">Completed By (Print/Sign):</p>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <input
-                                                    type="text"
-                                                    value={completedByName}
-                                                    onChange={e => setCompletedByName(e.target.value)}
-                                                    placeholder="Completed By Full Name"
-                                                    className="px-2.5 py-1 text-xs border border-slate-300 rounded bg-white"
-                                                />
-                                                {completedBySignature ? (
-                                                    <img src={completedBySignature} alt="Sign" className="h-6 max-w-[80px] object-contain border rounded px-1 bg-white" />
-                                                ) : (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleQuickSign('COMPLETED')}
-                                                        className="px-2 py-1 text-xs text-primary-700 bg-primary-100 rounded hover:bg-primary-200"
-                                                    >
-                                                        Sign
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="text-[11px] font-semibold text-slate-600 block mb-0.5">Date:</label>
-                                            <input
-                                                type="date"
-                                                value={completedDate}
-                                                onChange={e => setCompletedDate(e.target.value)}
-                                                className="px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* 2. Validation or Designee Approval */}
-                                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                        <div className="flex-1">
-                                            <p className="text-xs font-bold text-slate-800">Validation or Designee Approval (Print, Sign):</p>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <input
-                                                    type="text"
-                                                    value={validationApproverName}
-                                                    onChange={e => setValidationApproverName(e.target.value)}
-                                                    placeholder="Validation Lead Full Name"
-                                                    className="px-2.5 py-1 text-xs border border-slate-300 rounded bg-white"
-                                                />
-                                                {validationApproverSignature ? (
-                                                    <img src={validationApproverSignature} alt="Sign" className="h-6 max-w-[80px] object-contain border rounded px-1 bg-white" />
-                                                ) : (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleQuickSign('VALIDATION')}
-                                                        className="px-2 py-1 text-xs text-primary-700 bg-primary-100 rounded hover:bg-primary-200"
-                                                    >
-                                                        Sign
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="text-[11px] font-semibold text-slate-600 block mb-0.5">Date:</label>
-                                            <input
-                                                type="date"
-                                                value={validationApprovalDate}
-                                                onChange={e => setValidationApprovalDate(e.target.value)}
-                                                className="px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* 3. Process Owner or SME Approval */}
-                                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                        <div className="flex-1">
-                                            <p className="text-xs font-bold text-slate-800">Process Owner or SME Approval (Print, Sign):</p>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <input
-                                                    type="text"
-                                                    value={smeApproverName}
-                                                    onChange={e => setSmeApproverName(e.target.value)}
-                                                    placeholder="Process Owner / SME Full Name"
-                                                    className="px-2.5 py-1 text-xs border border-slate-300 rounded bg-white"
-                                                />
-                                                {smeApproverSignature ? (
-                                                    <img src={smeApproverSignature} alt="Sign" className="h-6 max-w-[80px] object-contain border rounded px-1 bg-white" />
-                                                ) : (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleQuickSign('SME')}
-                                                        className="px-2 py-1 text-xs text-primary-700 bg-primary-100 rounded hover:bg-primary-200"
-                                                    >
-                                                        Sign
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="text-[11px] font-semibold text-slate-600 block mb-0.5">Date:</label>
-                                            <input
-                                                type="date"
-                                                value={smeApprovalDate}
-                                                onChange={e => setSmeApprovalDate(e.target.value)}
-                                                className="px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* 4. Approval (Print/Sign) */}
-                                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                        <div className="flex-1">
-                                            <p className="text-xs font-bold text-slate-800">Approval (Print/Sign):</p>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <input
-                                                    type="text"
-                                                    value={approverName}
-                                                    onChange={e => setApproverName(e.target.value)}
-                                                    placeholder="Approver Full Name"
-                                                    className="px-2.5 py-1 text-xs border border-slate-300 rounded bg-white"
-                                                />
-                                                {approverSignature ? (
-                                                    <img src={approverSignature} alt="Sign" className="h-6 max-w-[80px] object-contain border rounded px-1 bg-white" />
-                                                ) : (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleQuickSign('APPROVAL')}
-                                                        className="px-2 py-1 text-xs text-primary-700 bg-primary-100 rounded hover:bg-primary-200"
-                                                    >
-                                                        Sign
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="text-[11px] font-semibold text-slate-600 block mb-0.5">Date:</label>
-                                            <input
-                                                type="date"
-                                                value={approvalDate}
-                                                onChange={e => setApprovalDate(e.target.value)}
-                                                className="px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                                            />
-                                        </div>
-                                    </div>
+                                    {renderSignatureSection('1. Completed By (Print/Sign)', 'COMPLETED', completedByName, setCompletedByName, completedBySignature, setCompletedBySignature, completedDate, setCompletedDate, false)}
+                                    {renderSignatureSection('2. Validation or Designee Approval (Print, Sign)', 'VALIDATION', validationApproverName, setValidationApproverName, validationApproverSignature, setValidationApproverSignature, validationApprovalDate, setValidationApprovalDate, false)}
+                                    {renderSignatureSection('3. Process Owner or SME Approval (Print, Sign)', 'SME', smeApproverName, setSmeApproverName, smeApproverSignature, setSmeApproverSignature, smeApprovalDate, setSmeApprovalDate, false)}
+                                    {renderSignatureSection('4. Approval (Print/Sign)', 'APPROVAL', approverName, setApproverName, approverSignature, setApproverSignature, approvalDate, setApprovalDate, false)}
                                 </div>
                             </div>
                         </div>
