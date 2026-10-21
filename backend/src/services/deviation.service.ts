@@ -154,7 +154,7 @@ export class DeviationService {
             deviationNumber,
             documentNumber: data.documentNumber || 'FORM-SH001',
             version: data.version || '1.0',
-            effectiveDate: data.effectiveDate || '10-Oct-2022',
+            effectiveDate: data.effectiveDate || '01-Oct-2026',
             protocolPortion: data.protocolPortion,
             protocolPortionCustom: data.protocolPortionCustom,
             testSection: data.testSection,

@@ -22,10 +22,10 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
     },
     logo: {
-        width: 100,
-        height: 32,
-        objectFit: 'contain',
+        height: 30,
+        marginLeft: -5,
         marginBottom: 4,
+        alignSelf: 'flex-start',
     },
     docMetaLeft: {
         fontSize: 8,
@@ -191,7 +191,7 @@ export const ValidationDeviationPdfDocument: React.FC<ValidationDeviationPdfDocu
 
     const docNumber = deviation?.documentNumber || 'FORM-SH001';
     const docVersion = deviation?.version || '1.0';
-    const effectiveDate = deviation?.effectiveDate || '10-Oct-2022';
+    const effectiveDate = deviation?.effectiveDate || '01-Oct-2026';
 
     return (
         <Document>
